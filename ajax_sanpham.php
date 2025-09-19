@@ -24,9 +24,10 @@ $sanpham_rs = mysqli_query($ketnoi, $sql_sp);
                 <div class="card-body">
                     <p class="card-text text-success m-0" style="font-weight: 600;">
                         <?php echo $sp["TenSP"] ?></p>
-                    <p>Giá chỉ từ <span class="text-danger" style="font-size:20px; font-weight:600;">129000 đ</span>
-                    </p>
-                    <button type="submit" class="inner-btn">Mua ngay</button>
+
+                    <button type="button" class="inner-btn" data-masp="<?php echo $sp["MaSP"]; ?>">
+                        Mua ngay
+                    </button>
                 </div>
             </div>
         </div>
