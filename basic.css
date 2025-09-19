@@ -1,0 +1,73 @@
+/* ==============================
+   🎨 Global style & Variables
+============================== */
+:root {
+    --color-green: #00B050;
+    --bg-green: #92D050;
+    --back-color: 160, 80%;
+}
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+a {
+    text-decoration: none;
+    color: rgb(0, 0, 0);
+}
+.bg-global{
+  
+
+
+    --bezier: cubic-bezier(0.22, 0.61, 0.36, 1);
+  --edge-light: hsla(0, 0%, 50%, 0.8);
+  --text-light: rgba(255, 255, 255, 0.4);
+  --back-color: 160, 80%;
+
+
+  padding: 0.7em 1em;
+  border-radius: 0.5em;
+  min-height: 2.4em;
+  min-width: 3em;
+  font-size: 18px;
+  letter-spacing: 0.05em;
+  line-height: 1;
+  font-weight: bold;
+
+  background: linear-gradient(
+    140deg,
+    hsla(var(--back-color), 32%, 1) min(2em, 20%),
+    hsla(var(--back-color), 12%, 0.6) min(8em, 100%)
+  );
+  color: hsla(0, 0%, 90%);
+  border: 0;
+  box-shadow: inset 0.4px 1px 4px var(--edge-light);
+
+ 
+}
+
+.bg-icon {
+    background: url('./img/background.jpg') center center / cover no-repeat;
+}
+
+
+html {
+    font-size: 16px; /* base cho rem */
+    scroll-behavior: smooth; /* mượt khi cuộn */
+}
+
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    line-height: 1.5;
+    background-color: #f9f9f9; /* màu nền nhẹ nhàng */
+    color: #333; /* text mặc định */
+    padding-top: 80px;
+}
+
+/* Reset ul li mặc định */
+ul, ol {
+    list-style: none;
+    padding-left: 0;
+}
