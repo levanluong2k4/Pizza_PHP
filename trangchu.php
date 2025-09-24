@@ -2,6 +2,20 @@
 $ketnoi = mysqli_connect("localhost", "root", "", "php_pizza");
 mysqli_set_charset($ketnoi, "utf8");
 
+// lấy thức uống
+$thucuong="SELECT sanpham.MaSP, 
+       sanpham.TenSP, 
+       sanpham.MoTa, 
+       sanpham.Anh, 
+       sanpham.MaLoai, 
+       sanpham.NgayThem
+FROM sanpham, loaisanpham
+WHERE sanpham.MaLoai = loaisanpham.MaLoai
+  AND loaisanpham.TenLoai = 'Thức uống';
+";
+$view_thucuong=mysqli_query($ketnoi,$thucuong);
+
+
 // Lấy sản phẩm
 if (isset($_POST['maloai'])) {
     $maloai = intval($_POST['maloai']);
@@ -44,50 +58,7 @@ $loai_rs = mysqli_query($ketnoi, $sql_loai);
         crossorigin="anonymous" referrerpolicy="no-referrer" />
 
     <style>
-    /* CSS cho modal size selection */
-    .size-options .form-check {
-        border: 2px solid #e0e0e0;
-        border-radius: 8px;
-        padding: 12px;
-        margin-bottom: 10px;
-        transition: all 0.3s ease;
-    }
 
-    .size-options .form-check:hover {
-        border-color: #28a745;
-        background-color: #f8f9fa;
-    }
-
-    .size-options .form-check-input:checked+.form-check-label {
-        color: #28a745;
-        font-weight: bold;
-    }
-
-    .size-options .form-check-input:checked~* {
-        border-color: #28a745;
-    }
-
-    .selected-info {
-        background-color: #f8f9fa;
-        padding: 15px;
-        border-radius: 8px;
-        border-left: 4px solid #28a745;
-    }
-
-    .modal-lg {
-        max-width: 800px;
-    }
-
-    .cart-count {
-        background-color: #dc3545;
-        color: white;
-        border-radius: 50%;
-        padding: 2px 6px;
-        font-size: 12px;
-        position: absolute;
-        top: -5px;
-        right: -5px;
-    }
     </style>
 </head>
 
@@ -190,13 +161,125 @@ $loai_rs = mysqli_query($ketnoi, $sql_loai);
 
         <div class="row">
             <div class="col-12 bg-success text-center py-3 animate__animated animate__pulse animate__infinite">
-                <h3 class="text-warning mb-0">🍕 Khuyến mãi - Combo đặc biệt 🍕</h3>
+                <h3 class="text-warning mb-0">⋆｡°✩🍸 Thức uống🍸⋆｡°✩</h3>
             </div>
         </div>
+        <div class="row">
+            <div class="inner-card py-3" id="product-drink">
+                <?php foreach ($view_thucuong as $sp): ?>
+                <div class="col-lg-4 col-6 wow animate__bounceInLeft">
+                    <div class="inner-items text-center">
+                        <div class="card border-0 bg-transparent">
+                            <img src="./<?php echo $sp["Anh"] ?>" class="card-img-top mx-auto"
+                                alt="<?php echo $sp["TenSP"] ?>">
+                            <div class="card-body">
+                                <p class="card-text text-success m-0" style="font-weight: 600;">
+                                    <?php echo $sp["TenSP"] ?></p>
+                                <button type="button" class="inner-btn" data-masp="<?php echo $sp["MaSP"]; ?>">
+                                    Mua ngay
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <?php endforeach; ?>
+            </div>
+        </div>
+
     </header>
 
     <main></main>
-    <footer></footer>
+    <footer class="d-none d-sm-block bg-success ">
+
+        <div class="footer-top">
+            <div class="container">
+                <div class="row">
+                    <div class="col-sm-6 col-lg-3 line">
+                        <div class="box-ft">
+                            <div class="logo"><a href="trangchu.php"> <img
+                                        src="http://thepizzacompany.vn/images/thumbs/000/0003942_logo trang - dung.png"
+                                        alt="" height="200px" with="auto"></a></div>
+                        </div>
+                    </div>
+                    <div class="col-sm-6 col-lg-3 line">
+                        <div class="box-ft">
+                            <p class="title-ft">Giới Thiệu</p>
+                            <ul class="list-menu-ft">
+                                <li><a href="/Shop/List">Hệ thống nhà hàng</a></li>
+                                <li><a href="/cau-chuyen-thuong-hieu">C&#xE2;u chuy&#x1EC7;n th&#x1B0;&#x1A1;ng
+                                        hi&#x1EC7;u</a></li>
+                                <li><a href="/tintuc_sukien">Tin t&#x1EE9;c &amp; s&#x1EF1; ki&#x1EC7;n</a></li>
+                                <li><a href="/tuyen-dung">Tuy&#x1EC3;n d&#x1EE5;ng</a></li>
+                            </ul>
+                            <p class="title-ft mt-20">VĂN PHÒNG ĐẠI DIỆN</p>
+                            <div class="address">
+                                <address>
+                                    <p>Công ty Cổ phần Pizza Ngon 77 Trần Nhân Tôn, Phường 9, Quận 5, Thành phố Hồ Chí
+                                        Minh </p>
+                                    <p>SĐT: +84 (028) 7308 3377 </p>
+                                    <p>MST: 0104115527 </p>
+                                    <p>Cấp lần đầu ngày 17 tháng 08 năm 2009 và có thể được sửa đổi vào từng thời điểm
+                                    </p>
+                                </address>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-sm-6 col-lg-3 line">
+                        <div class="box-ft">
+                            <p class="title-ft">Liên Hệ</p>
+                            <ul class="list-menu-ft">
+                                <li><a href="/huong-dan-mua-hang">H&#x1B0;&#x1EDB;ng d&#x1EAB;n mua h&#xE0;ng</a></li>
+                                <li><a href="/chinh-sach-giao-hang">Ch&#xED;nh s&#xE1;ch giao h&#xE0;ng</a></li>
+                                <li><a href="/chinh-sach-bao-mat">Ch&#xED;nh s&#xE1;ch b&#x1EA3;o m&#x1EAD;t</a></li>
+                                <li><a href="/dieu-khoan-va-dieu-kien">&#x110;i&#x1EC1;u kho&#x1EA3;n v&#xE0;
+                                        &#x110;i&#x1EC1;u ki&#x1EC7;n</a></li>
+                            </ul>
+                            <p class="title-ft mt-20">Tổng đài hỗ trợ</p>
+                            <ul class="list-support">
+                                <li> <a href="tel: 1900 6066">Đặt hàng: <strong>1900 6066 </strong>(9:30 &#x2013;
+                                        21:30)</a></li>
+                                <li> <a href="tel: 1900 633 606">Tổng đài CSKH: <strong>1900 6066 </strong>(9:30 -
+                                        21:30)</a></li>
+                            </ul>
+                        </div>
+                    </div>
+                    <div class="col-sm-6 col-lg-3 line">
+                        <div class="box-ft">
+                            <p class="title-ft">Liên kết với chúng tôi</p>
+                            <ul class="list-social">
+                                <li> <a href="https://www.facebook.com/ThePIZZAcompanyVN"> <em
+                                            class="ri-facebook-fill"></em>
+                                        <i class="fa-brands fa-facebook"></i>
+                                    </a></li>
+                                <li> <a href="https://www.instagram.com/thepizzacompanyvn.official/"> <em
+                                            class="ri-instagram-fill"></em>
+                                        <i class="fa-brands fa-instagram"></i>
+                                    </a></li>
+                                <li> <a href="https://www.youtube.com/channel/UCU9rDz-zWZxeiVa-YSBlYkQ"> <em
+                                            class="ri-youtube-fill"></em>
+                                        <i class="fa-brands fa-youtube"></i>
+                                    </a></li>
+                            </ul>
+
+                            <a class="logo-ddk" href='http://online.gov.vn/Home/WebDetails/74225' target="_blank"><img
+                                    width="134" height="50" alt='' title=''
+                                    src='https://thepizzacompany.vn/Themes/Emporium/Content/img/bocongthuong.png' /></a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="footer-bottom bg-success">
+            <div class="container">
+                <div class="copy-right">
+                    <p>Bản quyền © 2025 The Pizza Company. Đã đăng ký bản quyền.</p>
+
+                </div>
+            </div>
+        </div>
+
+    </footer>
 
     <!-- jQuery (phải load trước slick) -->
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
@@ -263,9 +346,10 @@ $loai_rs = mysqli_query($ketnoi, $sql_loai);
             var productImg = productCard.find('img').attr('src');
             var productName = productCard.find('.card-text').text();
             var maSP = $(this).data('masp');
+            var img = $(this).data('img'); // lấy ảnh theo size
 
             // Gọi AJAX để lấy thông tin size và giá
-            $.post("get_product_sizes.php", {
+            $.post("cart/get_product_sizes.php", {
                 masp: maSP
             }, function(data) {
                 var sizes = JSON.parse(data);
@@ -291,7 +375,7 @@ $loai_rs = mysqli_query($ketnoi, $sql_loai);
                                 <div class="row">
                                     <div class="col-md-5">
                                         <img src="${productImg}" class="img-fluid rounded" alt="${productName}">
-                                        <h6 class="mt-3 text-success">${productName}</h6>
+                                        <h6 class="mt-3 text-success text-center">${productName}</h6>
                                     </div>
                                     <div class="col-md-7">
                                         <h6>Chọn size:</h6>
@@ -347,7 +431,7 @@ $loai_rs = mysqli_query($ketnoi, $sql_loai);
                 html += `
                     <div class="form-check mb-2">
                         <input class="form-check-input size-radio" type="radio" name="sizeOption" 
-                               id="size${index}" value="${size.MaSize}" data-price="${size.Gia}" data-size-name="${size.TenSize}">
+                               id="size${index}" value="${size.MaSize}" data-price="${size.Gia}" data-size-name="${size.TenSize}" data-img="${size.Anh}">
                         <label class="form-check-label" for="size${index}">
                             <strong>${size.TenSize}</strong> - ${Number(size.Gia).toLocaleString()} VNĐ
                         </label>
@@ -363,11 +447,15 @@ $loai_rs = mysqli_query($ketnoi, $sql_loai);
             $(document).on('change', '.size-radio', function() {
                 var selectedPrice = $(this).data('price');
                 var selectedSizeName = $(this).data('size-name');
+                var selectedImg = $(this).data('img'); // ✅ lấy ảnh theo size
                 var quantity = parseInt($('#quantity').val());
 
                 $('#selectedSize').text(selectedSizeName);
                 $('#selectedPrice').text(Number(selectedPrice).toLocaleString());
                 $('#totalPrice').text(Number(selectedPrice * quantity).toLocaleString() + ' VNĐ');
+
+                // ✅ cập nhật ảnh sản phẩm theo size
+                $('.modal-body img').attr('src', selectedImg);
 
                 $('.selected-info').show();
                 $('#addToCartBtn').prop('disabled', false);
@@ -408,7 +496,8 @@ $loai_rs = mysqli_query($ketnoi, $sql_loai);
                         masp: maSP,
                         masize: selectedSize.val(),
                         quantity: $('#quantity').val(),
-                        price: selectedSize.data('price')
+                        price: selectedSize.data('price'),
+                        img: selectedSize.data('img') // ✅ gửi cả ảnh theo size
                     };
 
                     // Gọi AJAX để thêm vào giỏ hàng
@@ -416,6 +505,7 @@ $loai_rs = mysqli_query($ketnoi, $sql_loai);
                 }
             });
         }
+
 
         // Cập nhật tổng tiền
         function updateTotalPrice() {
@@ -430,7 +520,7 @@ $loai_rs = mysqli_query($ketnoi, $sql_loai);
 
         // Thêm vào giỏ hàng
         function addToCart(productData) {
-            $.post("add_to_cart.php", productData, function(response) {
+            $.post("cart/add_to_cart.php", productData, function(response) {
                 try {
                     var result = JSON.parse(response);
                     if (result.success) {
@@ -451,8 +541,8 @@ $loai_rs = mysqli_query($ketnoi, $sql_loai);
 
         // Cập nhật số lượng giỏ hàng
         function updateCartCount() {
-            $.get("get_cart_count.php", function(count) {
-                $('.cart-count').text(count);
+            $.get("cart/get_cart_count.php", function(count) {
+                $('.count-product').text(count);
             });
         }
 

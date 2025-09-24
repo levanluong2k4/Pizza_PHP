@@ -6,7 +6,7 @@ if (isset($_POST['masp'])) {
     $masp = intval($_POST['masp']);
     
     // Lấy thông tin size và giá của sản phẩm
-    $sql = "SELECT ss.MaSize, s.TenSize, ss.Gia 
+    $sql = "SELECT ss.MaSize, s.TenSize, ss.Gia , ss.Anh 
             FROM sanpham_size ss 
             INNER JOIN size s ON ss.MaSize = s.MaSize 
             WHERE ss.MaSP = $masp 
