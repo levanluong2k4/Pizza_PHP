@@ -21,7 +21,7 @@ header .inner-logo img {
 
 header .listmenu {
     border-radius: 10px;
-    padding: 5px 20px;
+    padding: 5px 8px;
     font-weight: 900;
     font-size: larger;
     display: flex;
@@ -232,7 +232,7 @@ header .listmenu li a {
   top: 0;            /* dính trên cùng */
   left: 0;
   width: 100%;       /* chiếm hết chiều ngang */
- background: url('./img/background.jpg') center center / cover no-repeat;
+ background: url('../img/background.jpg') center center / cover no-repeat;
   border-bottom: 1px solid #ccc;
   z-index: 1000;     /* nổi lên trên các phần tử khác */
 }
@@ -487,3 +487,25 @@ footer {
     text-decoration: underline;
 }
 /* end footer */
+
+
+
+.alert-cart-success {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    z-index: 9999;
+    min-width: 300px;
+    animation: slideInRight 0.5s ease-out;
+}
+
+@keyframes slideInRight {
+    from {
+        transform: translateX(100%);
+        opacity: 0;
+    }
+    to {
+        transform: translateX(0);
+        opacity: 1;
+    }
+}

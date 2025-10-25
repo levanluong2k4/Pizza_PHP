@@ -49,7 +49,7 @@ a {
 }
 
 .bg-icon {
-    background: url('./img/background.jpg') center center / cover no-repeat;
+    background: url('../img/background.jpg') center center / cover no-repeat;
 }
 
 
@@ -71,3 +71,26 @@ ul, ol {
     list-style: none;
     padding-left: 0;
 }
+
+/* responsive */
+@media (min-width: 992px) { /* lg */
+  .top-lg-8 {
+    top:  80% !important;
+  }
+}
+   @media (min-width: 576px) { /* sm */
+  .top-sm-9 {
+    top: 90% !important;
+  }
+}
+
+@media (min-width: 768px) { /* md */
+  .top-md-0 {
+    top: 0 !important;
+  }
+}
+
+/* ==============================
+   🎨 Utility Classes
+
+

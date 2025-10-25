@@ -1,6 +1,8 @@
-<?php
+<?php session_start();
+
 $ketnoi = mysqli_connect("localhost", "root", "", "php_pizza");
 mysqli_set_charset($ketnoi, "utf8");
+
 
 // lấy thức uống
 $thucuong="SELECT sanpham.MaSP, 
@@ -28,6 +30,48 @@ $sanpham_rs = mysqli_query($ketnoi, $sql_sp);
 // Lấy loại sản phẩm
 $sql_loai = "SELECT * FROM loaisanpham";
 $loai_rs = mysqli_query($ketnoi, $sql_loai);
+
+
+
+
+
+
+
+// Xử lý thêm sản phẩm vào giỏ hàng
+
+
+
+if (isset($_GET['id'])) {
+$id=$_GET['id'] ?? '';
+$sqlsize = "SELECT ss.MaSize, s.TenSize, ss.Gia , ss.Anh 
+            FROM sanpham_size ss 
+            INNER JOIN size s ON ss.MaSize = s.MaSize 
+            WHERE ss.MaSP = $id 
+            ORDER BY s.MaSize";
+
+$sanphamsize = mysqli_query($ketnoi, $sqlsize);
+$sizes = array();
+if ($sanphamsize && mysqli_num_rows($sanphamsize) > 0
+) {
+    while ($row = mysqli_fetch_assoc($sanphamsize)) {
+        $sizes[] = $row;
+    }
+
+}
+
+  
+
+    // Lấy thông tin sản phẩm
+    $sql_sp_info = "SELECT * FROM sanpham WHERE MaSP = $id";
+    $sp_info_result = mysqli_query($ketnoi, $sql_sp_info);
+    $sp_info = mysqli_fetch_assoc($sp_info_result);
+
+}
+
+   
+
+
+
 ?>
 
 <!doctype html>
@@ -51,15 +95,13 @@ $loai_rs = mysqli_query($ketnoi, $sql_loai);
     <link rel="stylesheet" type="text/css" href="slick/slick-theme.css" />
 
     <!-- CSS -->
-    <link rel="stylesheet" href="bai6.css">
-    <link rel="stylesheet" href="basic.css">
+    <link rel="stylesheet" href="css/bai6.css">
+    <link rel="stylesheet" href="css/basic.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css"
         integrity="sha512-SnH5WK+bZxgPHs44uWIX+LLJAJ9/2PkPKZ5QiAj6Ta86w+fsb2TkcmfRyVX3pBnMFcV7oQPJkl9QevSCWr3W6A=="
         crossorigin="anonymous" referrerpolicy="no-referrer" />
 
-    <style>
 
-    </style>
 </head>
 
 <body>
@@ -148,9 +190,9 @@ $loai_rs = mysqli_query($ketnoi, $sql_loai);
                             <div class="card-body">
                                 <p class="card-text text-success m-0" style="font-weight: 600;">
                                     <?php echo $sp["TenSP"] ?></p>
-                                <button type="button" class="inner-btn" data-masp="<?php echo $sp["MaSP"]; ?>">
+                                <a href="?id=<?php echo $sp["MaSP"]; ?>"  class="inner-btn" data-masp="<?php echo $sp["MaSP"]; ?>">
                                     Mua ngay
-                                </button>
+                                </a>
                             </div>
                         </div>
                     </div>
@@ -175,9 +217,9 @@ $loai_rs = mysqli_query($ketnoi, $sql_loai);
                             <div class="card-body">
                                 <p class="card-text text-success m-0" style="font-weight: 600;">
                                     <?php echo $sp["TenSP"] ?></p>
-                                <button type="button" class="inner-btn" data-masp="<?php echo $sp["MaSP"]; ?>">
+                                <a href="?id=<?php echo $sp["MaSP"]; ?>" class="inner-btn" ?>
                                     Mua ngay
-                                </button>
+                                </a>
                             </div>
                         </div>
                     </div>
@@ -186,100 +228,119 @@ $loai_rs = mysqli_query($ketnoi, $sql_loai);
             </div>
         </div>
 
-    </header>
 
-    <main></main>
-    <footer class="d-none d-sm-block bg-success ">
 
-        <div class="footer-top">
-            <div class="container">
-                <div class="row">
-                    <div class="col-sm-6 col-lg-3 line">
-                        <div class="box-ft">
-                            <div class="logo"><a href="trangchu.php"> <img
-                                        src="http://thepizzacompany.vn/images/thumbs/000/0003942_logo trang - dung.png"
-                                        alt="" height="200px" with="auto"></a></div>
-                        </div>
+
+
+        <?php if (isset($sp_info)): ?>
+        <!-- Modal chọn size -->
+        <div class="modal fade" id="sizeModal" tabindex="-1" aria-labelledby="sizeModalLabel" aria-hidden="true">
+            <div class="modal-dialog modal-lg">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="sizeModalLabel">
+                            Chọn size cho <?php echo htmlspecialchars($sp_info['TenSP']); ?>
+                        </h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                     </div>
-                    <div class="col-sm-6 col-lg-3 line">
-                        <div class="box-ft">
-                            <p class="title-ft">Giới Thiệu</p>
-                            <ul class="list-menu-ft">
-                                <li><a href="/Shop/List">Hệ thống nhà hàng</a></li>
-                                <li><a href="/cau-chuyen-thuong-hieu">C&#xE2;u chuy&#x1EC7;n th&#x1B0;&#x1A1;ng
-                                        hi&#x1EC7;u</a></li>
-                                <li><a href="/tintuc_sukien">Tin t&#x1EE9;c &amp; s&#x1EF1; ki&#x1EC7;n</a></li>
-                                <li><a href="/tuyen-dung">Tuy&#x1EC3;n d&#x1EE5;ng</a></li>
-                            </ul>
-                            <p class="title-ft mt-20">VĂN PHÒNG ĐẠI DIỆN</p>
-                            <div class="address">
-                                <address>
-                                    <p>Công ty Cổ phần Pizza Ngon 77 Trần Nhân Tôn, Phường 9, Quận 5, Thành phố Hồ Chí
-                                        Minh </p>
-                                    <p>SĐT: +84 (028) 7308 3377 </p>
-                                    <p>MST: 0104115527 </p>
-                                    <p>Cấp lần đầu ngày 17 tháng 08 năm 2009 và có thể được sửa đổi vào từng thời điểm
-                                    </p>
-                                </address>
+
+                    <div class="modal-body">
+                        <div class="row">
+                            <div class="col-md-5">
+                                <img src="./<?php echo htmlspecialchars($sp_info['Anh']); ?>" class="img-fluid rounded"
+                                    alt="<?php echo htmlspecialchars($sp_info['TenSP']); ?>">
+                                <h6 class="mt-3 text-success text-center">
+                                    <?php echo htmlspecialchars($sp_info['TenSP']); ?>
+                                </h6>
+                            </div>
+
+                            <div class="col-md-7">
+                                <h6>Chọn size:</h6>
+                                <div class="size-options">
+                                    <?php foreach ($sizes as $size): ?>
+                                    <div class="form-check">
+                                        <input class="form-check-input size-radio" type="radio" name="size"
+                                            id="size-<?php echo $size['MaSize']; ?>"
+                                            value="<?php echo $size['MaSize']; ?>"
+                                            data-name="<?php echo htmlspecialchars($size['TenSize']); ?>"
+                                            data-price="<?php echo floatval($size['Gia']); ?>">
+                                        <label class="form-check-label" for="size-<?php echo $size['MaSize']; ?>">
+                                            <img src="./<?php echo $size['Anh']; ?>" alt="" height="30px" class="me-2">
+                                            <?php echo $size['TenSize']; ?> - <?php echo number_format($size['Gia']); ?>
+                                            VNĐ
+                                        </label>
+                                    </div>
+                                    <?php endforeach; ?>
+                                </div>
+
+                                <div class="mt-3">
+                                    <div class="selected-info" style="display:none;">
+                                        <h6>Size đã chọn: <span id="selectedSize"></span></h6>
+                                        <h5 class="text-danger">Giá: <span id="selectedPrice"></span> VNĐ</h5>
+                                    </div>
+                                </div>
+
+                                <div class="mt-3">
+                                    <label for="quantity" class="form-label">Số lượng:</label>
+                                    <div class="input-group" style="width: 150px;">
+                                        <button class="btn btn-outline-secondary" type="button"
+                                            id="decreaseBtn">-</button>
+                                        <input type="number" class="form-control text-center" id="quantity" value="1"
+                                            min="1">
+                                        <button class="btn btn-outline-secondary" type="button"
+                                            id="increaseBtn">+</button>
+                                    </div>
+                                </div>
+
+                                <div class="mt-3">
+                                    <h5>Tổng tiền: <span id="totalPrice" class="text-danger">0 VNĐ</span></h5>
+                                </div>
                             </div>
                         </div>
                     </div>
-                    <div class="col-sm-6 col-lg-3 line">
-                        <div class="box-ft">
-                            <p class="title-ft">Liên Hệ</p>
-                            <ul class="list-menu-ft">
-                                <li><a href="/huong-dan-mua-hang">H&#x1B0;&#x1EDB;ng d&#x1EAB;n mua h&#xE0;ng</a></li>
-                                <li><a href="/chinh-sach-giao-hang">Ch&#xED;nh s&#xE1;ch giao h&#xE0;ng</a></li>
-                                <li><a href="/chinh-sach-bao-mat">Ch&#xED;nh s&#xE1;ch b&#x1EA3;o m&#x1EAD;t</a></li>
-                                <li><a href="/dieu-khoan-va-dieu-kien">&#x110;i&#x1EC1;u kho&#x1EA3;n v&#xE0;
-                                        &#x110;i&#x1EC1;u ki&#x1EC7;n</a></li>
-                            </ul>
-                            <p class="title-ft mt-20">Tổng đài hỗ trợ</p>
-                            <ul class="list-support">
-                                <li> <a href="tel: 1900 6066">Đặt hàng: <strong>1900 6066 </strong>(9:30 &#x2013;
-                                        21:30)</a></li>
-                                <li> <a href="tel: 1900 633 606">Tổng đài CSKH: <strong>1900 6066 </strong>(9:30 -
-                                        21:30)</a></li>
-                            </ul>
-                        </div>
-                    </div>
-                    <div class="col-sm-6 col-lg-3 line">
-                        <div class="box-ft">
-                            <p class="title-ft">Liên kết với chúng tôi</p>
-                            <ul class="list-social">
-                                <li> <a href="https://www.facebook.com/ThePIZZAcompanyVN"> <em
-                                            class="ri-facebook-fill"></em>
-                                        <i class="fa-brands fa-facebook"></i>
-                                    </a></li>
-                                <li> <a href="https://www.instagram.com/thepizzacompanyvn.official/"> <em
-                                            class="ri-instagram-fill"></em>
-                                        <i class="fa-brands fa-instagram"></i>
-                                    </a></li>
-                                <li> <a href="https://www.youtube.com/channel/UCU9rDz-zWZxeiVa-YSBlYkQ"> <em
-                                            class="ri-youtube-fill"></em>
-                                        <i class="fa-brands fa-youtube"></i>
-                                    </a></li>
-                            </ul>
 
-                            <a class="logo-ddk" href='http://online.gov.vn/Home/WebDetails/74225' target="_blank"><img
-                                    width="134" height="50" alt='' title=''
-                                    src='https://thepizzacompany.vn/Themes/Emporium/Content/img/bocongthuong.png' /></a>
-                        </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
+                        <a href="#" class="btn btn-success" id="addToCartBtn"
+                             disabled >Thêm vào giỏ hàng</a>
                     </div>
                 </div>
             </div>
         </div>
+        <?php endif; ?>
 
-        <div class="footer-bottom bg-success">
-            <div class="container">
-                <div class="copy-right">
-                    <p>Bản quyền © 2025 The Pizza Company. Đã đăng ký bản quyền.</p>
-
-                </div>
-            </div>
+    </header>
+  
+    <?php if(isset($_SESSION['cart_message']) && $_SESSION['cart_message'] == 'success'): ?>
+<div class="toast-container position-fixed top-0 end-0 p-3" style="z-index: 9999;">
+    <div id="cartToast" class="toast show" role="alert" aria-live="assertive" aria-atomic="true">
+        <div class="toast-header bg-success text-white">
+            <i class="fa fa-shopping-cart me-2"></i>
+            <strong class="me-auto">Giỏ hàng</strong>
+            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="toast" aria-label="Close"></button>
         </div>
+        <div class="toast-body">
+            <i class="fa fa-check-circle text-success"></i> Đã thêm sản phẩm vào giỏ hàng thành công!
+        </div>
+    </div>
+</div>
 
-    </footer>
+<script>
+    setTimeout(function() {
+        var toastEl = document.getElementById('cartToast');
+        if(toastEl) {
+            var toast = new bootstrap.Toast(toastEl);
+            toast.hide();
+        }
+    }, 3000); // Tự động ẩn sau 3 giây
+</script>
+<?php 
+    unset($_SESSION['cart_message']); 
+endif; 
+?>
+
+
+    <?php include 'footer.php'; ?>
 
     <!-- jQuery (phải load trước slick) -->
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
@@ -324,232 +385,92 @@ $loai_rs = mysqli_query($ketnoi, $sql_loai);
     });
     </script>
 
-    <script>
-    $(document).ready(function() {
-        // Xử lý tab switching
-        $(".tab-link").on("click", function() {
-            var maloai = $(this).data("loai");
+   
+ 
 
-            $.post("ajax_sanpham.php", {
-                maloai: maloai
-            }, function(data) {
-                $("#product-list").html(data);
-            });
 
-            $(".tab-link").removeClass("active");
-            $(this).addClass("active");
-        });
-
-        // Xử lý khi nhấn nút "Mua ngay"
-        $(document).on('click', '.inner-btn', function() {
-            var productCard = $(this).closest('.inner-items');
-            var productImg = productCard.find('img').attr('src');
-            var productName = productCard.find('.card-text').text();
-            var maSP = $(this).data('masp');
-            var img = $(this).data('img'); // lấy ảnh theo size
-
-            // Gọi AJAX để lấy thông tin size và giá
-            $.post("cart/get_product_sizes.php", {
-                masp: maSP
-            }, function(data) {
-                var sizes = JSON.parse(data);
-                if (sizes.length > 0) {
-                    showSizeModal(productName, productImg, sizes, maSP);
-                } else {
-                    alert('Sản phẩm này hiện tại chưa có thông tin size!');
-                }
-            });
-        });
-
-        // Hiển thị modal chọn size
-        function showSizeModal(productName, productImg, sizes, maSP) {
-            var modalHTML = `
-                <div class="modal fade" id="sizeModal" tabindex="-1" aria-labelledby="sizeModalLabel" aria-hidden="true">
-                    <div class="modal-dialog modal-lg">
-                        <div class="modal-content">
-                            <div class="modal-header">
-                                <h5 class="modal-title" id="sizeModalLabel">Chọn size cho ${productName}</h5>
-                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                            </div>
-                            <div class="modal-body">
-                                <div class="row">
-                                    <div class="col-md-5">
-                                        <img src="${productImg}" class="img-fluid rounded" alt="${productName}">
-                                        <h6 class="mt-3 text-success text-center">${productName}</h6>
-                                    </div>
-                                    <div class="col-md-7">
-                                        <h6>Chọn size:</h6>
-                                        <div class="size-options">
-                                            ${generateSizeOptions(sizes)}
-                                        </div>
-                                        <div class="mt-3">
-                                            <div class="selected-info" style="display:none;">
-                                                <h6>Size đã chọn: <span id="selectedSize"></span></h6>
-                                                <h5 class="text-danger">Giá: <span id="selectedPrice"></span> VNĐ</h5>
-                                            </div>
-                                        </div>
-                                        <div class="mt-3">
-                                            <label for="quantity" class="form-label">Số lượng:</label>
-                                            <div class="input-group" style="width: 150px;">
-                                                <button class="btn btn-outline-secondary" type="button" id="decreaseBtn">-</button>
-                                                <input type="number" class="form-control text-center" id="quantity" value="1" min="1">
-                                                <button class="btn btn-outline-secondary" type="button" id="increaseBtn">+</button>
-                                            </div>
-                                        </div>
-                                        <div class="mt-3">
-                                            <h5>Tổng tiền: <span id="totalPrice" class="text-danger">0 VNĐ</span></h5>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="modal-footer">
-                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
-                                <button type="button" class="btn btn-success" id="addToCartBtn" data-masp="${maSP}" disabled>Thêm vào giỏ hàng</button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            `;
-
-            // Xóa modal cũ nếu có
-            $('#sizeModal').remove();
-
-            // Thêm modal vào body
-            $('body').append(modalHTML);
-
-            // Hiển thị modal
-            $('#sizeModal').modal('show');
-
-            // Xử lý sự kiện trong modal
-            setupModalEvents();
+ 
+   <script>
+          document.addEventListener("DOMContentLoaded", function() {
+        const urlParams = new URLSearchParams(window.location.search);
+        if (urlParams.has('id')) {
+            
+            const modal = new bootstrap.Modal(document.getElementById('sizeModal'));
+            modal.show();
         }
-
-        // Tạo HTML cho các tùy chọn size
-        function generateSizeOptions(sizes) {
-            var html = '';
-            sizes.forEach(function(size, index) {
-                html += `
-                    <div class="form-check mb-2">
-                        <input class="form-check-input size-radio" type="radio" name="sizeOption" 
-                               id="size${index}" value="${size.MaSize}" data-price="${size.Gia}" data-size-name="${size.TenSize}" data-img="${size.Anh}">
-                        <label class="form-check-label" for="size${index}">
-                            <strong>${size.TenSize}</strong> - ${Number(size.Gia).toLocaleString()} VNĐ
-                        </label>
-                    </div>
-                `;
-            });
-            return html;
-        }
-
-        // Thiết lập các sự kiện trong modal
-        function setupModalEvents() {
-            // Khi chọn size
-            $(document).on('change', '.size-radio', function() {
-                var selectedPrice = $(this).data('price');
-                var selectedSizeName = $(this).data('size-name');
-                var selectedImg = $(this).data('img'); // ✅ lấy ảnh theo size
-                var quantity = parseInt($('#quantity').val());
-
-                $('#selectedSize').text(selectedSizeName);
-                $('#selectedPrice').text(Number(selectedPrice).toLocaleString());
-                $('#totalPrice').text(Number(selectedPrice * quantity).toLocaleString() + ' VNĐ');
-
-                // ✅ cập nhật ảnh sản phẩm theo size
-                $('.modal-body img').attr('src', selectedImg);
-
-                $('.selected-info').show();
-                $('#addToCartBtn').prop('disabled', false);
-            });
-
-            // Tăng số lượng
-            $(document).on('click', '#increaseBtn', function() {
-                var quantity = parseInt($('#quantity').val());
-                $('#quantity').val(quantity + 1);
-                updateTotalPrice();
-            });
-
-            // Giảm số lượng
-            $(document).on('click', '#decreaseBtn', function() {
-                var quantity = parseInt($('#quantity').val());
-                if (quantity > 1) {
-                    $('#quantity').val(quantity - 1);
-                    updateTotalPrice();
-                }
-            });
-
-            // Khi thay đổi số lượng bằng tay
-            $(document).on('change', '#quantity', function() {
-                var quantity = parseInt($(this).val());
-                if (quantity < 1) {
-                    $(this).val(1);
-                }
-                updateTotalPrice();
-            });
-
-            // Thêm vào giỏ hàng
-            $(document).on('click', '#addToCartBtn', function() {
-                var selectedSize = $('.size-radio:checked');
-                var maSP = $(this).data('masp');
-
-                if (selectedSize.length > 0) {
-                    var productData = {
-                        masp: maSP,
-                        masize: selectedSize.val(),
-                        quantity: $('#quantity').val(),
-                        price: selectedSize.data('price'),
-                        img: selectedSize.data('img') // ✅ gửi cả ảnh theo size
-                    };
-
-                    // Gọi AJAX để thêm vào giỏ hàng
-                    addToCart(productData);
-                }
-            });
-        }
-
-
-        // Cập nhật tổng tiền
-        function updateTotalPrice() {
-            var selectedSize = $('.size-radio:checked');
-            if (selectedSize.length > 0) {
-                var price = selectedSize.data('price');
-                var quantity = parseInt($('#quantity').val());
-                var total = price * quantity;
-                $('#totalPrice').text(Number(total).toLocaleString() + ' VNĐ');
-            }
-        }
-
-        // Thêm vào giỏ hàng
-        function addToCart(productData) {
-            $.post("cart/add_to_cart.php", productData, function(response) {
-                try {
-                    var result = JSON.parse(response);
-                    if (result.success) {
-                        $('#sizeModal').modal('hide');
-                        alert('Đã thêm sản phẩm vào giỏ hàng!');
-                        // Cập nhật số lượng giỏ hàng nếu có
-                        updateCartCount();
-                    } else {
-                        alert('Có lỗi xảy ra: ' + result.message);
-                    }
-                } catch (e) {
-                    alert('Có lỗi xảy ra khi xử lý phản hồi từ server');
-                }
-            }).fail(function() {
-                alert('Không thể kết nối tới server. Vui lòng thử lại!');
-            });
-        }
-
-        // Cập nhật số lượng giỏ hàng
-        function updateCartCount() {
-            $.get("cart/get_cart_count.php", function(count) {
-                $('.count-product').text(count);
-            });
-        }
-
-        // Load cart count khi trang được tải
-        updateCartCount();
     });
-    </script>
+   document.addEventListener("DOMContentLoaded", function() {
+        const radios = document.querySelectorAll('.size-radio');
+        const quantityInput = document.getElementById('quantity');
+        const totalPriceSpan = document.getElementById('totalPrice');
+        const selectedInfo = document.querySelector('.selected-info');
+        const selectedSizeSpan = document.getElementById('selectedSize');
+        const selectedPriceSpan = document.getElementById('selectedPrice');
+        const decreaseBtn = document.getElementById('decreaseBtn');
+        const increaseBtn = document.getElementById('increaseBtn');
+
+        function updateTotal() {
+            const selected = document.querySelector('.size-radio:checked');
+            const quantity = parseInt(quantityInput.value) || 1;
+
+            // Nếu chưa chọn size, reset lại hiển thị
+            if (!selected) {
+                totalPriceSpan.textContent = "0 VNĐ";
+                selectedInfo.style.display = 'none';
+                addToCartBtn.disabled = true;
+                return;
+            }
+
+            const name = selected.dataset.name;
+            const price = parseFloat(selected.dataset.price);
+
+            // Nếu giá không hợp lệ => ngăn lỗi NaN
+            if (isNaN(price)) {
+                totalPriceSpan.textContent = "0 VNĐ";
+                return;
+            }
+
+            const total = price * quantity;
+
+            selectedSizeSpan.textContent = name;
+            selectedPriceSpan.textContent = price.toLocaleString('vi-VN');
+            totalPriceSpan.textContent = total.toLocaleString('vi-VN') + " VNĐ";
+            selectedInfo.style.display = 'block';
+             addToCartBtn.disabled = false;
+               const sizeId = selected.value;
+    const productId = "<?php echo $sp_info['MaSP']; ?>";
+    addToCartBtn.href = `./cart/add_to_cart.php?id=${productId}&masize=${sizeId}&soluong=${quantity}`;
+        }
+
+        radios.forEach(radio => radio.addEventListener('change', updateTotal));
+        quantityInput.addEventListener('input', updateTotal);
+        decreaseBtn.addEventListener('click', () => {
+            let current = parseInt(quantityInput.value);
+            if (current > 1) {
+                quantityInput.value = current - 1;
+                updateTotal();
+            }
+        });
+        increaseBtn.addEventListener('click', () => {
+            quantityInput.value = parseInt(quantityInput.value) + 1;
+            updateTotal();
+        });
+
+
+
+        fetch(`./cart/add_to_cart.php?id=${maSP}&masize=${maSize}&soluong=${quantity}`)
+  .then(response => response.text())
+  .then(total => {
+      document.querySelector(".cart-count").textContent = total;
+      alert("Đã thêm sản phẩm vào giỏ hàng!");
+  });
+
+
+
+    });
+  
+   </script>
+    <script src="js/search.js"></script>
 
 </body>
 
