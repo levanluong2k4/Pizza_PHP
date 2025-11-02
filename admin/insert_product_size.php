@@ -1,13 +1,14 @@
 <?php
 
 require './process/check_admin.php';
-$ketnoi=mysqli_connect("localhost","root","","php_pizza");
-mysqli_set_charset($ketnoi,'utf8');
+require "../includes/db_connect.php";
 $sql="SELECT `MaSP`, `MaSize`, `Gia`, `Anh` FROM `sanpham_size` ";
 
 $result=mysqli_query($ketnoi,$sql);
 
-$sql_sanpham="SELECT * FROM `sanpham` ";
+$sql_sanpham=" SELECT * 
+FROM sanpham 
+ ";
 $result_sanpham=mysqli_query($ketnoi,$sql_sanpham);
 
 $sql_size="SELECT * FROM `size` ";

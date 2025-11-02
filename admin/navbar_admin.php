@@ -109,7 +109,7 @@
               <i class="fa-solid fa-box-open"></i> Quản lý sản phẩm
             </a>
             <ul class="dropdown-menu">
-              <li><a class="dropdown-item" href="insert_product.php"><i class="fa-solid fa-circle-plus"></i> Thêm sản phẩm</a></li>
+              <li><a class="dropdown-item" href="insert_products.php"><i class="fa-solid fa-circle-plus"></i> Thêm sản phẩm</a></li>
               <li><a class="dropdown-item" href="insert_product_size.php"><i class="fa-solid fa-ruler-combined"></i> Quản lý Size</a></li>
               <li><a class="dropdown-item" href="insert_category.php"><i class="fa-solid fa-tags"></i> Danh mục</a></li>
             </ul>

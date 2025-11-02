@@ -1,9 +1,10 @@
 <?php
 require './process/check_admin.php';
-$ketnoi=mysqli_connect("localhost","root","","php_pizza");
+
+require "../includes/db_connect.php";
 $sql="select * from sanpham";
 $kq=mysqli_query($ketnoi,$sql);
-mysqli_set_charset($ketnoi, "utf8");
+
 
 
 ?>
@@ -18,7 +19,7 @@ mysqli_set_charset($ketnoi, "utf8");
 </head>
 
 <body>
-    <a href="insert_producs.php">Thêm sản phẩm</a>
+    <a href="insert_products.php">Thêm sản phẩm</a>
     <form action="" method="post">
 
         <table border="1" cellspacing="0" cellpadding="5">

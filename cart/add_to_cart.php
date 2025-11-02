@@ -57,52 +57,7 @@ else {
     // --- Trường hợp 2: Người dùng ĐÃ đăng nhập ---
 $user_id = $_SESSION['user_id'];
 
-// Nếu vẫn còn session cart thì merge vào database trước khi xóa
-if (isset($_SESSION['cart']) && !empty($_SESSION['cart'])) {
-    // Kiểm tra giỏ hàng tồn tại chưa
-    $sql_cart = "SELECT * FROM giohang WHERE MaKH='$user_id'";
-    $result = mysqli_query($ketnoi, $sql_cart);
-    if (mysqli_num_rows($result) == 0) {
-        mysqli_query($ketnoi, "
-        INSERT INTO `giohang`( `MaKH`) VALUES ('$user_id')
-        ");
-    }
 
-    // Lấy CartID
-    $sql_cart_id = "SELECT CartID FROM giohang WHERE MaKH='$user_id'";
-   
-    $result_cart_id = mysqli_query($ketnoi, $sql_cart_id);
-  
-    $cart_row = mysqli_fetch_assoc($result_cart_id);
-    $cart_id = $cart_row['CartID'];
-
-
-    // Lưu các item từ session vào DB
-    foreach ($_SESSION['cart'] as $key => $item) {
-       $maSP_s = $item['masp'];
-
-        $maSize_s = $item['size_id'];
-        $soLuong_s = $item['quantity'];
-
-        $sql_check = "SELECT * FROM chitietgiohang 
-                      WHERE CartID='$cart_id' AND MaSP='$maSP_s' AND MaSize='$maSize_s'";
-        $check_result = mysqli_query($ketnoi, $sql_check);
-
-        if (mysqli_num_rows($check_result) == 0) {
-            $sql_insert_detail = "INSERT INTO chitietgiohang(CartID, MaSP, MaSize, Quantity)
-                                  VALUES('$cart_id', '$maSP_s', '$maSize_s', '$soLuong_s')";
-            mysqli_query($ketnoi, $sql_insert_detail);
-        } else {
-            $sql_update_detail = "UPDATE chitietgiohang 
-                                  SET Quantity = Quantity + '$soLuong_s' 
-                                  WHERE CartID='$cart_id' AND MaSP='$maSP_s' AND MaSize='$maSize_s'";
-            mysqli_query($ketnoi, $sql_update_detail);
-        }
-    }
-
-   
-    unset($_SESSION['cart']);
-}
 
 // --- Giờ thêm sản phẩm mới vào giỏ hàng trong DB ---
 $sql_cart = "SELECT * FROM giohang WHERE MaKH='$user_id'";

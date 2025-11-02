@@ -2,8 +2,7 @@
 
 require './process/check_admin.php';
 $id=$_GET['ma'];
-$ketnoi= mysqli_connect("localhost","root","","php_pizza");
-mysqli_set_charset($ketnoi,"utf8");
+require "../includes/db_connect.php";
 $sql="select * from loaisanpham";
 $list_loaisp=mysqli_query($ketnoi,$sql);
 $sql="select * from sanpham where MaSP=$id";

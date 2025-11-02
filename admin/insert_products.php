@@ -1,8 +1,7 @@
 <?php
 
 require './process/check_admin.php';
-$ketnoi=mysqli_connect("localhost","root","","php_pizza");
-mysqli_set_charset($ketnoi,'utf8');
+require "../includes/db_connect.php";
 $sql="select * from loaisanpham";
 $result=mysqli_query($ketnoi,$sql);
 

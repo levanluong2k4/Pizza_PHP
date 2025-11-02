@@ -77,7 +77,7 @@ $order_id=$_GET['order_id'] ?? null;
     </header>
 
 
-    <?php include 'footer.php'; ?>
+    <?php include './components/footer.php'; ?>
 
     <!-- jQuery (phải load trước slick) -->
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>

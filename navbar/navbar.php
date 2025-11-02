@@ -1,30 +1,88 @@
 <?php
 
+
 if (session_status() == PHP_SESSION_NONE) {
     session_start();
 }
+$user_id =$_SESSION['user_id']?? null;
 
-if ( isset($_COOKIE['remember'])) {
-    $ketnoi = mysqli_connect("localhost", "root", "", "php_pizza");
-    mysqli_set_charset($ketnoi, "utf8");
+$ketnoi = mysqli_connect("localhost", "root", "", "php_pizza");
+mysqli_set_charset($ketnoi, "utf8");
 
-    $token = $_COOKIE['remember'];
+if (isset($_COOKIE['remember']) && !empty($_COOKIE['remember'])) {
+    $token = mysqli_real_escape_string($ketnoi, $_COOKIE['remember']);
     $sql = "SELECT * FROM khachhang WHERE token='$token'";
     $result = mysqli_query($ketnoi, $sql);
 
-   
+    if ($result && mysqli_num_rows($result) > 0) {
         $row = mysqli_fetch_assoc($result);
-        $_SESSION['user_id'] = $row['MaKH'];
-        $_SESSION['name'] = $row['HoTen'];
-   
+        if ($row) {
+            $_SESSION['user_id'] = $row['MaKH'];
+            $_SESSION['name'] = $row['HoTen'];
+        }
+    } else {
+        
+        setcookie('remember', '', time() - 3600, '/');
+    }
 }
+
 $count = 0;
 
 if (isset($_SESSION['user_id']) ) {
-    $userId = mysqli_real_escape_string($ketnoi, $_SESSION['user_id']);
+
+    // Nếu vẫn còn session cart thì merge vào database trước khi xóa
+if (!empty($_SESSION['cart'])) {
+    // Kiểm tra giỏ hàng tồn tại chưa
+    $sql_cart = "SELECT * FROM giohang WHERE MaKH='$user_id'";
+    $result = mysqli_query($ketnoi, $sql_cart);
+    if (mysqli_num_rows($result) == 0) {
+        mysqli_query($ketnoi, "
+        INSERT INTO `giohang`( `MaKH`) VALUES ('$user_id')
+        ");
+    }
+
+    // Lấy CartID
+    $sql_cart_id = "SELECT CartID FROM giohang WHERE MaKH='$user_id'";
+   
+    $result_cart_id = mysqli_query($ketnoi, $sql_cart_id);
+  
+    $cart_row = mysqli_fetch_assoc($result_cart_id);
+    $cart_id = $cart_row['CartID'];
+
+
+    // Lưu các item từ session vào DB
+    foreach ($_SESSION['cart'] as $key => $item) {
+       $maSP_s = $item['masp'];
+
+        $maSize_s = $item['size_id'];
+        $soLuong_s = $item['quantity'];
+
+        $sql_check = "SELECT * FROM chitietgiohang 
+                      WHERE CartID='$cart_id' AND MaSP='$maSP_s' AND MaSize='$maSize_s'";
+        $check_result = mysqli_query($ketnoi, $sql_check);
+
+        if (mysqli_num_rows($check_result) == 0) {
+            $sql_insert_detail = "INSERT INTO chitietgiohang(CartID, MaSP, MaSize, Quantity)
+                                  VALUES('$cart_id', '$maSP_s', '$maSize_s', '$soLuong_s')";
+            mysqli_query($ketnoi, $sql_insert_detail);
+        } else {
+            $sql_update_detail = "UPDATE chitietgiohang 
+                                  SET Quantity = Quantity + '$soLuong_s' 
+                                  WHERE CartID='$cart_id' AND MaSP='$maSP_s' AND MaSize='$maSize_s'";
+            mysqli_query($ketnoi, $sql_update_detail);
+        }
+    }
+
+   
+    unset($_SESSION['cart']);
+}
+
+
+
+   
     $sql = "SELECT SUM(Quantity) AS cnt
             FROM chitietgiohang
-            WHERE CartID = (SELECT CartID FROM giohang WHERE MaKH = '$userId')";
+            WHERE CartID = (SELECT CartID FROM giohang WHERE MaKH = '$user_id')";
     $res = mysqli_query($ketnoi, $sql);
     if ($res) {
         $row = mysqli_fetch_assoc($res);

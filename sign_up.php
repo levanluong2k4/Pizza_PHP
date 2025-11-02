@@ -1,4 +1,8 @@
 <?php session_start(); ?>
+<?php 
+print_r($_SESSION);
+
+?>
 
 
 <!DOCTYPE html>
@@ -37,16 +41,27 @@
   <main class="container my-5 form-sign_up">
 <!-- From Uiverse.io by micaelgomestavares --> 
 <form class="form" action="handlers/process_sign_up.php" method="post">
-    <p class="title">Register </p>
+    <p class="title">Đăng ký </p>
     <p class="message">Signup now and get full access to our app. </p>
         <div class="row">
         <label  class="col-6 pe-0">
-            <input class="input" type="text" name="name" placeholder="" required="" value="<?php echo isset($_SESSION['old_name'])? (htmlspecialchars($_SESSION['old_name'])):''?>">
-            <span>name</span>
+            <input class="input" type="text" name="name" placeholder="" required="" 
+            value="<?php echo isset($_SESSION['old_name'])? (htmlspecialchars($_SESSION['old_name'])):'' ?>">
+            <span>Tên đăng nhập</span>
         </label>
 
         <label class="col-6 p">
-            <input class="input" type="number" name="sdt" placeholder="" required="" value="<?php echo isset($_SESSION['old_sdt'])? (htmlspecialchars($_SESSION['old_sdt'])):''?>">
+           <input 
+  class="input"
+  type="number"
+  name="sdt"
+  min="0"
+  placeholder=""
+  required
+  oninput="this.value = this.value.replace(/[^0-9]/g, '')"
+  value="<?php echo isset($_SESSION['old_sdt'])? (htmlspecialchars($_SESSION['old_sdt'])):'' ?>"
+  maxlength="10"
+>
             <span>Số điện thoại</span>
         </label>
     </div>  
@@ -63,7 +78,7 @@
     </label> 
         
     <label>
-        <input class="input" type="password" name="password" placeholder="" required="" value="<?php echo isset($_SESSION['old_password'])? (htmlspecialchars($_SESSION['old_password'])):''?>">
+        <input class="input" type="password" name="password" placeholder="" required="" value="<?php  if(isset($_SESSION['old_password'])) echo $_SESSION['old_password']  ?>">
         <span>Password</span>
           <?php 
     if (isset($_SESSION['error']) && $_SESSION['error'] === 'password_mismatch') {
@@ -76,7 +91,7 @@
         <input class="input" type="password" name="password_confirm" placeholder="" required="" value="<?php echo isset($_SESSION['old_password_confirm'])? (htmlspecialchars($_SESSION['old_password_confirm'])):''?>" >
         <span>Confirm password</span>
     </label>
-    <button class="submit">Submit</button>
+    <button class="submit" name="sign_up">Submit</button>
     <p class="signin">Already have an acount ? <a href="#">Signin</a> </p>
 </form>
 
@@ -85,7 +100,7 @@
     </main>
 
 
-     <?php include 'footer.php'; ?>
+     <?php include './components/footer.php'; ?>
 
     <!-- jQuery (phải load trước slick) -->
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>

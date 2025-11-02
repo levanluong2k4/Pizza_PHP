@@ -1,6 +1,5 @@
 <?php
-$ketnoi = mysqli_connect("localhost", "root", "", "php_pizza");
-mysqli_set_charset($ketnoi, "utf8");
+require '../includes/db_connect.php';
 
 if (isset($_GET['q'])) {
     $keyword = mysqli_real_escape_string($ketnoi, $_GET['q']);

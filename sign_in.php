@@ -1,10 +1,10 @@
 <?php session_start(); 
 
 if (isset($_SESSION['user_id'])) {
- 
-    header("Location: trangchu.php");
+     echo "<script>history.back();</script>";
     exit();
 }
+
 
 
 ?>
@@ -90,7 +90,7 @@ if (isset($_SESSION['error']) && $_SESSION['error'] === 'wrong_password') {
     </main>
 
 
-    <?php include 'footer.php'; ?>
+    <?php include 'components/footer.php'; ?>
 
     <!-- jQuery (phải load trước slick) -->
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>

@@ -5,10 +5,14 @@ if (!isset($_SESSION['user_id'])) {
     exit();
 }
 
+
 $ketnoi = mysqli_connect("localhost", "root", "", "php_pizza");
 mysqli_set_charset($ketnoi, "utf8");
 
 $user_id = $_SESSION['user_id'];
+
+$sql_user = "UPDATE `khachhang` SET `Diachi`='{$_SESSION['temp_diachi']}' WHERE MaKH='$user_id'";
+mysqli_query($ketnoi, $sql_user);
 
 // Lấy giỏ hàng
 $sql_cart = "SELECT * FROM giohang WHERE MaKH='$user_id'";
@@ -37,6 +41,7 @@ foreach ($card_detail as $products) {
 $tennguoinhan = $_SESSION['temp_hoten'];
 $sdtnguoinhan = $_SESSION['temp_sodt'];
 $diachinguoinhan = $_SESSION['temp_diachi'];
+
 
 // --- Chèn đơn hàng ---
 $sql_order = "INSERT INTO donhang (MaKH, TongTien, Tennguoinhan, sdtnguoinhan, diachinguoinhan)
@@ -69,6 +74,13 @@ if ($result_order) {
 
     $sql_delete_cart = "DELETE FROM giohang WHERE MaKH='$user_id'";
     mysqli_query($ketnoi, $sql_delete_cart);
+    unset($_SESSION['temp_hoten']);
+    unset($_SESSION['temp_sodt']);
+    unset($_SESSION['temp_diachi']);
+    unset($_SESSION['temp_so_nha']);
+echo '<pre>';
+print_r($_SESSION);
+echo '</pre>';
 
     // --- Chuyển hướng ---
     header("Location: ../order_confirmation.php?order_id=$order_id");

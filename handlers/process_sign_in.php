@@ -5,8 +5,7 @@ $email = $_POST['email'] ?? '';
 $password = $_POST['password'] ?? '';
 $remember = isset($_POST['remember']) ? true : false;
 
-$ketnoi = mysqli_connect("localhost", "root", "", "php_pizza");
-mysqli_set_charset($ketnoi, "utf8");
+require '../includes/db_connect.php';
 
 // --- 1️⃣ Kiểm tra trong bảng admin trước ---
 $sql_admin = "SELECT * FROM admin WHERE email='$email'";
@@ -58,7 +57,7 @@ if (mysqli_num_rows($result_user) > 0) {
     } else {
         $_SESSION['old_email'] = $email;
         $_SESSION['error'] = 'wrong_password';
-        header("Location: ../sign_in.php");
+        echo "<script>history.back();</script>";
         exit();
     }
 } else {
