@@ -103,6 +103,12 @@ if (!empty($_SESSION['cart'])) {
 
 
 ?>
+<style>
+
+.list-group-item-action{
+    width: 65%;
+}
+</style>
 
 <nav class="inner-navbar   navbar navbar-expand-lg ">
     <div class="container-fluid justify-content-lg-around">
@@ -111,7 +117,7 @@ if (!empty($_SESSION['cart'])) {
             <span class="navbar-toggler-icon"></span>
         </button>
 
-        <a class=" inner-logo me-lg-3" href="#"><img src="./img/logo.png" alt></a>
+        <a class=" inner-logo me-lg-3" href="trangchu.php"><img src="./img/logo.png" alt></a>
 
         <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent1"
             aria-controls="navbarSupportedContent1" aria-expanded="false" aria-label="Toggle navigation">
@@ -138,12 +144,12 @@ if (!empty($_SESSION['cart'])) {
         <!-- add to cart -->
 
         <div class="bg-global p-1  col-md-12 col-lg-3  rounded-3">
-            <form class="d-flex    inner-search col-md-12" role="search ">
-                <input class="form-control me-2 border-0" type="search" placeholder="Search" aria-label="Search"
+            <form method="post" action="research.php" class="d-flex    inner-search col-md-12" role="search ">
+                <input name="name_products" class="form-control me-2 border-0" type="search" placeholder="Search" aria-label="Search"
                     id="search-box" autocomplete="off">
                 <div id="search-result" class="list-group position-absolute col-sm-12 col-lg-6 top-sm-9 top-lg-8 ">
                 </div>
-                <button class="btn btn-outline-light border-start rounded-0   " type="submit"><i
+                <button class="btn btn-outline-light border-start rounded-0" name="btn_research" type="submit"><i
                         class="fa-solid fa-magnifying-glass text-dark-emphasis fw-bold "></i></button>
             </form>
         </div>

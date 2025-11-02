@@ -37,7 +37,7 @@ $order_id=$_GET['order_id'] ?? null;
 
 <body>
     <header class="bg-icon">
-        <?php include 'navbar/navbar.php'; ?>
+        <?php include 'components/navbar.php'; ?>
 
 
     <div class="row">

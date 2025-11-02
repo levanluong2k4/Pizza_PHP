@@ -12,12 +12,13 @@
 
                     <div class="modal-body">
                         <div class="row">
-                            <div class="col-md-5">
-                                <img src="./<?php echo htmlspecialchars($sp_info['Anh']); ?>" class="img-fluid rounded"
+                            <div class="col-md-5 d-flex flex-column align-items-center">
+                                <img src="./<?php echo htmlspecialchars($sp_info['Anh']); ?>" class="rounded" style="width: 200px; height: auto;"
                                     alt="<?php echo htmlspecialchars($sp_info['TenSP']); ?>">
-                                <h6 class="mt-3 text-success text-center">
+                                <h5 class="mt-3 text-success text-center">
                                     <?php echo htmlspecialchars($sp_info['TenSP']); ?>
-                                </h6>
+                                </h5>
+                                <p class="mt-3 fw-bolder opacity-50 text-center"><?php echo htmlspecialchars($sp_info['MoTa']); ?> </p>
                             </div>
 
                             <div class="col-md-7">

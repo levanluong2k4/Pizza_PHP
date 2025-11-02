@@ -34,7 +34,7 @@ print_r($_SESSION);
 </head>
 <body>
       <header class="bg-icon">
-        <?php include 'navbar/navbar.php'; ?>
+        <?php include 'components/navbar.php'; ?>
 
     </header>
 

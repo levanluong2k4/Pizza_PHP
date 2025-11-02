@@ -34,7 +34,7 @@ require "includes/query_products.php";
 
 <body>
     <header class="bg-icon">
-        <?php include 'navbar/navbar.php'; ?>
+        <?php include 'components/navbar.php'; ?>
 
         <div class="row">
             <div class="col-12 text-center">

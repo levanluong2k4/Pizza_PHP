@@ -157,7 +157,7 @@ mysqli_close($ketnoi);
 
 <body>
     <header class="bg-icon">
-        <?php include 'navbar/navbar.php'; ?>
+        <?php include 'components/navbar.php'; ?>
     </header>
 
     <!-- ✅ Hiển thị thông báo lưu thông tin -->

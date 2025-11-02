@@ -41,7 +41,7 @@ if (isset($_SESSION['user_id'])) {
 
 <body>
     <header class="bg-icon">
-        <?php include 'navbar/navbar.php'; ?>
+        <?php include 'components/navbar.php'; ?>
 
     </header>
 
