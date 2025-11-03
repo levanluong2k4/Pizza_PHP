@@ -1,91 +1,104 @@
-<?php
+<?php 
 session_start();
-if (!isset($_SESSION['user_id'])) {
-    header("Location: ../sign_in.php");
-    exit();
-}
-
-
 $ketnoi = mysqli_connect("localhost", "root", "", "php_pizza");
 mysqli_set_charset($ketnoi, "utf8");
 
-$user_id = $_SESSION['user_id'];
-
-$sql_user = "UPDATE `khachhang` SET `Diachi`='{$_SESSION['temp_diachi']}' WHERE MaKH='$user_id'";
-mysqli_query($ketnoi, $sql_user);
-
-// Lấy giỏ hàng
-$sql_cart = "SELECT * FROM giohang WHERE MaKH='$user_id'";
-$cart = mysqli_query($ketnoi, $sql_cart);
-$result_cart = mysqli_fetch_array($cart);
-
-// Lấy chi tiết giỏ hàng
-$sql_card_detail = "SELECT * FROM chitietgiohang WHERE CartID='{$result_cart['CartID']}'";
-$card_detail = mysqli_query($ketnoi, $sql_card_detail);
-
-// --- Tính tổng tiền ---
-$total_price = 0;
-foreach ($card_detail as $products) {
-    $product_id = $products['MaSP'];
-    $product_size = $products['MaSize'];
-    $quantity = $products['Quantity'];
-
-    $sql_product = "SELECT * FROM sanpham_size WHERE MaSP='$product_id' AND MaSize='$product_size'";
-    $product = mysqli_query($ketnoi, $sql_product);
-    $result_product = mysqli_fetch_array($product);
-
-    $price = $result_product['Gia'];
-    $total_price += $price * $quantity; // cộng dồn
+if (!isset($_SESSION['user_id']) && (!isset($_POST['order_guest']) || !isset($_SESSION['cart']))) {
+    header("Location: ../sign_in.php");
+    exit();
 }
 
 $tennguoinhan = $_SESSION['temp_hoten'];
 $sdtnguoinhan = $_SESSION['temp_sodt'];
 $diachinguoinhan = $_SESSION['temp_diachi'];
 
+// --- Trường hợp khách vãng lai ---
+if (isset($_POST['order_guest'])) {
 
-// --- Chèn đơn hàng ---
-$sql_order = "INSERT INTO donhang (MaKH, TongTien, Tennguoinhan, sdtnguoinhan, diachinguoinhan)
-VALUES ('$user_id', '$total_price', '$tennguoinhan', '$sdtnguoinhan', '$diachinguoinhan')";
-$result_order = mysqli_query($ketnoi, $sql_order);
-
-if ($result_order) {
-    $order_id = mysqli_insert_id($ketnoi);
-
-    // --- Chèn chi tiết đơn hàng ---
-    foreach ($card_detail as $products) {
-        $product_id = $products['MaSP'];
-        $product_size = $products['MaSize'];
-        $quantity = $products['Quantity'];
-
-        $sql_product = "SELECT * FROM sanpham_size WHERE MaSP='$product_id' AND MaSize='$product_size'";
-        $product = mysqli_query($ketnoi, $sql_product);
-        $result_product = mysqli_fetch_array($product);
-        $price = $result_product['Gia'];
-        $thanh_tien = $price * $quantity;
-
-        $sql_order_detail = "INSERT INTO chitietdonhang (MaDH, MaSP, MaSize, SoLuong, ThanhTien)
-                             VALUES ('$order_id', '$product_id', '$product_size', '$quantity', '$thanh_tien')";
-        mysqli_query($ketnoi, $sql_order_detail);
+    $total_price = 0;
+    foreach ($_SESSION['cart'] as $item) {
+        $maSP = $item['masp'];
+        $maSize = $item['size_id'];
+        $soLuong = $item['quantity'];
+        $sql_product = "SELECT Gia FROM sanpham_size WHERE MaSP='$maSP' AND MaSize='$maSize'";
+        $res = mysqli_query($ketnoi, $sql_product);
+        $row = mysqli_fetch_assoc($res);
+        $price = $row['Gia'];
+        $total_price += $price * $soLuong;
     }
 
-    // --- Xóa giỏ hàng ---
-    $sql_delete_cart_detail = "DELETE FROM chitietgiohang WHERE CartID='{$result_cart['CartID']}'";
-    mysqli_query($ketnoi, $sql_delete_cart_detail);
+    $sql_order = "INSERT INTO donhang (TongTien, diachinguoinhan, sdtnguoinhan, Tennguoinhan, is_guest)
+                  VALUES ('$total_price', '$diachinguoinhan', '$sdtnguoinhan', '$tennguoinhan', 1)";
+    mysqli_query($ketnoi, $sql_order);
+    $order_id = mysqli_insert_id($ketnoi);
 
-    $sql_delete_cart = "DELETE FROM giohang WHERE MaKH='$user_id'";
-    mysqli_query($ketnoi, $sql_delete_cart);
-    unset($_SESSION['temp_hoten']);
-    unset($_SESSION['temp_sodt']);
-    unset($_SESSION['temp_diachi']);
-    unset($_SESSION['temp_so_nha']);
-echo '<pre>';
-print_r($_SESSION);
-echo '</pre>';
+    foreach ($_SESSION['cart'] as $item) {
+        $maSP = $item['masp'];
+        $maSize = $item['size_id'];
+        $soLuong = $item['quantity'];
+        $sql_product = "SELECT Gia FROM sanpham_size WHERE MaSP='$maSP' AND MaSize='$maSize'";
+        $res = mysqli_query($ketnoi, $sql_product);
+        $row = mysqli_fetch_assoc($res);
+        $price = $row['Gia'];
+        $thanh_tien = $price * $soLuong;
 
-    // --- Chuyển hướng ---
+        mysqli_query($ketnoi, "INSERT INTO chitietdonhang (MaDH, MaSP, MaSize, SoLuong, ThanhTien)
+                               VALUES ('$order_id', '$maSP', '$maSize', '$soLuong', '$thanh_tien')");
+    }
+
+    unset($_SESSION['cart']);
     header("Location: ../order_confirmation.php?order_id=$order_id");
     exit();
-} else {
-    echo "Lỗi khi chèn đơn hàng: " . mysqli_error($ketnoi);
 }
+
+// --- Trường hợp khách đăng nhập ---
+else {
+    $user_id = $_SESSION['user_id'];
+    $total_price = 0;
+
+    $res_cart = mysqli_query($ketnoi, "SELECT * FROM giohang WHERE MaKH='$user_id'");
+    $cart = mysqli_fetch_assoc($res_cart);
+    $cartId = $cart['CartID'];
+
+    $res_items = mysqli_query($ketnoi, "SELECT * FROM chitietgiohang WHERE CartID='$cartId'");
+    while ($item = mysqli_fetch_assoc($res_items)) {
+        $maSP = $item['MaSP'];
+        $maSize = $item['MaSize'];
+        $quantity = $item['Quantity'];
+        $res_price = mysqli_query($ketnoi, "SELECT Gia FROM sanpham_size WHERE MaSP='$maSP' AND MaSize='$maSize'");
+        $p = mysqli_fetch_assoc($res_price);
+        $price = $p['Gia'];
+        $total_price += $price * $quantity;
+    }
+
+    mysqli_query($ketnoi, "INSERT INTO donhang (MaKH, TongTien, diachinguoinhan, sdtnguoinhan, Tennguoinhan, is_guest)
+                           VALUES ('$user_id', '$total_price', '$diachinguoinhan', '$sdtnguoinhan', '$tennguoinhan', 0)");
+    $order_id = mysqli_insert_id($ketnoi);
+
+    mysqli_data_seek($res_items, 0); // reset con trỏ
+    while ($item = mysqli_fetch_assoc($res_items)) {
+        $maSP = $item['MaSP'];
+        $maSize = $item['MaSize'];
+        $quantity = $item['Quantity'];
+        $res_price = mysqli_query($ketnoi, "SELECT Gia FROM sanpham_size WHERE MaSP='$maSP' AND MaSize='$maSize'");
+        $p = mysqli_fetch_assoc($res_price);
+        $price = $p['Gia'];
+        $thanh_tien = $price * $quantity;
+        mysqli_query($ketnoi, "INSERT INTO chitietdonhang (MaDH, MaSP, MaSize, SoLuong, ThanhTien)
+                               VALUES ('$order_id', '$maSP', '$maSize', '$quantity', '$thanh_tien')");
+    }
+
+    // Xóa giỏ hàng (đúng thứ tự)
+    mysqli_query($ketnoi, "DELETE FROM chitietgiohang WHERE CartID='$cartId'");
+    mysqli_query($ketnoi, "DELETE FROM giohang WHERE MaKH='$user_id'");
+
+    unset($_SESSION['temp_hoten'], $_SESSION['temp_sodt'], $_SESSION['temp_diachi'], $_SESSION['temp_so_nha']);
+
+    header("Location: ../order_confirmation.php?order_id=$order_id");
+    exit();
+}
+
+
+
+
 ?>

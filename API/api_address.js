@@ -7,11 +7,15 @@ document.addEventListener("DOMContentLoaded", function () {
     const fullAddress = document.getElementById("full_address");
     const saveBtn = document.getElementById("saveBtn");
 
-    const apiBase = "https://provinces.open-api.vn/api/";
+   
+    const apiBase = "http://provinces.open-api.vn/api/";
 
     // 🏙️ Load Tỉnh/Thành phố
     fetch(apiBase + "?depth=1")
-        .then(res => res.json())
+        .then(res => {
+            if (!res.ok) throw new Error('Network response was not ok');
+            return res.json();
+        })
         .then(data => {
             data.forEach(p => provinceSelect.add(new Option(p.name, p.code)));
 
@@ -25,7 +29,8 @@ document.addEventListener("DOMContentLoaded", function () {
             if (typeof oldAddress !== "undefined" && oldAddress.so_nha) {
                 soNhaInput.value = oldAddress.so_nha;
             }
-        });
+        })
+   
 
     // 🏘️ Khi chọn Tỉnh mới
     provinceSelect.addEventListener("change", () => {
@@ -61,7 +66,10 @@ document.addEventListener("DOMContentLoaded", function () {
     // 🧩 Load Huyện
     function loadDistricts(provinceCode) {
         fetch(apiBase + "p/" + provinceCode + "?depth=2")
-            .then(res => res.json())
+            .then(res => {
+                if (!res.ok) throw new Error('Network response was not ok');
+                return res.json();
+            })
             .then(data => {
                 districtSelect.innerHTML = "<option value=''>-- Chọn Quận/Huyện --</option>";
                 data.districts.forEach(d => districtSelect.add(new Option(d.name, d.code)));
@@ -72,13 +80,17 @@ document.addEventListener("DOMContentLoaded", function () {
                     districtSelect.value = oldAddress.district;
                     loadWards(oldAddress.district);
                 }
-            });
+            })
+         
     }
 
     // 🧩 Load Xã
     function loadWards(districtCode) {
         fetch(apiBase + "d/" + districtCode + "?depth=2")
-            .then(res => res.json())
+            .then(res => {
+                if (!res.ok) throw new Error('Network response was not ok');
+                return res.json();
+            })
             .then(data => {
                 wardSelect.innerHTML = "<option value=''>-- Chọn Xã/Phường --</option>";
                 data.wards.forEach(w => wardSelect.add(new Option(w.name, w.name)));
@@ -89,7 +101,8 @@ document.addEventListener("DOMContentLoaded", function () {
                     wardSelect.value = oldAddress.ward;
                     updateAddress();
                 }
-            });
+            })
+         
     }
 
     // 🧩 Cập nhật địa chỉ hiển thị
@@ -102,6 +115,6 @@ document.addEventListener("DOMContentLoaded", function () {
         const full = [soNha, ward, district, province].filter(Boolean).join(", ");
         diachiInput.value = full;
         fullAddress.textContent = full ? "🏠 " + full : "";
-        saveBtn.style.display = 'block';
+        if (saveBtn) saveBtn.style.display = 'block';
     }
 });

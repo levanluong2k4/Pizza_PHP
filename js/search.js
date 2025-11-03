@@ -60,3 +60,36 @@ data.forEach(item => {
         resultBox.innerHTML = "";
     }
 });
+
+
+
+// Ẩn kết quả khi click ra ngoài
+document.addEventListener("click", function (event) {
+    // Nếu phần được click không nằm trong ô tìm kiếm hoặc danh sách gợi ý
+    if (!resultBox.contains(event.target) && event.target !== searchBox) {
+        resultBox.innerHTML = ""; // Xóa gợi ý
+    }
+});
+
+
+
+
+// Xử lý bật/tắt nút tìm kiếm
+document.addEventListener("DOMContentLoaded", function () {
+    const searchInput = document.getElementById("search-box");
+    const searchButton = document.getElementById("search-btn");
+
+    // Hàm kiểm tra và bật/tắt nút
+    function toggleButton() {
+        const hasText = searchInput.value.trim().length > 0;
+        searchButton.disabled = !hasText; // Nếu có chữ => bật nút
+    }
+
+    // Kiểm tra mỗi khi người dùng gõ
+    searchInput.addEventListener("input", toggleButton);
+
+    // Khi load lại trang, kiểm tra luôn (trường hợp nhập sẵn)
+    toggleButton();
+});
+
+

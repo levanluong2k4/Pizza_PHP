@@ -47,7 +47,11 @@ $_SESSION['cart'][$maSP . '_' . $maSize]['subtotal'] =
 
        // Lưu thông báo thành công vào session
     $_SESSION['cart_message'] = 'success';
-    header("location:../trangchu.php");
+        if (!empty($_SERVER['HTTP_REFERER'])) {
+            header("Location: " . $_SERVER['HTTP_REFERER']);
+        } else {
+            header("Location: ../trangchu.php"); // fallback nếu không có referer
+        }
     exit();
 }
 

@@ -4,15 +4,17 @@
   flex-direction: column;
   gap: 10px;
   min-width: 60%;
-  background-color: #fff;
+  background-color: #ffffff4d;
   padding: 20px;
   border-radius: 20px;
   position: relative;
+  box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
+  
 }
 
 .title {
   font-size: 28px;
-  color: royalblue;
+ color: #6A877D;
   font-weight: 600;
   letter-spacing: -1px;
   position: relative;
@@ -28,13 +30,32 @@
   width: 16px;
   border-radius: 50%;
   left: 0px;
-  background-color: royalblue;
+  background: linear-gradient(
+    140deg,
+    hsla(var(--back-color), 32%, 1) min(2em, 20%),
+    hsla(var(--back-color), 12%, 0.6) min(8em, 100%)
+  );
+     --bezier: cubic-bezier(0.22, 0.61, 0.36, 1);
+  --edge-light: hsla(0, 0%, 50%, 0.8);
+  --text-light: rgba(255, 255, 255, 0.4);
+  --back-color: 160, 80%;
+  box-shadow: inset 0.4px 1px 4px var(--edge-light);
+
 }
 
 .title::before {
   width: 18px;
   height: 18px;
-  background-color: royalblue;
+  background: linear-gradient(
+    140deg,
+    hsla(var(--back-color), 32%, 1) min(2em, 20%),
+    hsla(var(--back-color), 12%, 0.6) min(8em, 100%)
+  );
+     --bezier: cubic-bezier(0.22, 0.61, 0.36, 1);
+  --edge-light: hsla(0, 0%, 50%, 0.8);
+  --text-light: rgba(255, 255, 255, 0.4);
+  --back-color: 160, 80%;
+  box-shadow: inset 0.4px 1px 4px var(--edge-light);
 }
 
 .title::after {
@@ -53,11 +74,11 @@
 }
 
 .signin a {
-  color: royalblue;
+  color: #258F6C;
 }
 
 .signin a:hover {
-  text-decoration: underline royalblue;
+  text-decoration: underline #6A877D;
 }
 
 .flex {
@@ -106,16 +127,26 @@
 .submit {
   border: none;
   outline: none;
-  background-color: royalblue;
+ 
   padding: 10px;
   border-radius: 10px;
   color: #fff;
   font-size: 16px;
   transform: .3s ease;
+    background: linear-gradient(
+    140deg,
+    hsla(var(--back-color), 32%, 1) min(2em, 20%),
+    hsla(var(--back-color), 12%, 0.6) min(8em, 100%)
+  );
+     --bezier: cubic-bezier(0.22, 0.61, 0.36, 1);
+  --edge-light: hsla(0, 0%, 50%, 0.8);
+  --text-light: rgba(255, 255, 255, 0.4);
+  --back-color: 160, 80%;
+  box-shadow: inset 0.4px 1px 4px var(--edge-light);
 }
 
 .submit:hover {
-  background-color: rgb(56, 90, 194);
+  background-color: rgb(23, 163, 69);
   cursor: pointer;
 }
 
@@ -136,4 +167,10 @@
     display: flex;
     justify-content: center;
     align-items: center;
+}
+    body{
+        padding: 0;
+    }
+footer {
+    margin-top: 0;
 }

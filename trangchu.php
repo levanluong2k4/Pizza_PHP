@@ -24,7 +24,7 @@ require "includes/query_products.php";
 
     
     <!-- CSS -->
-    <link rel="stylesheet" href="css/bai6.css">
+    <link rel="stylesheet" href="css/pizza.css">
     <link rel="stylesheet" href="css/basic.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css"
         integrity="sha512-SnH5WK+bZxgPHs44uWIX+LLJAJ9/2PkPKZ5QiAj6Ta86w+fsb2TkcmfRyVX3pBnMFcV7oQPJkl9QevSCWr3W6A=="
@@ -82,10 +82,13 @@ require "includes/query_products.php";
         </div>
 
         <div class="row">
-            <div class="container bg-success py-3 d-flex px-5">
-                <div class="col-5 text-start animate__animated animate__pulse animate__infinite">
-                    <h3 class="text-warning mb-0">🍕 Khuyến mãi - Combo đặc
-                        biệt 🍕</h3>
+            <div class="container bg-navbar py-3 d-flex px-5">
+                <div class=" d-flex align-items-center  col-5 text-start animate__animated animate__pulse animate__infinite">
+                     <img src="./img/pizza.png" alt=""style="width: 100px; height: auto; margin-right: 10px;"> 
+                    <h3 class="text-warning mb-0 inner-title inner-title">
+                      PIZZA </h3>
+
+                        <img src="./img/pizza.png" alt="" style="width: 100px; height: auto; margin-left: 10px;"> 
                 </div>
                 <div class="col-7 text-end inner-nav-tab">
                     <ul class="nav justify-content-end">
@@ -109,6 +112,8 @@ require "includes/query_products.php";
                         <?php } ?>
                         <?php endforeach; ?>
                     </ul>
+             
+
                 </div>
             </div>
         </div>
@@ -123,10 +128,14 @@ require "includes/query_products.php";
         <!-- khai vị  -->
 
         <div class="row">
-            <div class="container bg-success py-3 d-flex px-5">
+            <div class="container position-relative inner-img bg-navbar py-3 d-flex px-5">
                 <div class=" text-start animate__animated animate__pulse animate__infinite">
 
-                    <h3 class="text-warning mb-0"> 🍔 Món Khai vị 🍔</h3>
+                    <h3 class="text-warning mb-0 inner-title"> 🍔 Món Khai vị 🍔</h3>
+                   
+                </div>
+                 <div class="position-absolute top-0 end-0">
+                        <img src="./img/pizza1.png" alt="" >
                 </div>
             </div>
         </div>
@@ -141,8 +150,8 @@ require "includes/query_products.php";
         <!-- thức uống -->
 
         <div class="row">
-            <div class="col-12 bg-success text-center py-3 animate__animated animate__pulse animate__infinite">
-                <h3 class="text-warning mb-0">⋆｡°✩🍸 Thức uống🍸⋆｡°✩</h3>
+            <div class="col-12 bg-navbar text-center py-3 animate__animated animate__pulse animate__infinite">
+                <h3 class="text-warning mb-0 inner-title">⋆｡°✩🍸 Thức uống🍸⋆｡°✩</h3>
             </div>
         </div>
         <div class="row">

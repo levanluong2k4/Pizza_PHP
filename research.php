@@ -1,17 +1,25 @@
 <?php 
-$name_products = '';  // tránh lỗi undefined
-$products_reseach = null;   // tránh lỗi undefined
-if(isset($_POST['btn_research'])){
-    $name_products = $_POST['name_products'] ?? '';
-    require 'includes/db_connect.php';
-    $sql = "SELECT * FROM sanpham WHERE TenSP LIKE '%$name_products%'";
-    $products_reseach = mysqli_query($ketnoi, $sql);
-  
-    
-}
-  require 'includes/query_products.php';
+   $search = $_GET['search'] ?? '';
+$products_research = null;   
 
+if ($search!='') {
+ 
+    require 'includes/db_connect.php';
+
+
+    $stmt = $ketnoi->prepare("SELECT * FROM sanpham WHERE TenSP LIKE ?");
+    $searchTerm = "%$search%";
+    $stmt->bind_param("s", $searchTerm);
+    $stmt->execute();
+    $products_research = $stmt->get_result();
+
+ 
+    $stmt->close();
+}
+
+require 'includes/query_products.php';
 ?>
+
 
 <!DOCTYPE html>
 <html lang="en">
@@ -29,7 +37,7 @@ if(isset($_POST['btn_research'])){
     <link rel="stylesheet" type="text/css" href="//cdn.jsdelivr.net/npm/slick-carousel@1.8.1/slick/slick-theme.css" />
     
     <!-- CSS -->
-    <link rel="stylesheet" href="css/bai6.css">
+    <link rel="stylesheet" href="css/pizza.css">
     <link rel="stylesheet" href="css/basic.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css"
         integrity="sha512-SnH5WK+bZxgPHs44uWIX+LLJAJ9/2PkPKZ5QiAj6Ta86w+fsb2TkcmfRyVX3pBnMFcV7oQPJkl9QevSCWr3W6A=="
@@ -79,44 +87,62 @@ if(isset($_POST['btn_research'])){
 
     <header class="bg-icon">
         <?php include 'components/navbar.php'; ?>
-        <main class="container my-5">
-            <h2 class="mb-4">Kết quả tìm kiếm cho: "<?= htmlspecialchars($name_products) ; mysqli_num_rows($products_reseach); ?>"</h2>
-            <?php if (mysqli_num_rows($products_reseach) > 0): ?>
-                <div id="productContainer">
-                    <?php 
-                    $products = mysqli_fetch_all($products_reseach, MYSQLI_ASSOC);
-                    $total_products = count($products);
-                    $products_per_row = 3;
-                    $rows = array_chunk($products, $products_per_row);
-                    $initial_rows = 1; // Hiển thị 1 dòng đầu tiên (4 sản phẩm)
-                    
-                    foreach($rows as $index => $row_products): 
-                        $show_class = $index < $initial_rows ? 'show' : '';
-                    ?>
-                        <div class="row row-cols-1 row-cols-md-2 row-cols-lg-4 g-4 mb-4 product-row <?= $show_class ?>">
-                            <?php foreach($row_products as $sp): ?>
-                               
-                                    <?php include 'components/product_card.php'; ?>
-                              
-                            <?php endforeach; ?>
+      <main class="container my-5">
+    <h2 class="mb-4">
+        Kết quả tìm kiếm cho: "<?= htmlspecialchars($search) ?>"
+    </h2>
+
+    <?php if ($products_research && mysqli_num_rows($products_research) > 0): ?>
+        <div id="productContainer">
+            <?php 
+            $products = mysqli_fetch_all($products_research, MYSQLI_ASSOC);
+            $total_products = count($products);
+            $products_per_row = 3;
+            $rows = array_chunk($products, $products_per_row);
+            $initial_rows = 1;
+            
+            foreach ($rows as $index => $row_products): 
+                $show_class = $index < $initial_rows ? 'show' : '';
+            ?>
+                <div class="row row-cols-1 row-cols-md-2 row-cols-lg-4 g-4 mb-4 product-row <?= $show_class ?>">
+                    <?php foreach ($row_products as $sp): ?>
+                            <div class="col-lg-4 col-6 wow animate__bounceInLeft">
+                    <div class="inner-items text-center">
+                        <div class="card border-0 bg-transparent">
+                            <img src="./<?php echo $sp["Anh"] ?>" class="card-img-top mx-auto"
+                                alt="<?php echo $sp["TenSP"] ?>">
+                            <div class="card-body">
+                                <p class="card-text text-success mb-3" style="font-weight: 600;">
+                                    <?php echo $sp["TenSP"] ?></p>
+                                <a href="?search=<?php echo $search ?>&id=<?php echo $sp["MaSP"]; ?>" class="inner-btn mt-2"
+                                    data-masp="<?php echo $sp["MaSP"]; ?>">
+                                    Mua ngay
+                                </a>
+                            </div>
                         </div>
+                    </div>
+                </div>
                     <?php endforeach; ?>
                 </div>
-                
-                <?php if(count($rows) > $initial_rows): ?>
-                    <div class="text-center">
-                        <button id="loadMoreBtn" class="btn btn-primary btn-load-more">
-                            <i class="fas fa-chevron-down me-2"></i>Xem thêm
-                        </button>
-                    </div>
-                <?php endif; ?>
-                
-            <?php else: ?>
-                <div class="alert alert-info" role="alert">
-                    <i class="fas fa-info-circle me-2"></i>Không tìm thấy sản phẩm nào.
-                </div>
-            <?php endif; ?>
-        </main>
+            <?php endforeach; ?>
+        </div>
+
+        <?php if (count($rows) > $initial_rows): ?>
+            <div class="text-center">
+                <button id="loadMoreBtn" class="btn btn-outline-success btn-load-more">
+                    <i class="fas fa-chevron-down me-2"></i>Xem thêm
+                </button>
+            </div>
+        <?php endif; ?>
+
+    <?php else: ?>
+        <div class="alert alert-info" role="alert">
+            <i class="fas fa-info-circle me-2"></i>
+            Không tìm thấy sản phẩm nào.
+        </div>
+    <?php endif; ?>
+</main>
+
            <!-- Modal chọn size -->
         <?php require "includes/modal_size.php" ?>
     </header>

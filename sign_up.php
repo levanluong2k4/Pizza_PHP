@@ -25,24 +25,34 @@ print_r($_SESSION);
     <link rel="stylesheet" type="text/css" href="slick/slick-theme.css" />
 
     <!-- CSS -->
-    <link rel="stylesheet" href="css/bai6.css">
+    <link rel="stylesheet" href="css/pizza.css">
     <link rel="stylesheet" href="css/basic.css">
      <link rel="stylesheet" href="css/sign_up.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css"
         integrity="sha512-SnH5WK+bZxgPHs44uWIX+LLJAJ9/2PkPKZ5QiAj6Ta86w+fsb2TkcmfRyVX3pBnMFcV7oQPJkl9QevSCWr3W6A=="
         crossorigin="anonymous" referrerpolicy="no-referrer" />
 </head>
+<style>
+    body{
+        padding: 0;
+    }
+footer {
+    margin-top: 0;
+}
+</style>
 <body>
       <header class="bg-icon">
         <?php include 'components/navbar.php'; ?>
 
-    </header>
-
-  <main class="container my-5 form-sign_up">
+          <main class="container  form-sign_up">
 <!-- From Uiverse.io by micaelgomestavares --> 
 <form class="form" action="handlers/process_sign_up.php" method="post">
-    <p class="title">Đăng ký </p>
-    <p class="message">Signup now and get full access to our app. </p>
+     <div class="flex align-center mb-3">
+        <a class="  me-lg-3" href="trangchu.php"><img src="./img/logo1.png" alt="logo pizza" style="width: 100px; height:auto;"></a>
+<h1 class="title">ĐĂNG KÝ </h1>
+     </div>
+    
+    <p class="message">Đăng ký ngay để có quyền truy cập đầy đủ vào ứng dụng của chúng tôi.</p>
         <div class="row">
         <label  class="col-6 pe-0">
             <input class="input" type="text" name="name" placeholder="" required="" 
@@ -79,7 +89,7 @@ print_r($_SESSION);
         
     <label>
         <input class="input" type="password" name="password" placeholder="" required="" value="<?php  if(isset($_SESSION['old_password'])) echo $_SESSION['old_password']  ?>">
-        <span>Password</span>
+        <span>Mật khẩu</span>
           <?php 
     if (isset($_SESSION['error']) && $_SESSION['error'] === 'password_mismatch') {
         echo '<span style="color: red; font-size: 0.8em;">Mật khẩu không trùng khớp.</span>';
@@ -89,15 +99,19 @@ print_r($_SESSION);
     </label>
     <label>
         <input class="input" type="password" name="password_confirm" placeholder="" required="" value="<?php echo isset($_SESSION['old_password_confirm'])? (htmlspecialchars($_SESSION['old_password_confirm'])):''?>" >
-        <span>Confirm password</span>
+        <span>Xác nhận mật khẩu</span>
     </label>
-    <button class="submit" name="sign_up">Submit</button>
-    <p class="signin">Already have an acount ? <a href="#">Signin</a> </p>
+    <button class="submit" name="sign_up">Đăng ký</button>
+    <p class="signin">Bạn đã có tài khoản ? <a href="sign_in.php">Đăng nhập</a> </p>
 </form>
 
 
 
     </main>
+
+    </header>
+
+
 
 
      <?php include './components/footer.php'; ?>

@@ -19,7 +19,7 @@ mysqli_set_charset($ketnoi, "utf8");
 ];
 echo '<pre>';
 print_r($_SESSION);
-print_r($_POST);
+// print_r($_POST);
 echo '</pre>';
 
 // Nếu có user đăng nhập → lấy thông tin mặc định
@@ -148,7 +148,7 @@ mysqli_close($ketnoi);
     <link rel="stylesheet" href="./css/animate.css">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" type="text/css" href="//cdn.jsdelivr.net/npm/slick-carousel@1.8.1/slick/slick.css" />
-    <link rel="stylesheet" href="css/bai6.css">
+    <link rel="stylesheet" href="css/pizza.css">
     <link rel="stylesheet" href="css/basic.css">
     <link rel="stylesheet" href="css/sign_up.css">
     <link rel="stylesheet" href="css/cart.css">
@@ -156,48 +156,23 @@ mysqli_close($ketnoi);
 </head>
 
 <body>
-    <header class="bg-icon">
+    <header class="bg-icon pt-5">
         <?php include 'components/navbar.php'; ?>
-    </header>
 
-    <!-- ✅ Hiển thị thông báo lưu thông tin -->
-    <?php if(!empty($updateMessage)): ?>
-    <div class="alert alert-success alert-dismissible fade show alert-cart" role="alert">
-        <i class="fa fa-check-circle"></i> <?php echo $updateMessage; ?>
-        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-    </div>
-    <?php endif; ?>
-
-    <!-- Hiển thị thông báo giỏ hàng -->
-    <?php if(isset($_SESSION['cart_message'])): ?>
-    <?php
-        $message = '';
-        $alert_type = 'success';
-
-        switch($_SESSION['cart_message']) {
-            case 'delete_success':
-                $message = 'Đã xóa sản phẩm khỏi giỏ hàng!';
-                $alert_type = 'warning';
-                break;
-        }
-    ?>
-    <div class="alert alert-<?php echo $alert_type; ?> alert-dismissible fade show alert-cart" role="alert">
-        <i class="fa fa-check-circle"></i> <?php echo $message; ?>
-        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-    </div>
-    <?php unset($_SESSION['cart_message']); ?>
-    <?php endif; ?>
-
+        
     <main class="container my-5">
         <h2 class="text-center mb-4">Giỏ hàng của bạn</h2>
 
         <?php if (empty($cartItems)): ?>
         <div class="text-center">
-            <i class="fas fa-shopping-cart fa-5x text-muted mb-3"></i>
+            <img src="./img/cart.png" alt=""style="width: 150px; height: 150px; object-fit: contain;">
             <h4>Giỏ hàng của bạn đang trống</h4>
             <p class="text-muted">Hãy thêm một số sản phẩm vào giỏ hàng để tiếp tục mua sắm</p>
-            <a href="trangchu.php" class="btn btn-success">Tiếp tục mua sắm</a>
+            <a href="trangchu.php" class="btn btn-outline-success">Tiếp tục mua sắm</a>
         </div>
+
+
+
 
         <?php else: ?>
         <div class="row">
@@ -206,7 +181,7 @@ mysqli_close($ketnoi);
                     <div class="card-header">
                         <h5 class="mb-0">Sản phẩm trong giỏ hàng (<?php echo count($cartItems); ?> sản phẩm)</h5>
                     </div>
-                    <div class="card-body">
+                    <div class="card-body scrollable-menu" style="max-height: 500px; overflow-y: auto;">
                         <?php foreach ($cartItems as $item): ?>
                         <div class="row cart-item mb-3 pb-3 border-bottom align-items-center">
                             <div class="col-md-2">
@@ -318,7 +293,8 @@ mysqli_close($ketnoi);
                     <div class="card-header">
                         <h5 class="mb-0">Tổng kết đơn hàng</h5>
                     </div>
-                    <div class="card-body">
+                    <div class="card-body ">
+                        <form action="./cart/process_order.php" method="post">
                         <div class="d-flex justify-content-between mb-2">
                             <span>Tạm tính:</span>
                             <span><?php echo number_format($tongtien); ?> VNĐ</span>
@@ -333,25 +309,30 @@ mysqli_close($ketnoi);
                             <strong class="text-danger"><?php echo number_format($tongtien); ?> VNĐ</strong>
                         </div>
                         
-                        <a href="<?php echo $thieuThongTin && isset($_SESSION['user_id']) ? '#' : 'cart/process_order.php'; ?>" 
+                        <button name="order" type="submit"  
                            class="btn btn-success w-100 mb-2 <?php echo $thieuThongTin && isset($_SESSION['user_id']) ? 'disabled' : ''; ?>"
                            <?php echo $thieuThongTin && isset($_SESSION['user_id']) ? 'style="opacity:0.5; pointer-events:none;"' : ''; ?>>
                             <i class="fas fa-shopping-bag"></i> Đặt hàng
-                        </a>
+                        </button>
 
                         <?php if(!isset($_SESSION['user_id'])): ?>
-                        <a href="<?php echo $thieuThongTin ? '#' : 'cart/process_order.php'; ?>" 
+                        <button name="order_guest" type="submit" 
                            class="btn btn-warning order-guest w-100 mb-2 <?php echo $thieuThongTin ? 'disabled' : ''; ?>"
                            <?php echo $thieuThongTin ? 'style="opacity:0.5; pointer-events:none;"' : ''; ?>>
                             <i class="fas fa-shopping-bag"></i> Đặt hàng không cần đăng nhập
-                        </a>
+                        </button>
                         <?php endif; ?>
+                        </form>
                     </div>
                 </div>
             </div>
         </div>
         <?php endif; ?>
     </main>
+    </header>
+
+
+
 
     <?php include './components/footer.php'; ?>
 

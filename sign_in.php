@@ -31,7 +31,7 @@ if (isset($_SESSION['user_id'])) {
     <link rel="stylesheet" type="text/css" href="slick/slick-theme.css" />
 
     <!-- CSS -->
-    <link rel="stylesheet" href="css/bai6.css">
+    <link rel="stylesheet" href="css/pizza.css">
     <link rel="stylesheet" href="css/basic.css">
     <link rel="stylesheet" href="css/sign_up.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css"
@@ -42,13 +42,15 @@ if (isset($_SESSION['user_id'])) {
 <body>
     <header class="bg-icon">
         <?php include 'components/navbar.php'; ?>
-
-    </header>
-
+        
     <main class="container my-5 form-sign_up">
       
         <form class="form" action="handlers/process_sign_in.php" method="post">
-            <p class="title">Sign in </p>
+         
+             <div class="flex align-center mb-3">
+        <a class="  me-lg-3" href="trangchu.php"><img src="./img/logo1.png" alt="logo pizza" style="width: 100px; height:auto;"></a>
+<h1 class="title">ĐĂNG NHẬP </h1>
+     </div>
             <p class="message">Signup now and get full access to our app. </p>
 
 
@@ -88,6 +90,9 @@ if (isset($_SESSION['error']) && $_SESSION['error'] === 'wrong_password') {
 
 
     </main>
+
+    </header>
+
 
 
     <?php include 'components/footer.php'; ?>

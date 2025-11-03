@@ -1,4 +1,6 @@
 
+@import url('https://fonts.googleapis.com/css2?family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&display=swap');
+
 /* ==============================
    🏷️ Header
 ============================== */
@@ -392,7 +394,7 @@ footer {
     font-size: 14px;
     line-height: 1.6;
     padding-top: 40px;
-    margin-top: 40px;
+  
 }
 
 .footer-top {
@@ -508,4 +510,10 @@ footer {
         transform: translateX(0);
         opacity: 1;
     }
+}
+.inner-title{
+    font-family: 'Libre Baskerville', serif;
+    font-size: 2rem;
+    font-weight: 700;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
 }

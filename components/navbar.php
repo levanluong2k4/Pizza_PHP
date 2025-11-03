@@ -98,6 +98,10 @@ if (!empty($_SESSION['cart'])) {
 }
 
 
+$sqlloaisp="SELECT * FROM loaisanpham";
+$loaisp=mysqli_query($ketnoi,$sqlloaisp);
+
+
 
 
 
@@ -108,6 +112,9 @@ if (!empty($_SESSION['cart'])) {
 .list-group-item-action{
     width: 65%;
 }
+
+
+
 </style>
 
 <nav class="inner-navbar   navbar navbar-expand-lg ">
@@ -144,13 +151,27 @@ if (!empty($_SESSION['cart'])) {
         <!-- add to cart -->
 
         <div class="bg-global p-1  col-md-12 col-lg-3  rounded-3">
-            <form method="post" action="research.php" class="d-flex    inner-search col-md-12" role="search ">
-                <input name="name_products" class="form-control me-2 border-0" type="search" placeholder="Search" aria-label="Search"
-                    id="search-box" autocomplete="off">
-                <div id="search-result" class="list-group position-absolute col-sm-12 col-lg-6 top-sm-9 top-lg-8 ">
-                </div>
-                <button class="btn btn-outline-light border-start rounded-0" name="btn_research" type="submit"><i
-                        class="fa-solid fa-magnifying-glass text-dark-emphasis fw-bold "></i></button>
+            <form method="get" action="research.php" class="d-flex    inner-search col-md-12" role="search ">
+               <input 
+        name="search" 
+        class="form-control me-2 border-0" 
+        type="search" 
+        placeholder="Search" 
+        aria-label="Search"
+        id="search-box"
+        value="<?php echo isset($_GET['search']) ? htmlspecialchars($_GET['search']) : '' ?>" 
+        autocomplete="off"
+    >
+    <div id="search-result" class="list-group position-absolute col-sm-12 col-lg-6 top-sm-9 top-lg-8"></div>
+    <button 
+        class="btn btn-outline-light border-start rounded-0" 
+       
+        id="search-btn" 
+        type="submit" 
+        disabled
+    >
+        <i class="fa-solid fa-magnifying-glass text-dark-emphasis fw-bold"></i>
+    </button>
             </form>
         </div>
 
@@ -161,17 +182,18 @@ if (!empty($_SESSION['cart'])) {
                 <li class="nav-item dropdown col-md-12 col-lg-3  text-md-center ">
                     <a class="nav-link dropdown-toggle text-warning" href="#" role="button" data-bs-toggle="dropdown"
                         aria-expanded="false">
-                        Menu
+                        Thực đơn
                     </a>
-                    <ul class="dropdown-menu bg-global p-0 text-md-center text-lg-start">
-                        <li class="dropdown-item"><a href="#">Action</a></li>
-                        <li class="dropdown-item"><a href> Another action</a></li>
-                        <li>
-                            <hr class="dropdown-divider">
-                        </li>
-                        <li class="dropdown-item"><a href="#">Something else
-                                here</a></li>
+                                <ul class="dropdown-menu bg-global p-0 text-md-center text-lg-start scrollable-menu">
+                        <?php foreach($loaisp as $value): ?>
+                            <li class="dropdown-item">
+                                <a href="research.php?category=<?php echo $value['MaLoai'] ?>">
+                                    <?php echo $value['TenLoai'] ?>
+                                </a>
+                            </li>
+                        <?php endforeach; ?>
                     </ul>
+
                 </li>
                 <li class="nav-item">
                     <a class="nav-link " aria-current="page" href="#">Đặt hàng</a>
@@ -189,9 +211,9 @@ if (!empty($_SESSION['cart'])) {
     
     <?php if (isset($_SESSION['user_id'])): ?>
         <!-- Nếu đã đăng nhập -->
-        <li class="nav-item d-flex align-items-center">
-            <span class="text-white me-2">Xin chào, <?php echo htmlspecialchars($_SESSION['name']); ?>!</span>
-        </li>
+       <p>
+        <span class="text-white me-2">Xin chào, <?php echo htmlspecialchars($_SESSION['name']); ?>!</span>
+       </p>
         <li class="nav-item dropdown col-12 col-md-12 text-center text-md-center">
             <a class="nav-link dropdown-toggle text-warning p-0" href="#" role="button"
                 data-bs-toggle="dropdown" aria-expanded="false">
