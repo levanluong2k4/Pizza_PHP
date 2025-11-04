@@ -1,6 +1,10 @@
 <?php 
 
 $order_id=$_GET['order_id'] ?? null;
+if(!isset($_GET['order_id'])){
+    header("Location: trangchu.php");
+    exit();
+} 
 
 ?>
 

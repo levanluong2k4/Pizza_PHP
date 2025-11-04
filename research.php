@@ -1,25 +1,52 @@
 <?php 
-   $search = $_GET['search'] ?? '';
-$products_research = null;   
+$search = $_GET['search'] ?? '';
+$category_id = $_GET['category_id'] ?? '';
 
-if ($search!='') {
- 
-    require 'includes/db_connect.php';
+require 'includes/db_connect.php';
+$products_result = null;
+$categories = null;
 
+// Chuẩn bị câu SQL cơ bản
+$sql = "SELECT * FROM sanpham WHERE 1=1";
+$params = [];
+$types = "";
 
-    $stmt = $ketnoi->prepare("SELECT * FROM sanpham WHERE TenSP LIKE ?");
-    $searchTerm = "%$search%";
-    $stmt->bind_param("s", $searchTerm);
-    $stmt->execute();
-    $products_research = $stmt->get_result();
-
- 
-    $stmt->close();
+// Nếu có từ khóa tìm kiếm
+if ($search != '') {
+    $sql .= " AND TenSP LIKE ?";
+    $params[] = "%$search%";
+    $types .= "s";
 }
+
+// Nếu có chọn loại sản phẩm
+if ($category_id != '') {
+    $sql .= " AND MaLoai = ?";
+    $params[] = $category_id;
+    $types .= "s";
+
+    // Lấy thông tin loại để hiển thị tiêu đề
+    $sql_categories = "SELECT * FROM loaisanpham WHERE MaLoai = ?";
+    $stmt_cat = $ketnoi->prepare($sql_categories);
+    $stmt_cat->bind_param("s", $category_id);
+    $stmt_cat->execute();
+    $categories = $stmt_cat->get_result()->fetch_assoc();
+    $stmt_cat->close();
+}
+
+// Chuẩn bị truy vấn chính
+$stmt = $ketnoi->prepare($sql);
+
+// Gắn tham số nếu có
+if (!empty($params)) {
+    $stmt->bind_param($types, ...$params);
+}
+
+$stmt->execute();
+$products_result = $stmt->get_result();
+$stmt->close();
 
 require 'includes/query_products.php';
 ?>
-
 
 <!DOCTYPE html>
 <html lang="en">
@@ -85,17 +112,21 @@ require 'includes/query_products.php';
 
 <body>
 
-    <header class="bg-icon">
+    <header class="bg-icon pt-2">
         <?php include 'components/navbar.php'; ?>
-      <main class="container my-5">
+<main class="container my-5">
     <h2 class="mb-4">
-        Kết quả tìm kiếm cho: "<?= htmlspecialchars($search) ?>"
+        <?php 
+            if ($search != "") echo "Kết quả tìm kiếm cho: " . htmlspecialchars($search);
+            if ($category_id!= "" && $categories) echo " - " . htmlspecialchars($categories['TenLoai']);
+        ?>
     </h2>
+    <hr>
 
-    <?php if ($products_research && mysqli_num_rows($products_research) > 0): ?>
+    <?php if ($products_result && mysqli_num_rows($products_result) > 0): ?>
         <div id="productContainer">
             <?php 
-            $products = mysqli_fetch_all($products_research, MYSQLI_ASSOC);
+            $products = mysqli_fetch_all($products_result, MYSQLI_ASSOC);
             $total_products = count($products);
             $products_per_row = 3;
             $rows = array_chunk($products, $products_per_row);
@@ -106,22 +137,23 @@ require 'includes/query_products.php';
             ?>
                 <div class="row row-cols-1 row-cols-md-2 row-cols-lg-4 g-4 mb-4 product-row <?= $show_class ?>">
                     <?php foreach ($row_products as $sp): ?>
-                            <div class="col-lg-4 col-6 wow animate__bounceInLeft">
-                    <div class="inner-items text-center">
-                        <div class="card border-0 bg-transparent">
-                            <img src="./<?php echo $sp["Anh"] ?>" class="card-img-top mx-auto"
-                                alt="<?php echo $sp["TenSP"] ?>">
-                            <div class="card-body">
-                                <p class="card-text text-success mb-3" style="font-weight: 600;">
-                                    <?php echo $sp["TenSP"] ?></p>
-                                <a href="?search=<?php echo $search ?>&id=<?php echo $sp["MaSP"]; ?>" class="inner-btn mt-2"
-                                    data-masp="<?php echo $sp["MaSP"]; ?>">
-                                    Mua ngay
-                                </a>
+                    <div class="col-lg-4 col-6 wow animate__bounceInLeft">
+                        <div class="inner-items text-center">
+                            <div class="card border-0 bg-transparent">
+                                <img src="./<?php echo $sp["Anh"] ?>" class="card-img-top mx-auto"
+                                    alt="<?php echo $sp["TenSP"] ?>">
+                                <div class="card-body">
+                                    <p class="card-text text-success mb-3" style="font-weight: 600;">
+                                        <?php echo $sp["TenSP"] ?>
+                                    </p>
+                                    <a href="?id=<?php echo $sp["MaSP"]; ?>" class="inner-btn mt-2"
+                                        data-masp="<?php echo $sp["MaSP"]; ?>">
+                                        Mua ngay
+                                    </a>
+                                </div>
                             </div>
                         </div>
                     </div>
-                </div>
                     <?php endforeach; ?>
                 </div>
             <?php endforeach; ?>
@@ -142,6 +174,7 @@ require 'includes/query_products.php';
         </div>
     <?php endif; ?>
 </main>
+
 
            <!-- Modal chọn size -->
         <?php require "includes/modal_size.php" ?>

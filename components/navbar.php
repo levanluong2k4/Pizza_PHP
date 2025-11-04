@@ -108,13 +108,9 @@ $loaisp=mysqli_query($ketnoi,$sqlloaisp);
 
 ?>
 <style>
-
-.list-group-item-action{
+.list-group-item-action {
     width: 65%;
 }
-
-
-
 </style>
 
 <nav class="inner-navbar   navbar navbar-expand-lg ">
@@ -124,7 +120,14 @@ $loaisp=mysqli_query($ketnoi,$sqlloaisp);
             <span class="navbar-toggler-icon"></span>
         </button>
 
-        <a class=" inner-logo me-lg-3" href="trangchu.php"><img src="./img/logo.png" alt></a>
+        <div class="d-flex flex-column align-align-items-end">
+            <a class=" inner-logo me-lg-3" href="trangchu.php"><img src="./img/logo.png" alt="logo"></a>
+                <?php if (isset($_SESSION['user_id'])): ?>
+               <p class="m-0">
+        <span class=" fw-bolder me-2" style="color:#1F6C11">Xin chào, <?php echo htmlspecialchars($_SESSION['name']); ?>!</span>
+            </p>
+        <?php endif; ?>
+        </div>
 
         <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent1"
             aria-controls="navbarSupportedContent1" aria-expanded="false" aria-label="Toggle navigation">
@@ -152,26 +155,14 @@ $loaisp=mysqli_query($ketnoi,$sqlloaisp);
 
         <div class="bg-global p-1  col-md-12 col-lg-3  rounded-3">
             <form method="get" action="research.php" class="d-flex    inner-search col-md-12" role="search ">
-               <input 
-        name="search" 
-        class="form-control me-2 border-0" 
-        type="search" 
-        placeholder="Search" 
-        aria-label="Search"
-        id="search-box"
-        value="<?php echo isset($_GET['search']) ? htmlspecialchars($_GET['search']) : '' ?>" 
-        autocomplete="off"
-    >
-    <div id="search-result" class="list-group position-absolute col-sm-12 col-lg-6 top-sm-9 top-lg-8"></div>
-    <button 
-        class="btn btn-outline-light border-start rounded-0" 
-       
-        id="search-btn" 
-        type="submit" 
-        disabled
-    >
-        <i class="fa-solid fa-magnifying-glass text-dark-emphasis fw-bold"></i>
-    </button>
+                <input name="search" class="form-control me-2 border-0" type="search" placeholder="Search"
+                    aria-label="Search" id="search-box"
+                    value="<?php echo isset($_GET['search']) ? htmlspecialchars($_GET['search']) : '' ?>"
+                    autocomplete="off">
+                <div id="search-result" class="list-group position-absolute col-sm-12 col-lg-6 top-sm-9 top-lg-8"></div>
+                <button class="btn btn-outline-light border-start rounded-0" id="search-btn" type="submit" disabled>
+                    <i class="fa-solid fa-magnifying-glass text-dark-emphasis fw-bold"></i>
+                </button>
             </form>
         </div>
 
@@ -184,13 +175,13 @@ $loaisp=mysqli_query($ketnoi,$sqlloaisp);
                         aria-expanded="false">
                         Thực đơn
                     </a>
-                                <ul class="dropdown-menu bg-global p-0 text-md-center text-lg-start scrollable-menu">
+                    <ul class="dropdown-menu bg-global p-0 text-md-center text-lg-start scrollable-menu">
                         <?php foreach($loaisp as $value): ?>
-                            <li class="dropdown-item">
-                                <a href="research.php?category=<?php echo $value['MaLoai'] ?>">
-                                    <?php echo $value['TenLoai'] ?>
-                                </a>
-                            </li>
+                        <li class="dropdown-item">
+                            <a href="research.php?category_id=<?php echo $value['MaLoai'] ?>">
+                                <?php echo $value['TenLoai'] ?>
+                            </a>
+                        </li>
                         <?php endforeach; ?>
                     </ul>
 
@@ -206,49 +197,53 @@ $loaisp=mysqli_query($ketnoi,$sqlloaisp);
         </div>
 
         <div class="collapse navbar-collapse   " id="navbarSupportedContent1">
-            <div>
-<ul class="navbar-nav me-auto mb-2 mb-lg-0 bg-global listmenu ms-lg-auto">
-    
-    <?php if (isset($_SESSION['user_id'])): ?>
-        <!-- Nếu đã đăng nhập -->
-       <p>
-        <span class="text-white me-2">Xin chào, <?php echo htmlspecialchars($_SESSION['name']); ?>!</span>
-       </p>
-        <li class="nav-item dropdown col-12 col-md-12 text-center text-md-center">
-            <a class="nav-link dropdown-toggle text-warning p-0" href="#" role="button"
-                data-bs-toggle="dropdown" aria-expanded="false">
-                <img src="./img/user.png" alt="" height="30px">
-            </a>
-            <ul class="dropdown-menu bg-global p-0 text-md-center text-lg-center">
-                <li class="dropdown-item"><a href="#">Thông tin cá nhân</a></li>
-                   
-                <li class="dropdown-item"><a href="handlers/process_sign_out.php">Đăng xuất</a></li>
-                <li><hr class="dropdown-divider"></li>
-                <li class="dropdown-item"><a href="#">Quên mật khẩu</a></li>
-            </ul>
-        </li>
+          
 
-    <?php else: ?>
-        <!-- Nếu chưa đăng nhập -->
-        <li class="nav-item dropdown col-12 col-md-12 text-center text-md-center">
-            <a class="nav-link dropdown-toggle text-warning p-0" href="#" role="button"
-                data-bs-toggle="dropdown" aria-expanded="false">
-                <img src="./img/user.png" alt="" height="30px">
-            </a>
-            <ul class="dropdown-menu bg-global p-0 text-md-center text-lg-center">
-                <li class="dropdown-item"><a href="./sign_in.php">Đăng nhập</a></li>
-                <li class="dropdown-item"><a href="./sign_up.php">Đăng ký</a></li>
-                <li><hr class="dropdown-divider"></li>
-                <li class="dropdown-item"><a href="#">Quên mật khẩu</a></li>
-            </ul>
-        </li>
-    <?php endif; ?>
-    
-</ul>
+                <ul class="navbar-nav me-auto mb-2 mb-lg-0 bg-global listmenu ms-lg-auto">
 
-            </div>
+                    <?php if (isset($_SESSION['user_id'])): ?>
+                    <!-- Nếu đã đăng nhập -->
+
+                    <li class="nav-item dropdown col-12 col-md-12 text-center text-md-center">
+                        <a class="nav-link dropdown-toggle text-warning p-0" href="#" role="button"
+                            data-bs-toggle="dropdown" aria-expanded="false">
+                            <img src="./img/user.png" alt="" height="30px">
+                        </a>
+                        <ul class="dropdown-menu bg-global p-0 text-md-center text-lg-center">
+                            <li class="dropdown-item"><a href="#">Thông tin cá nhân</a></li>
+
+                            <li class="dropdown-item"><a href="handlers/process_sign_out.php">Đăng xuất</a></li>
+                            <li>
+                                <hr class="dropdown-divider">
+                            </li>
+                            <li class="dropdown-item"><a href="#">Quên mật khẩu</a></li>
+                        </ul>
+                    </li>
+
+                    <?php else: ?>
+                    <!-- Nếu chưa đăng nhập -->
+                    <li class="nav-item dropdown col-12 col-md-12 text-center text-md-center">
+                        <a class="nav-link dropdown-toggle text-warning p-0" href="#" role="button"
+                            data-bs-toggle="dropdown" aria-expanded="false">
+                            <img src="./img/user.png" alt="" height="30px">
+                        </a>
+                        <ul class="dropdown-menu bg-global p-0 text-md-center text-lg-center">
+                            <li class="dropdown-item"><a href="./sign_in.php">Đăng nhập</a></li>
+                            <li class="dropdown-item"><a href="./sign_up.php">Đăng ký</a></li>
+                            <li>
+                                <hr class="dropdown-divider">
+                            </li>
+                            <li class="dropdown-item"><a href="#">Quên mật khẩu</a></li>
+                        </ul>
+                    </li>
+                    <?php endif; ?>
+
+                </ul>
+
+         
 
         </div>
+        
         <a href="cart.php" class="button_cart d-md-none d-sm-none d-lg-block">
             <svg viewBox="0 0 16 16" class="bi bi-cart-check" height="24" width="24" xmlns="http://www.w3.org/2000/svg"
                 fill="#fff">
@@ -263,6 +258,7 @@ $loaisp=mysqli_query($ketnoi,$sqlloaisp);
                 <span class="cart-count"><?php echo $count; ?></span>
             </div>
         </a>
+
 
     </div>
 </nav>

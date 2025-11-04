@@ -6,11 +6,11 @@
                             <div class="card-body">
                                 <p class="card-text text-success mb-3" style="font-weight: 600;">
                                     <?php echo $sp["TenSP"] ?></p>
-                                <a href="?id=<?php echo $sp["MaSP"]; ?>" class="inner-btn mt-2"
+                                <button  class="inner-btn mt-2 btn-buy"
                                     data-masp="<?php echo $sp["MaSP"]; ?>">
                                     Mua ngay
-                                </a>
+                                </button>
                             </div>
                         </div>
                     </div>
-                </div>
+        </div>

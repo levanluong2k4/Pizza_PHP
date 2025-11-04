@@ -236,7 +236,7 @@ header .listmenu li a {
   width: 100%;       /* chiếm hết chiều ngang */
  background: url('../img/background.jpg') center center / cover no-repeat;
   border-bottom: 1px solid #ccc;
-  z-index: 1000;     /* nổi lên trên các phần tử khác */
+  z-index: 2000;     /* nổi lên trên các phần tử khác */
 }
 
 /* card */
