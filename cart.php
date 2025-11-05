@@ -1,73 +1,108 @@
 <?php
+
+
 session_start();
 $ketnoi = mysqli_connect("localhost", "root", "", "php_pizza");
 mysqli_set_charset($ketnoi, "utf8");
-   $hoten = trim($_POST['hoten'] ?? '');
-    $sodt = trim($_POST['sodt'] ?? '');
-    $so_nha = trim($_POST['so_nha'] ?? '');
-    $diachi_full = trim($_POST['diachi'] ?? '');
-    $province_code = $_POST['province'] ?? '';
-    $district_code = $_POST['district'] ?? '';
-    $ward_name = $_POST['ward'] ?? '';
+   
+$hoten = trim($_POST['hoten'] ?? '');
+$sodt = trim($_POST['sodt'] ?? '');
+$so_nha = trim($_POST['so_nha'] ?? '');
+$diachi_full = trim($_POST['diachi'] ?? ''); // có thể là chuỗi tổng hợp từ client
+$province_code = $_POST['province'] ?? '';
+$district_code = $_POST['district'] ?? '';
+$ward_name = $_POST['ward'] ?? ''; // frontend đang gửi tên xã/phường (theo api script của bạn)
 
-
-    $_SESSION['old_address'] = [
+// Lưu tạm old_address (giữ codes để frontend có thể prefill select)
+$_SESSION['old_address'] = [
     'province' => $province_code,
     'district' => $district_code,
     'ward' => $ward_name,
     'so_nha' => $so_nha,
 ];
-echo '<pre>';
-print_r($_SESSION);
-// print_r($_POST);
-echo '</pre>';
 
-// Nếu có user đăng nhập → lấy thông tin mặc định
-if (isset($_SESSION['user_id'])) {
-    $user_id = $_SESSION['user_id'];
-    $sql_us = "SELECT * FROM khachhang WHERE MaKH='$user_id'";
-    $result_us = mysqli_query($ketnoi, $sql_us);
-    $user = mysqli_fetch_assoc($result_us);
-   
-    if (empty($_SESSION['temp_hoten'])) $_SESSION['temp_hoten'] = $user['HoTen'];
-    if (empty($_SESSION['temp_sodt'])) $_SESSION['temp_sodt'] = $user['SoDT'];
-    if (empty($_SESSION['temp_diachi'])) $_SESSION['temp_diachi'] = $user['Diachi'];
+// Helper: lấy tên tỉnh/huyện từ API provinces.open-api.vn theo code
+function getLocationNameFromCode($endpoint) {
+    // endpoint ví dụ: "p/01" hoặc "d/001" — trả về JSON
+    $apiBase = "https://provinces.open-api.vn/api/";
+    $url = $apiBase . $endpoint;
+    // dùng @file_get_contents để tránh warning nếu lỗi; kiểm tra sau
+    $json = @file_get_contents($url);
+    if (!$json) return null;
+    $data = json_decode($json, true);
+    if (!$data) return null;
+    // các endpoint trả về cấu trúc khác nhau:
+    // - p/{code} => { "code": "...", "name": "...", ... }
+    // - d/{code} => { "code": "...", "name": "...", ... }
+    return $data['name'] ?? null;
 }
-$thieuThongTin = empty($hoten) || empty($sodt) || empty($so_nha) || empty($diachi_full);
 
-// ✅ CẬP NHẬT: Lưu thông tin vào DATABASE ngay khi nhấn nút Lưu
+// Chuyển mã -> tên (nếu có)
+$province_name = null;
+$district_name = null;
+
+if (!empty($province_code)) {
+    $tmp = getLocationNameFromCode("p/" . urlencode($province_code));
+    if ($tmp) $province_name = $tmp;
+    else $province_name = $province_code; // fallback: giữ code nếu api fail
+}
+
+if (!empty($district_code)) {
+    $tmp = getLocationNameFromCode("d/" . urlencode($district_code));
+    if ($tmp) $district_name = $tmp;
+    else $district_name = $district_code;
+}
+
+// Lưu dữ liệu tạm vào SESSION (dùng tên để hiển thị)
+$_SESSION['temp_hoten'] = $hoten !== '' ? $hoten : ($_SESSION['temp_hoten'] ?? '');
+$_SESSION['temp_sodt'] = $sodt !== '' ? $sodt : ($_SESSION['temp_sodt'] ?? '');
+$_SESSION['temp_so_nha'] = $so_nha !== '' ? $so_nha : ($_SESSION['temp_so_nha'] ?? '');
+$_SESSION['temp_province'] = $province_name ?? ($_SESSION['temp_province'] ?? '');
+$_SESSION['temp_district'] = $district_name ?? ($_SESSION['temp_district'] ?? '');
+$_SESSION['temp_ward'] = $ward_name !== '' ? $ward_name : ($_SESSION['temp_ward'] ?? '');
+// Nếu client gửi chuỗi diachi (hidden), ưu tiên dùng chuỗi đó; nếu rỗng, ghép từ các phần
+if (!empty($diachi_full)) {
+    $_SESSION['temp_diachi'] = $diachi_full;
+} else {
+    $parts = array_filter([$so_nha, $ward_name, $district_name, $province_name]);
+    $_SESSION['temp_diachi'] = implode(', ', $parts);
+}
+
+// Kiểm tra thiếu thông tin (dùng để disable nút đặt hàng)
+$thieuThongTin = empty($_SESSION['temp_hoten']) || empty($_SESSION['temp_sodt']) || empty($_SESSION['temp_so_nha']) || empty($_SESSION['temp_diachi']);
+
+// Lưu vào DB khi nhấn Lưu
 $saved = false;
 $updateMessage = '';
 
 if (isset($_POST['save_address'])) {
- 
- 
-    // Lưu vào SESSION
-    $_SESSION['temp_hoten'] = $hoten;
-    $_SESSION['temp_sodt'] = $sodt;
-   $_SESSION['temp_so_nha'] = $so_nha;
-   $_SESSION['temp_province'] = $province_code;
-   $_SESSION['temp_district'] = $district_code;
-   $_SESSION['temp_ward'] = $ward_name;
-    $_SESSION['temp_diachi'] = $diachi_full;
 
-
-
-    // ✅ CẬP NHẬT VÀO DATABASE nếu user đã đăng nhập
+    // Nếu user đăng nhập, cập nhật vào bảng khachhang
     if (isset($_SESSION['user_id'])) {
         $user_id = $_SESSION['user_id'];
-        
-        // Escape các giá trị để tránh SQL injection
-        $hoten_safe = mysqli_real_escape_string($ketnoi, $hoten);
-        $sodt_safe = mysqli_real_escape_string($ketnoi, $sodt);
-        $diachi_safe = mysqli_real_escape_string($ketnoi, $diachi_full);
 
-        $sql_update = "UPDATE khachhang SET 
-                       HoTen = '$hoten_safe',
-                       SoDT = '$sodt_safe',
-                       Diachi = '$diachi_safe'
-                       WHERE MaKH = '$user_id'";
-        
+        // Chuẩn bị giá trị an toàn
+        $hoten_safe = mysqli_real_escape_string($ketnoi, $_SESSION['temp_hoten']);
+        $sodt_safe = mysqli_real_escape_string($ketnoi, $_SESSION['temp_sodt']);
+        $diachi_safe = mysqli_real_escape_string($ketnoi, $_SESSION['temp_diachi']);
+        $sonha_safe = mysqli_real_escape_string($ketnoi, $so_nha);
+        $tinh_safe = mysqli_real_escape_string($ketnoi, $province_name ?? '');
+        $huyen_safe = mysqli_real_escape_string($ketnoi, $district_name ?? '');
+        $xaphuong_safe = mysqli_real_escape_string($ketnoi, $ward_name);
+
+        // UPDATE: lưu cả tên tỉnh/huyện/xã và số nhà. Nếu bạn vẫn muốn giữ cột Diachi (chuỗi tổng hợp), cũng lưu luôn.
+            $sql_update = "
+                UPDATE khachhang SET
+                    HoTen = '$hoten_safe',
+                    SoDT = '$sodt_safe',
+                    sonha = '$sonha_safe',
+                    tinhthanhpho = '$tinh_safe',
+                    huyenquan = '$huyen_safe',
+                    xaphuong = '$xaphuong_safe'
+                WHERE MaKH = '$user_id'
+            ";
+
+
         if (mysqli_query($ketnoi, $sql_update)) {
             $saved = true;
             $updateMessage = 'Thông tin đã được lưu vào hệ thống!';
@@ -75,10 +110,13 @@ if (isset($_POST['save_address'])) {
             $updateMessage = 'Lỗi khi lưu thông tin: ' . mysqli_error($ketnoi);
         }
     } else {
+        // Nếu chưa login: chỉ lưu vào SESSION (đã làm ở trên)
         $saved = true;
         $updateMessage = 'Thông tin đã được lưu tạm thời!';
     }
 }
+
+
 
 // -------------------------------
 // LẤY DỮ LIỆU GIỎ HÀNG ĐỂ HIỂN THỊ
@@ -136,8 +174,17 @@ else {
         }
     }
 }
+
+
 mysqli_close($ketnoi);
 ?>
+<?php if ($updateMessage): ?>
+    <div class="alert alert-<?php echo $saved ? 'success' : 'danger'; ?>">
+        <?php echo $updateMessage; ?>
+    </div>
+<?php endif; ?>
+
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -182,33 +229,51 @@ mysqli_close($ketnoi);
                         <h5 class="mb-0">Sản phẩm trong giỏ hàng (<?php echo count($cartItems); ?> sản phẩm)</h5>
                     </div>
                     <div class="card-body scrollable-menu" style="max-height: 500px; overflow-y: auto;">
-                        <?php foreach ($cartItems as $item): ?>
-                        <div class="row cart-item mb-3 pb-3 border-bottom align-items-center">
-                            <div class="col-md-2">
-                                <img src="<?php echo $item['anh']; ?>" class="img-fluid rounded" alt="<?php echo $item['tensp']; ?>">
-                            </div>
-                            <div class="col-md-4">
-                                <h6><?php echo $item['tensp']; ?></h6>
-                                <p class="text-muted mb-1">Size: <?php echo $item['tensize']; ?></p>
-                                <p class="text-success mb-0"><?php echo number_format($item['price']); ?> VNĐ</p>
-                            </div>
-                            <div class="col-md-3">
-                                <div class="input-group">
-                                    <a href="./cart/update_cart.php?masp=<?php echo $item['masp']; ?>&masize=<?php echo $item['masize']; ?>&type=decrease" class="btn btn-outline-secondary btn-sm">-</a>
-                                    <input type="number" class="form-control form-control-sm text-center" value="<?php echo $item['quantity']; ?>" min="1" readonly>
-                                    <a href="./cart/update_cart.php?masp=<?php echo $item['masp']; ?>&masize=<?php echo $item['masize']; ?>&type=increase" class="btn btn-outline-secondary btn-sm">+</a>
-                                </div>
-                            </div>
-                            <div class="col-md-2">
-                                <p class="mb-0"><strong><?php echo number_format($item['subtotal']); ?> VNĐ</strong></p>
-                            </div>
-                            <div class="col-md-1">
-                                <a href="./cart/update_cart.php?masp=<?php echo $item['masp']; ?>&masize=<?php echo $item['masize']; ?>&type=delete" class="btn btn-danger btn-sm" onclick="return confirm('Bạn có chắc muốn xóa sản phẩm này?')">
-                                    <i class="fas fa-trash"></i>
-                                </a>
-                            </div>
-                        </div>
-                        <?php endforeach; ?>
+                      <?php foreach ($cartItems as $item): ?>
+<div class="row cart-item mb-3 pb-3 border-bottom align-items-center" 
+     id="cart-item-<?php echo $item['masp']; ?>-<?php echo $item['masize']; ?>">
+    <div class="col-md-2">
+        <img src="<?php echo $item['anh']; ?>" class="img-fluid rounded" alt="<?php echo $item['tensp']; ?>">
+    </div>
+    <div class="col-md-4">
+        <h6><?php echo $item['tensp']; ?></h6>
+        <p class="text-muted mb-1">Size: <?php echo $item['tensize']; ?></p>
+        <p class="text-success mb-0"><?php echo number_format($item['price']); ?> VNĐ</p>
+    </div>
+    <div class="col-md-3">
+        <div class="input-group">
+            <!-- ❌ XÓA CÁC THẺ <a> CŨ VÀ THAY BẰNG <button> -->
+            <button type="button" class="btn btn-outline-secondary btn-sm btn-update-cart" 
+                    data-masp="<?php echo $item['masp']; ?>"
+                    data-masize="<?php echo $item['masize']; ?>"
+                    data-type="decrease">
+                -
+            </button>
+            <input type="number" class="form-control form-control-sm text-center quantity-display" 
+                   value="<?php echo $item['quantity']; ?>" min="1" readonly>
+            <button type="button" class="btn btn-outline-secondary btn-sm btn-update-cart"
+                    data-masp="<?php echo $item['masp']; ?>"
+                    data-masize="<?php echo $item['masize']; ?>"
+                    data-type="increase">
+                +
+            </button>
+        </div>
+    </div>
+    <div class="col-md-2">
+        <p class="mb-0 subtotal-display">
+            <strong><?php echo number_format($item['subtotal']); ?> VNĐ</strong>
+        </p>
+    </div>
+    <div class="col-md-1">
+        <!-- ❌ XÓA THẺ <a> CŨ VÀ THAY BẰNG <button> -->
+        <button type="button" class="btn btn-danger btn-sm btn-delete-cart" 
+                data-masp="<?php echo $item['masp']; ?>"
+                data-masize="<?php echo $item['masize']; ?>">
+            <i class="fas fa-trash"></i>
+        </button>
+    </div>
+</div>
+<?php endforeach; ?>
                     </div>
                 </div>
             </div>
@@ -219,7 +284,8 @@ mysqli_close($ketnoi);
                         <h5 class="mb-0">Thông tin người nhận</h5>
                     </div>
                     <div class="card-body">
-                      <form method="POST" action="">
+
+                         <form method="POST" action="">
                             <!-- Tên người nhận -->
                             <div class="d-flex justify-content-between align-items-center mb-3">
                                 <span style="min-width: 150px;">Tên người nhận</span>
@@ -284,7 +350,7 @@ mysqli_close($ketnoi);
                                 </button>
                             </div>
                        </form>
-                    </div>
+                      </div>
                 </div>
 
                 <hr>
@@ -297,7 +363,7 @@ mysqli_close($ketnoi);
                         <form action="./cart/process_order.php" method="post">
                         <div class="d-flex justify-content-between mb-2">
                             <span>Tạm tính:</span>
-                            <span><?php echo number_format($tongtien); ?> VNĐ</span>
+                            <span id="total-amount"><?php echo number_format($tongtien); ?> VNĐ</span>
                         </div>
                         <div class="d-flex justify-content-between mb-2">
                             <span>Phí vận chuyển:</span>
@@ -306,7 +372,7 @@ mysqli_close($ketnoi);
                         <hr>
                         <div class="d-flex justify-content-between mb-3">
                             <strong>Tổng cộng:</strong>
-                            <strong class="text-danger"><?php echo number_format($tongtien); ?> VNĐ</strong>
+                            <strong class="text-danger" id="total-amount"><?php echo number_format($tongtien); ?> VNĐ</strong>
                         </div>
                         
                         <button name="order" type="submit"  
@@ -423,10 +489,12 @@ window.addEventListener('load', function() {
 
 
 
+
 </script>
 
 
 
+  <script src="./js/cart.js"></script>
     <script src="./API/api_address.js"></script>
 
 </body>
