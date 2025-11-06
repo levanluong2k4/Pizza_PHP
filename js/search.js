@@ -12,15 +12,16 @@ searchBox.addEventListener("keyup", function () {
 
                 if (data.length > 0) {
 data.forEach(item => {
-    let option = document.createElement("a");
-    option.href = "trangchu.php?id=" + item.MaSP; // 👈 chuyển hướng
+    let option = document.createElement("button");
     option.classList.add(
         "list-group-item",
         "list-group-item-action",
         "d-flex",
         "align-items-center",
-        "suggest-search"
+        "suggest-search",
+        "btn-buy"
     );
+    option.setAttribute("data-masp", item.MaSP);
     option.style.width = "65%";
 
     // ảnh sản phẩm
@@ -46,6 +47,9 @@ data.forEach(item => {
 
     option.appendChild(img);
     option.appendChild(infoDiv);
+    option.addEventListener("click", () => {
+    resultBox.innerHTML = "";
+        });
 
     resultBox.appendChild(option);
 });

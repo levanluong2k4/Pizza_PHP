@@ -50,7 +50,7 @@
 
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
-                <a href="javascript:void(0)" class="btn btn-success" id="addToCartBtn" disabled>Thêm vào giỏ hàng</a>
+                <a href="javascript:void(0)" class="btn btn-success" id="addToCartBtn" disabled >Thêm vào giỏ hàng</a>
             </div>
         </div>
     </div>

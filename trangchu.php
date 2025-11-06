@@ -216,132 +216,9 @@ function initProductSlick() {
   });
 }
 
-// ==================== MODAL SIZE ====================
-function updateModal(data) {
-  console.log(" Updating modal with:", data);
-  
-  // Kiểm tra dữ liệu
-  if (!data || !data.product) {
-    console.error(" Invalid data:", data);
-    alert("Không thể tải thông tin sản phẩm!");
-    return;
-  }
-  
-  // Cập nhật tiêu đề modal
-  $('#sizeModalLabel').text('Chọn size cho ' + data.product.TenSP);
-  
-  // Cập nhật hình ảnh (bỏ ./ nếu đường dẫn đã có)
-  let imagePath = data.product.Anh;
-  if (!imagePath.startsWith('./') && !imagePath.startsWith('http')) {
-    imagePath = './' + imagePath;
-  }
-  $('.product-image').attr('src', imagePath).attr('alt', data.product.TenSP);
-  
-  // Cập nhật tên và mô tả
-  $('.product-name').text(data.product.TenSP);
-  $('.product-description').text(data.product.MoTa || '');
-  
-  // Cập nhật sizes
-  let sizeHTML = '';
-  if (data.sizes && data.sizes.length > 0) {
-    data.sizes.forEach(function(size) {
-      let sizeImagePath = size.Anh;
-      if (!sizeImagePath.startsWith('./') && !sizeImagePath.startsWith('http')) {
-        sizeImagePath = './' + sizeImagePath;
-      }
-      
-      sizeHTML += `
-        <div class="form-check">
-          <input class="form-check-input size-radio" type="radio" 
-                 name="size" id="size-${size.MaSize}"
-                 value="${size.MaSize}" 
-                 data-name="${size.TenSize}" 
-                 data-price="${size.Gia}">
-          <label class="form-check-label" for="size-${size.MaSize}">
-            <img src="${sizeImagePath}" alt="" height="30px" class="me-2">
-            ${size.TenSize} - ${parseInt(size.Gia).toLocaleString('vi-VN')} VNĐ
-          </label>
-        </div>
-      `;
-    });
-  } else {
-    sizeHTML = '<p class="text-danger">Sản phẩm này hiện chưa có size.</p>';
-  }
-  
-  $('.size-container').html(sizeHTML);
-  
-  // Reset
-  $('#quantity').val(1);
-  $('#totalPrice').text('0 VNĐ');
-  $('.selected-info').hide();
-  $('#addToCartBtn').attr('disabled', true);
-  
-  // Lưu product ID
-  $('#sizeModal').data('product-id', data.product.MaSP);
-}
 
-function updateTotal() {
-  const selected = document.querySelector('.size-radio:checked');
-  const quantityInput = document.getElementById('quantity');
-  const quantity = parseInt(quantityInput.value) || 1;
-  const addToCartBtn = document.getElementById('addToCartBtn');
 
-  if (!selected) {
-    document.getElementById('totalPrice').textContent = "0 VNĐ";
-    document.querySelector('.selected-info').style.display = 'none';
-    addToCartBtn.setAttribute('disabled', true);
-    return;
-  }
 
-  const name = selected.dataset.name;
-  const price = parseFloat(selected.dataset.price);
-  const total = price * quantity;
-
-  document.getElementById('selectedSize').textContent = name;
-  document.getElementById('selectedPrice').textContent = price.toLocaleString('vi-VN');
-  document.getElementById('totalPrice').textContent = total.toLocaleString('vi-VN') + " VNĐ";
-  document.querySelector('.selected-info').style.display = 'block';
-
-  const sizeId = selected.value;
-  const productId = $('#sizeModal').data('product-id');
-
-  // Không gán href, chỉ lưu vào data
-  addToCartBtn.removeAttribute('disabled');
-  addToCartBtn.dataset.productId = productId;
-  addToCartBtn.dataset.sizeId = sizeId;
-  addToCartBtn.dataset.quantity = quantity;
-}
-
-// Sự kiện khi nhấn “Thêm vào giỏ hàng”
-document.getElementById('addToCartBtn').addEventListener('click', function () {
-  const productId = this.dataset.productId;
-  const sizeId = this.dataset.sizeId;
-  const quantity = this.dataset.quantity || 1;
-
-  if (!productId || !sizeId) {
-    alert('Vui lòng chọn size trước!');
-    return;
-  }
-
-  fetch(`./cart/add_to_cart.php?id=${productId}&masize=${sizeId}&soluong=${quantity}`)
-    .then(res => res.json())
-    .then(data => {
-      if (data.status === 'success') {
-        // Hiển thị thông báo
-        alert('Đã thêm sản phẩm vào giỏ hàng!');
-        // Cập nhật số lượng icon giỏ hàng (nếu có)
-        if (data.totalQuantity && document.querySelector('#cart-count')) {
-          document.querySelector('#cart-count').textContent = data.totalQuantity;
-        }
-        // Đóng modal
-        const modal = bootstrap.Modal.getInstance(document.getElementById('sizeModal'));
-        modal.hide();
-      } else {
-        alert('Có lỗi xảy ra khi thêm sản phẩm!');
-      }
-    })
-    .catch(err => console.error('Lỗi fetch:', err));
-});
 
 // ==================== DOCUMENT READY ====================
 $(document).ready(function() {
@@ -402,58 +279,10 @@ $(document).ready(function() {
     });
   });
   
-  // ==================== MUA NGAY ====================
-  $(document).on('click', '.btn-buy', function(e) {
-    e.preventDefault();
-    let id = $(this).data("masp");
-    console.log("🛒 Buy button clicked, product ID:", id);
 
-    $.ajax({
-      url: "includes/query_products.php",
-      method: "GET",
-      data: { id: id },
-      dataType: 'json' 
-    })
-    .done(function(response) {
-      console.log(" Product data loaded:", response);
-      
-      // Update modal
-      updateModal(response);
-      
-      // Lưu product ID vào modal
-      document.getElementById('sizeModal').dataset.productId = id;
-      
-      // Hiển thị modal
-      let modal = new bootstrap.Modal(document.getElementById('sizeModal'));
-      modal.show();
-    })
-    .fail(function(xhr, status, error) {
-      console.error(" Product request failed:", status, error);
-      console.log("Response:", xhr.responseText);
-      alert("Có lỗi xảy ra, vui lòng thử lại!");
-    });
-  });
-  
-  // ==================== SIZE & QUANTITY ====================
-  $(document).on('change', '.size-radio', updateTotal);
-  $(document).on('input', '#quantity', updateTotal);
-  
-  $(document).on('click', '#decreaseBtn', function() {
-    let input = document.getElementById('quantity');
-    let current = parseInt(input.value);
-    if (current > 1) {
-      input.value = current - 1;
-      updateTotal();
-    }
-  });
-  
-  $(document).on('click', '#increaseBtn', function() {
-    let input = document.getElementById('quantity');
-    input.value = parseInt(input.value) + 1;
-    updateTotal();
-  });
 });
 </script>
+<script src="js/add_to_cart.js"></script>
 
 </body>
 </html>

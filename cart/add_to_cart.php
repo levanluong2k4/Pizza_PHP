@@ -1,83 +1,99 @@
 <?php
 session_start();
+require '../includes/db_connect.php';
 
-$maSP = $_GET['id'] ?? '';
-$maSize = $_GET['masize'] ?? '';
-$soLuong = $_GET['soluong'] ?? 1;
+$product_id = $_GET['id'] ?? '';
+$size_id = $_GET['masize'] ?? '';
+$quantity = (int)($_GET['soluong'] ?? 1);
+$user_id = $_SESSION['user_id'] ?? null;
 
-$ketnoi = mysqli_connect("localhost", "root", "", "php_pizza");
-mysqli_set_charset($ketnoi, "utf8");
+if (empty($product_id) || empty($size_id)) {
+    echo json_encode(['status' => 'error', 'message' => 'Thiếu thông tin sản phẩm']);
+    exit;
+}
 
-// --- Trường hợp 1: Người dùng CHƯA đăng nhập ---
-if (!isset($_SESSION['user_id'])) {
-    if (empty($_SESSION['cart'][$maSP . '_' . $maSize])) {
-        $sql = "SELECT sp.MaSP, sp.TenSP, ss.Gia, ss.Anh, s.TenSize, s.MaSize
-                FROM sanpham sp
-                JOIN sanpham_size ss ON sp.MaSP = ss.MaSP
-                JOIN size s ON ss.MaSize = s.MaSize
-                WHERE sp.MaSP = '$maSP' AND s.MaSize = '$maSize'";
-        $result = mysqli_query($ketnoi, $sql);
-        $item = mysqli_fetch_array($result);
-
-        $_SESSION['cart'][$maSP . '_' . $maSize] = array(
-            'masp' => $item['MaSP'],
-            'tensp' => $item['TenSP'],
-            'tensize' => $item['TenSize'],
-            'size_id' => $item['MaSize'],
-            'price' => $item['Gia'],
-            'quantity' => $soLuong,
-            'anh' => $item['Anh'],
-            'subtotal' => $item['Gia'] * $soLuong
-        );
+try {
+    if ($user_id) {
+        // User đã đăng nhập - Lưu vào database
+        
+        // Kiểm tra hoặc tạo giỏ hàng
+        $sql_cart = "SELECT CartID FROM giohang WHERE MaKH='$user_id'";
+        $result = mysqli_query($ketnoi, $sql_cart);
+        
+        if (mysqli_num_rows($result) == 0) {
+            mysqli_query($ketnoi, "INSERT INTO giohang (MaKH) VALUES ('$user_id')");
+            $cart_id = mysqli_insert_id($ketnoi);
+        } else {
+            $row = mysqli_fetch_assoc($result);
+            $cart_id = $row['CartID'];
+        }
+        
+        // Kiểm tra sản phẩm đã tồn tại chưa
+        $sql_check = "SELECT * FROM chitietgiohang 
+                      WHERE CartID='$cart_id' AND MaSP='$product_id' AND MaSize='$size_id'";
+        $check_result = mysqli_query($ketnoi, $sql_check);
+        
+        if (mysqli_num_rows($check_result) > 0) {
+            // Cập nhật số lượng
+            $sql_update = "UPDATE chitietgiohang 
+                          SET Quantity = Quantity + $quantity 
+                          WHERE CartID='$cart_id' AND MaSP='$product_id' AND MaSize='$size_id'";
+            mysqli_query($ketnoi, $sql_update);
+        } else {
+            // Thêm mới
+            $sql_insert = "INSERT INTO chitietgiohang (CartID, MaSP, MaSize, Quantity) 
+                          VALUES ('$cart_id', '$product_id', '$size_id', $quantity)";
+            mysqli_query($ketnoi, $sql_insert);
+        }
+        
+        // Lấy tổng số lượng trong giỏ hàng
+        $sql_total = "SELECT SUM(Quantity) AS total FROM chitietgiohang WHERE CartID='$cart_id'";
+        $total_result = mysqli_query($ketnoi, $sql_total);
+        $total_row = mysqli_fetch_assoc($total_result);
+        $total_quantity = (int)($total_row['total'] ?? 0);
+        
+        echo json_encode([
+            'status' => 'success',
+            'message' => 'Đã thêm vào giỏ hàng',
+            'totalQuantity' => $total_quantity
+        ]);
+        
     } else {
-        $_SESSION['cart'][$maSP . '_' . $maSize]['quantity'] += $soLuong;
-        $_SESSION['cart'][$maSP . '_' . $maSize]['subtotal'] =
-            $_SESSION['cart'][$maSP . '_' . $maSize]['price'] *
-            $_SESSION['cart'][$maSP . '_' . $maSize]['quantity'];
+        // User chưa đăng nhập - Lưu vào session
+        
+        if (!isset($_SESSION['cart'])) {
+            $_SESSION['cart'] = [];
+        }
+        
+        $key = $product_id . '_' . $size_id;
+        
+        if (isset($_SESSION['cart'][$key])) {
+            $_SESSION['cart'][$key]['quantity'] += $quantity;
+        } else {
+            $_SESSION['cart'][$key] = [
+                'masp' => $product_id,
+                'size_id' => $size_id,
+                'quantity' => $quantity
+            ];
+        }
+        
+        // Tính tổng số lượng
+        $total_quantity = 0;
+        foreach ($_SESSION['cart'] as $item) {
+            $total_quantity += $item['quantity'];
+        }
+        
+        echo json_encode([
+            'status' => 'success',
+            'message' => 'Đã thêm vào giỏ hàng',
+            'totalQuantity' => $total_quantity
+        ]);
     }
-
-    $totalQuantity = 0;
-    foreach ($_SESSION['cart'] as $item) {
-        $totalQuantity += $item['quantity'];
-    }
-
+    
+} catch (Exception $e) {
     echo json_encode([
-        'status' => 'success',
-        'totalQuantity' => $totalQuantity
+        'status' => 'error',
+        'message' => 'Lỗi: ' . $e->getMessage()
     ]);
-    exit();
 }
-
-// --- Trường hợp 2: Người dùng ĐÃ đăng nhập ---
-$user_id = $_SESSION['user_id'];
-
-// Kiểm tra giỏ hàng có tồn tại trong DB chưa
-$sql_cart = "SELECT * FROM giohang WHERE MaKH='$user_id'";
-$result = mysqli_query($ketnoi, $sql_cart);
-if (mysqli_num_rows($result) == 0) {
-    mysqli_query($ketnoi, "INSERT INTO giohang(MaKH) VALUES('$user_id')");
-}
-
-$sql_cart_detail = "SELECT * FROM chitietgiohang 
-                    WHERE CartID=(SELECT CartID FROM giohang WHERE MaKH='$user_id')
-                    AND MaSP='$maSP' AND MaSize='$maSize'";
-$result_detail = mysqli_query($ketnoi, $sql_cart_detail);
-
-if (mysqli_num_rows($result_detail) == 0) {
-    $sql_insert_detail = "INSERT INTO chitietgiohang(CartID, MaSP, MaSize, Quantity)
-                          VALUES((SELECT CartID FROM giohang WHERE MaKH='$user_id'),
-                                 '$maSP','$maSize','$soLuong')";
-    mysqli_query($ketnoi, $sql_insert_detail);
-} else {
-    $sql_update_detail = "UPDATE chitietgiohang 
-                          SET Quantity = Quantity + '$soLuong'
-                          WHERE CartID=(SELECT CartID FROM giohang WHERE MaKH='$user_id')
-                          AND MaSP='$maSP' AND MaSize='$maSize'";
-    mysqli_query($ketnoi, $sql_update_detail);
-}
-
-echo json_encode([
-    'status' => 'success'
-]);
-exit();
 ?>

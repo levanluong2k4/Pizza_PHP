@@ -112,7 +112,7 @@ require 'includes/query_products.php';
 
 <body>
 
-    <header class="bg-icon pt-2">
+<header class="bg-icon pt-2">
         <?php include 'components/navbar.php'; ?>
 <main class="container my-5">
     <h2 class="mb-4">
@@ -146,10 +146,10 @@ require 'includes/query_products.php';
                                     <p class="card-text text-success mb-3" style="font-weight: 600;">
                                         <?php echo $sp["TenSP"] ?>
                                     </p>
-                                    <a href="?id=<?php echo $sp["MaSP"]; ?>" class="inner-btn mt-2"
-                                        data-masp="<?php echo $sp["MaSP"]; ?>">
-                                        Mua ngay
-                                    </a>
+                                <button  class="inner-btn mt-2 btn-buy"
+                                    data-masp="<?php echo $sp["MaSP"]; ?>">
+                                    Mua ngay
+                                </button>
                                 </div>
                             </div>
                         </div>
@@ -183,119 +183,52 @@ require 'includes/query_products.php';
     <?php require "includes/toast_cart.php"?>
 
     <?php include './components/footer.php'; ?>
+<!-- Thêm trước Bootstrap JS -->
+<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
 
-    <!-- Bootstrap JS -->
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"></script>
+<!-- Bootstrap JS -->
+<script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.8/dist/umd/popper.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.min.js"></script>
+  
+<!-- Search JS -->
+<script src="js/search.js"></script>
+<script>
+
     
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            const loadMoreBtn = document.getElementById('loadMoreBtn');
-            if(!loadMoreBtn) return;
-            
-            const productRows = document.querySelectorAll('.product-row');
-            let currentShowingRows = <?= $initial_rows ?>;
-            const rowsToLoadPerClick = 2; // Load thêm 2 dòng (8 sản phẩm) mỗi lần click
-            
-            loadMoreBtn.addEventListener('click', function() {
-                let rowsShown = 0;
-                
-                // Hiển thị thêm 2 dòng tiếp theo
-                for(let i = currentShowingRows; i < productRows.length && rowsShown < rowsToLoadPerClick; i++) {
-                    productRows[i].classList.add('show');
-                    rowsShown++;
-                    currentShowingRows++;
-                }
-                
-                // Ẩn nút nếu đã hiển thị hết tất cả sản phẩm
-                if(currentShowingRows >= productRows.length) {
-                    loadMoreBtn.style.display = 'none';
-                }
-                
-                // Smooth scroll đến sản phẩm mới được hiển thị
-                setTimeout(() => {
-                    const newlyShownRow = productRows[currentShowingRows - rowsShown];
-                    if(newlyShownRow) {
-                        newlyShownRow.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-                    }
-                }, 100);
-            });
-        });
-    </script>
+    // ==================== ADD TO CART ====================
+// ==================== ADD TO CART ====================
 
-
- <script>
-    document.addEventListener("DOMContentLoaded", function() {
-        const urlParams = new URLSearchParams(window.location.search);
-        if (urlParams.has('id')) {
-
-            const modal = new bootstrap.Modal(document.getElementById('sizeModal'));
-            modal.show();
+    
+    // ==================== LOAD MORE ====================
+    $('#loadMoreBtn').on('click', function() {
+        const productRows = $('.product-row');
+        let currentShowingRows = $('.product-row.show').length;
+        const rowsToLoadPerClick = 2;
+        
+        let rowsShown = 0;
+        for(let i = currentShowingRows; i < productRows.length && rowsShown < rowsToLoadPerClick; i++) {
+            $(productRows[i]).addClass('show');
+            rowsShown++;
+            currentShowingRows++;
         }
-    });
-    document.addEventListener("DOMContentLoaded", function() {
-        const radios = document.querySelectorAll('.size-radio');
-        const quantityInput = document.getElementById('quantity');
-        const totalPriceSpan = document.getElementById('totalPrice');
-        const selectedInfo = document.querySelector('.selected-info');
-        const selectedSizeSpan = document.getElementById('selectedSize');
-        const selectedPriceSpan = document.getElementById('selectedPrice');
-        const decreaseBtn = document.getElementById('decreaseBtn');
-        const increaseBtn = document.getElementById('increaseBtn');
-
-        function updateTotal() {
-            const selected = document.querySelector('.size-radio:checked');
-            const quantity = parseInt(quantityInput.value) || 1;
-
-            // Nếu chưa chọn size, reset lại hiển thị
-            if (!selected) {
-                totalPriceSpan.textContent = "0 VNĐ";
-                selectedInfo.style.display = 'none';
-                addToCartBtn.disabled = true;
-                return;
-            }
-
-            const name = selected.dataset.name;
-            const price = parseFloat(selected.dataset.price);
-
-            // Nếu giá không hợp lệ => ngăn lỗi NaN
-            if (isNaN(price)) {
-                totalPriceSpan.textContent = "0 VNĐ";
-                return;
-            }
-
-            const total = price * quantity;
-
-            selectedSizeSpan.textContent = name;
-            selectedPriceSpan.textContent = price.toLocaleString('vi-VN');
-            totalPriceSpan.textContent = total.toLocaleString('vi-VN') + " VNĐ";
-            selectedInfo.style.display = 'block';
-            addToCartBtn.disabled = false;
-            const sizeId = selected.value;
-            const productId = "<?php echo $sp_info['MaSP']; ?>";
-            addToCartBtn.href = `./cart/add_to_cart.php?id=${productId}&masize=${sizeId}&soluong=${quantity}`;
+        
+        if(currentShowingRows >= productRows.length) {
+            $(this).hide();
         }
-
-        radios.forEach(radio => radio.addEventListener('change', updateTotal));
-        quantityInput.addEventListener('input', updateTotal);
-        decreaseBtn.addEventListener('click', () => {
-            let current = parseInt(quantityInput.value);
-            if (current > 1) {
-                quantityInput.value = current - 1;
-                updateTotal();
+        
+        setTimeout(() => {
+            const newlyShownRow = productRows[currentShowingRows - rowsShown];
+            if(newlyShownRow) {
+                newlyShownRow.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
             }
-        });
-        increaseBtn.addEventListener('click', () => {
-            quantityInput.value = parseInt(quantityInput.value) + 1;
-            updateTotal();
-        });
-        fetch(`./cart/add_to_cart.php?id=${maSP}&masize=${maSize}&soluong=${quantity}`)
-            .then(response => response.text())
-            .then(total => {
-                document.querySelector(".cart-count").textContent = total;
-                alert("Đã thêm sản phẩm vào giỏ hàng!");
-            });
+        }, 100);
     });
-    </script>
- <script src="js/search.js"></script>
+
+</script>
+<script src="js/add_to_cart.js"></script>
+
+    
+  
+
 </body>
 </html>

@@ -1,5 +1,10 @@
 // File: cart.js
 $(document).ready(function() {
+
+
+      function updateCartCount(count) {
+        $('.cart-count').text(count);
+    }
     
     // 1. XỬ LÝ TĂNG/GIẢM SỐ LƯỢNG
     $('.btn-update-cart').click(function(e) {
@@ -37,7 +42,7 @@ $(document).ready(function() {
                         }
                     });
                     $('#total-amount').text(formatNumber(response.total));
-                    
+                     updateCartCount(response.cartCount); // CẬP NHẬT SỐ NAVBAR
                     showNotification(response.message, 'success');
                     
                  
@@ -75,6 +80,7 @@ $(document).ready(function() {
                         formatNumber(response.subtotal) + ' VNĐ'
                     );
                     $('#total-amount').text(formatNumber(response.total));
+                        updateCartCount(response.cartCount); // CẬP NHẬT SỐ NAVBAR
                     showNotification(response.message, 'success');
                 } else {
                     showNotification(response.message, 'danger');
@@ -126,6 +132,7 @@ $(document).ready(function() {
                         }
                     });
                     $('#total-amount').text(formatNumber(response.total));
+                        updateCartCount(response.cartCount); // CẬP NHẬT SỐ NAVBAR
                     showNotification(response.message, 'success');
                 } else {
                     showNotification(response.message, 'danger');

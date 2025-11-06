@@ -14,7 +14,8 @@ $response = array(
     'message' => '',
     'quantity' => 0,
     'subtotal' => 0,
-    'total' => 0
+    'total' => 0,
+    'cartCount' => 0  // THÊM FIELD NÀY
 );
 
 if ($id_product && $type) {
@@ -92,6 +93,12 @@ if ($id_product && $type) {
             $result_total = mysqli_query($ketnoi, $sql_total);
             $total_data = mysqli_fetch_assoc($result_total);
             $response['total'] = $total_data['total'] ?? 0;
+            
+            // *** THÊM PHẦN NÀY: Tính tổng số lượng sản phẩm trong giỏ ***
+            $sql_count = "SELECT SUM(Quantity) as count FROM chitietgiohang WHERE CartID='$cartId'";
+            $result_count = mysqli_query($ketnoi, $sql_count);
+            $count_data = mysqli_fetch_assoc($result_count);
+            $response['cartCount'] = (int)($count_data['count'] ?? 0);
         }
     }
     
@@ -136,12 +143,13 @@ if ($id_product && $type) {
             
             // Tính tổng tiền
             $total = 0;
+            $totalCount = 0;
             foreach ($_SESSION['cart'] as $item) {
                 $total += $item['subtotal'];
+                $totalCount += $item['quantity'];
             }
             $response['total'] = $total;
-
- 
+            $response['cartCount'] = $totalCount;  // *** THÊM DÒNG NÀY ***
         }
     }
 }
