@@ -314,7 +314,9 @@ mysqli_close($ketnoi);
                                     }
                                     ?>
                                 </span>
-                                <input type="number" min='0' name="sodt" id="sodt_input" class="form-control mx-2" value="<?php echo isset($_SESSION['temp_sodt']) ? htmlspecialchars($_SESSION['temp_sodt']) : ''; ?>" style="display: none; flex: 1;">
+                                <input 
+                                oninput="this.value = this.value.replace(/[^0-9]/g, '')"
+                                type="number" maxlenght='10' name="sodt" id="sodt_input" class="form-control mx-2" value="<?php echo isset($_SESSION['temp_sodt']) ? htmlspecialchars($_SESSION['temp_sodt']) : ''; ?>" style="display: none; flex: 1;">
                                 <i class="fa-solid fa-pen-to-square edit-btn" style="color: #30d952; cursor: pointer;" data-field="sodt"></i>
                             </div>
 

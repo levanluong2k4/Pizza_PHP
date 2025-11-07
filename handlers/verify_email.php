@@ -44,7 +44,7 @@ if (isset($_POST['verify_code'])) {
     if ($code_age > 200) {
         $error = "❌ Mã xác nhận đã hết hạn. Vui lòng nhấn 'Gửi lại mã'.";
     } elseif ($input_code == $_SESSION['temp_user']['code']) {
-        require 'includes/db_connect.php';
+        require '../includes/db_connect.php';
 
         $name = $_SESSION['temp_user']['name'];
         $sdt = $_SESSION['temp_user']['sdt'];
@@ -69,7 +69,7 @@ if (isset($_POST['verify_code'])) {
         unset($_SESSION['old_password']);
         unset($_SESSION['old_password_confirm']);
 
-        echo "<script>alert('Đăng ký thành công!'); window.location.href='trangchu.php';</script>";
+        echo "<script>alert('Đăng ký thành công!'); window.location.href='../trangchu.php';</script>";
         exit();
     } else {
         $error = "❌ Mã xác nhận không đúng. Vui lòng thử lại.";

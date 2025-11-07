@@ -1,9 +1,4 @@
 <?php session_start(); ?>
-<?php 
-print_r($_SESSION);
-
-?>
-
 
 <!DOCTYPE html>
 <html lang="en">
@@ -55,7 +50,7 @@ footer {
     <p class="message">Đăng ký ngay để có quyền truy cập đầy đủ vào ứng dụng của chúng tôi.</p>
         <div class="row">
         <label  class="col-6 pe-0">
-            <input class="input" type="text" name="name" placeholder="" required="" 
+            <input class="input" type="text" id="name" name="name"  required="" 
             value="<?php echo isset($_SESSION['old_name'])? (htmlspecialchars($_SESSION['old_name'])):'' ?>">
             <span>Tên đăng nhập</span>
         </label>
@@ -68,39 +63,33 @@ footer {
   min="0"
   placeholder=""
   required
-  oninput="this.value = this.value.replace(/[^0-9]/g, '')"
+  oninput="this.value = this.value.replace(/[^0-9]/g, '')" id="sdt"
   value="<?php echo isset($_SESSION['old_sdt'])? (htmlspecialchars($_SESSION['old_sdt'])):'' ?>"
   maxlength="10"
 >
             <span>Số điện thoại</span>
+            <small id="error-phone" class="text-danger" style="font-size: 0.8em;"></small>
         </label>
     </div>  
             
-    <label>
-        <input class="input" type="email"name="email" placeholder="" required="" value="<?php echo isset($_SESSION['old_email'])? (htmlspecialchars($_SESSION['old_email'])):''?>">
-        <span>Email</span>
-              <?php 
-    if (isset($_SESSION['error']) && $_SESSION['error'] === 'password_already_exists') {
-        echo '<span style="color: red; font-size: 0.8em;">Email đã tồn tại !Vui lòng chọn email khác.</span>';
-    unset($_SESSION['error']);
-    }
-    ?>
-    </label> 
-        
-    <label>
-        <input class="input" type="password" name="password" placeholder="" required="" value="<?php  if(isset($_SESSION['old_password'])) echo $_SESSION['old_password']  ?>">
-        <span>Mật khẩu</span>
-          <?php 
-    if (isset($_SESSION['error']) && $_SESSION['error'] === 'password_mismatch') {
-        echo '<span style="color: red; font-size: 0.8em;">Mật khẩu không trùng khớp.</span>';
-    unset($_SESSION['error']);
-    }
-    ?>
-    </label>
-    <label>
-        <input class="input" type="password" name="password_confirm" placeholder="" required="" value="<?php echo isset($_SESSION['old_password_confirm'])? (htmlspecialchars($_SESSION['old_password_confirm'])):''?>" >
-        <span>Xác nhận mật khẩu</span>
-    </label>
+<label>
+  <input class="input" type="email" id="email" name="email" required value="<?php echo isset($_SESSION['old_email'])? (htmlspecialchars($_SESSION['old_email'])):''?>">
+  <span>Email</span>
+  <small id="error-email" class="text-danger" style="font-size: 0.8em;"></small>
+</label>
+
+<label>
+  <input class="input" type="password" id="password" name="password" required value="<?php  if(isset($_SESSION['old_password'])) echo $_SESSION['old_password']  ?>">
+  <span>Mật khẩu</span>
+  <small id="error-password" class="text-danger" style="font-size: 0.8em;"></small>
+</label>
+
+<label>
+  <input class="input" type="password" id="password_confirm" name="password_confirm" required value="<?php echo isset($_SESSION['old_password_confirm'])? (htmlspecialchars($_SESSION['old_password_confirm'])):''?>">
+  <span>Xác nhận mật khẩu</span>
+  <small id="error-password-confirm" class="text-danger" style="font-size: 0.8em;"></small>
+</label>
+
     <button class="submit" name="sign_up">Đăng ký</button>
     <p class="signin">Bạn đã có tài khoản ? <a href="sign_in.php">Đăng nhập</a> </p>
 </form>
@@ -127,6 +116,68 @@ footer {
     <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/slick-carousel@1.8.1/slick/slick.min.js"></script>
 
     <script src="./js/wow.min.js"></script>
-      <script src="js/cart.js"></script>
+
+    <script>
+$(document).ready(function () {
+  $(".form").on("submit", function (e) {
+    e.preventDefault();
+
+    // Xóa lỗi cũ
+    $("#error-email, #error-password, #error-password-confirm").text("");
+
+    let name = $("#name").val();
+    let sdt = $("#sdt").val();
+    let email = $("#email").val();
+    let password = $("#password").val();
+    let password_confirm = $("#password_confirm").val();
+
+    $.ajax({
+      url: "handlers/process_sign_up.php",
+      type: "POST",
+      dataType: "json",
+      data: {
+        name: name,
+        sdt: sdt,
+        email: email,
+        password: password,
+        password_confirm: password_confirm,
+      },
+      success: function (response) {
+        // Nếu có lỗi nhập
+        if (!response.success) {
+          switch (response.error_type) {
+            case "email":
+              $("#error-email").text(response.message);
+              break;
+            case "email_format":
+              $("#error-email").text(response.message);
+              break;
+            case "phone":
+              $("#error-phone").text(response.message);
+              break;
+            case "password_length":
+              $("#error-password").text(response.message);
+              break;
+            case "password_mismatch":
+              $("#error-password-confirm").text(response.message);
+              break;
+            default:
+              console.error("Không xác định được loại lỗi:", response);
+          }
+        } else {
+          // Nếu thành công → chuyển trang
+          window.location.href = "handlers/verify_email.php";
+        }
+      },
+      error: function (xhr, status, error) {
+        console.error("AJAX Error:", error);
+      },
+    });
+  });
+});
+
+
+    </script>
+  
 </body>
 </html>

@@ -55,27 +55,18 @@ if (isset($_SESSION['user_id'])) {
 
 
             <label>
-                <input class="input" type="email" name="email" placeholder="" required=""
+                <input class="input" type="email" id="email" name="email" placeholder="" required=""
                     value="<?php echo isset($_SESSION['old_email'])? (htmlspecialchars($_SESSION['old_email'])):''?>">
                 <span>Email</span>
-                <?php 
-if (isset($_SESSION['error']) && $_SESSION['error'] === 'email_not_found') {
-    echo '<span style="color: red; font-size: 0.8em;">Email chưa đăng ký Tài khoản.</span>';
-     unset($_SESSION['error']);
-}
-?>
+                <small id="error-email" class="text-danger" style="font-size: 0.8em;"></small>
+
 
             </label>
 
             <label>
-                <input class="input" type="password" name="password" placeholder="" required="" value="<?php echo isset($_SESSION['old_password'])? (htmlspecialchars($_SESSION['old_password'])):''?>">
+                <input class="input" type="password" id="password" name="password" placeholder="" required="" value="<?php echo isset($_SESSION['old_password'])? (htmlspecialchars($_SESSION['old_password'])):''?>">
                 <span>Password</span>
-                <?php 
-if (isset($_SESSION['error']) && $_SESSION['error'] === 'wrong_password') {
-    echo '<span style="color: red; font-size: 0.8em;"> mật khẩu không đúng.</span>';
-    unset($_SESSION['error']);
-}
-?>
+                <small id="error-password" class="text-danger" style="font-size: 0.8em;"></small>
 
             </label>
             <div class="remember-me">
@@ -108,7 +99,63 @@ if (isset($_SESSION['error']) && $_SESSION['error'] === 'wrong_password') {
     <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/slick-carousel@1.8.1/slick/slick.min.js"></script>
 
     <script src="./js/wow.min.js"></script>
-    <script src="js/cart.js"></script>
+   
+
+        <script>
+$(document).ready(function () {
+  $(".form").on("submit", function (e) {
+    e.preventDefault();
+
+    // Xóa lỗi cũ
+    $("#error-email, #error-password").text("");
+
+    let email = $("#email").val();
+    let password = $("#password").val();
+
+    $.ajax({
+      url: "handlers/process_sign_in.php",
+      type: "POST",
+      dataType: "json",
+      data: {
+        email: email,
+        password: password,
+      },
+      success: function (response) {
+        if (!response.success) {
+          switch (response.error_type) {
+            case "email_not_found":
+              $("#error-email").text(response.message);
+              break;
+            case "password":
+              $("#error-password").text(response.message);
+              break;
+             case "email_format":
+              $("#error-email").text(response.message);
+              break;
+
+             case "password_length":
+              $("#error-password").text(response.message);
+              break;
+            default:
+              console.error("Không xác định được loại lỗi:", response);
+          }
+        } else {
+          if (response.admin) {
+            window.location.href = "admin/navbar_admin.php";
+          } else {
+            window.location.href = "trangchu.php";
+          }
+        }
+      },
+      error: function (xhr, status, error) {
+        console.error("AJAX Error:", error);
+      },
+    }); // 
+  });
+});
+
+
+    </script>
 </body>
 
 </html>
