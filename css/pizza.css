@@ -517,3 +517,54 @@ footer {
     font-weight: 700;
     text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
 }
+
+
+
+
+/* nav & tab */
+ .nav-order .nav-link {
+  font-weight: 900;
+  color:white;
+  cursor: pointer;
+  
+  transition: color 0.3s ease-in-out, border-color 0.3s ease-in-out;
+}
+.nav-order{
+  margin-right: 50px;
+}
+
+ .nav-order .nav-link:hover {
+  color: var(--bs-yellow);
+}
+
+ .nav-order .nav-link.active {
+  color: var(--bs-yellow);
+  border: 2px solid var(--bs-yellow);
+  border-radius: 10px; /* áp dụng ngay, không animate */
+}
+ .nav-order .nav-link:not(.active) {
+  border: 2px solid transparent; /* để tránh nhảy layout khi chuyển đổi */
+  border-radius: 10px; /* áp dụng ngay, không animate */
+}
+
+
+.bg-nav-order{
+      --bezier: cubic-bezier(0.22, 0.61, 0.36, 1);
+  --edge-light: hsla(0, 0%, 50%, 0.8);
+  --text-light: rgba(255, 255, 255, 0.4);
+  --back-color: 160, 80%;
+  background: linear-gradient(
+    140deg,
+    hsla(var(--back-color), 32%, 1) min(2em, 20%),
+    hsla(var(--back-color), 12%, 0.6) min(8em, 100%)
+  );
+  color: hsla(0, 0%, 90%);
+  border: 0;
+  box-shadow: inset 0.4px 1px 4px var(--edge-light);
+}
+
+.form-order{
+  max-width: 80%;
+  margin: auto;
+      box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
+}

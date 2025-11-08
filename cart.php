@@ -126,6 +126,9 @@ $tongtien = 0;
 
 // Trường hợp 1: Người dùng đã đăng nhập
 if (isset($_SESSION['user_id'])) {
+    
+
+
     $sql_cart = "SELECT * FROM giohang WHERE MaKH='" . $_SESSION['user_id'] . "'";
     $result = mysqli_query($ketnoi, $sql_cart);
     $row = mysqli_fetch_array($result);
