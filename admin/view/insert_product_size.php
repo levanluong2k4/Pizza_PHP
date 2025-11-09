@@ -1,7 +1,8 @@
 <?php
 
-require './process/check_admin.php';
-require "../includes/db_connect.php";
+// require './process/check_admin.php';
+require __DIR__ . '/../../includes/db_connect.php';
+
 $sql="SELECT `MaSP`, `MaSize`, `Gia`, `Anh` FROM `sanpham_size` ";
 
 $result=mysqli_query($ketnoi,$sql);
@@ -27,7 +28,7 @@ $result_size=mysqli_query($ketnoi,$sql_size);
 </head>
 
 <body>
-    <form action="../admin/process/insert_product_size.php" method="post" enctype="multipart/form-data">
+    <form action="../../admin/process/insert_product_size.php" method="post" enctype="multipart/form-data">
         <table>
 
             <tr>

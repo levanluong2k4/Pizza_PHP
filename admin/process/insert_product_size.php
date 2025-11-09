@@ -17,7 +17,7 @@ if (move_uploaded_file($image["tmp_name"], $path_file)) {
     VALUES ('$id_sanpham','$id_size','$gia','$save_file_name')";
     mysqli_query($ketnoi,$sql);
     mysqli_close($ketnoi);
-    header("location: ../view_sanphamsize.php");
+    header("location: ../view/view_sanphamsize.php");
 } else {
     echo "Upload ảnh thất bại!";
 }

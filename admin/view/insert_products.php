@@ -1,7 +1,8 @@
 <?php
 
-require './process/check_admin.php';
-require "../includes/db_connect.php";
+// require './process/check_admin.php';
+require __DIR__ . '/../../includes/db_connect.php';
+
 $sql="select * from loaisanpham";
 $result=mysqli_query($ketnoi,$sql);
 
@@ -19,7 +20,7 @@ $result=mysqli_query($ketnoi,$sql);
 </head>
 
 <body>
-    <form action="../admin/process/insert_product.php" method="post" enctype="multipart/form-data">
+    <form action="../../admin/process/insert_product.php" method="post" enctype="multipart/form-data">
         <table>
 
             <tr>

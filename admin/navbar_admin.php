@@ -17,7 +17,7 @@
         font-family: "Segoe UI", sans-serif;
     }
 
-    /* ✅ Navbar màu xanh lá gradient */
+ 
     .navbar {
         background: linear-gradient(90deg, #28a745, #66bb6a);
         box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
@@ -34,14 +34,14 @@
         transition: all 0.3s ease;
     }
 
-    /* ✅ Hover: nền sáng, text đậm */
+   
     .navbar-nav .nav-link:hover,
     .navbar-nav .dropdown:hover .nav-link {
         background-color: rgba(255, 255, 255, 0.25);
         border-radius: 8px;
     }
 
-    /* ✅ Dropdown items */
+   
     .dropdown-menu a {
         display: flex;
         align-items: center;
@@ -54,7 +54,7 @@
         color: #28a745;
     }
 
-    /* ✅ Nested dropdown styling */
+   
     .dropdown-submenu {
         position: relative;
     }
@@ -65,7 +65,13 @@
         margin-top: -1px;
     }
 
-    /* Icon mũi tên cho submenu */
+ 
+    .navbar-nav > li:last-child .dropdown-submenu .dropdown-menu {
+        left: auto;
+        right: 100%;
+    }
+
+  
     .dropdown-submenu>a::after {
         content: "\f054";
         font-family: "Font Awesome 6 Free";
@@ -74,12 +80,12 @@
         font-size: 0.8em;
     }
 
-    /* ✅ Căn giữa menu */
+
     .navbar-nav {
         margin: 0 auto;
     }
 
-    /* ✅ Nút Logout bên phải */
+  
     .logout-btn {
         color: #fff;
         font-weight: 600;
@@ -95,7 +101,6 @@
         color: #28a745;
     }
 
-    /* ✅ Tiêu đề chính */
     .main-title {
         color: #28a745;
         font-weight: 700;
@@ -109,7 +114,7 @@
 </head>
 
 <body>
-    <!-- ✅ NAVBAR -->
+ 
     <nav class="navbar navbar-expand-lg">
         <div class="container-fluid">
             <a class="navbar-brand" href="#"><i class="fa-solid fa-leaf"></i> Admin Panel</a>
@@ -168,13 +173,12 @@
                     <li class="nav-item dropdown">
                         <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown"
                             aria-expanded="false">
-                            <i class="fa-solid fa-user-tie"></i> Quản lý nhân viên
+                            <i class="fa-solid fa-user-tie"></i> Quản lý tài khoản
                         </a>
                         <ul class="dropdown-menu">
-                            <li><a class="dropdown-item" href="list_employee.php"><i class="fa-solid fa-list"></i> Danh sách nhân viên</a></li>
-                            <li><a class="dropdown-item" href="add_employee.php"><i class="fa-solid fa-user-plus"></i> Thêm nhân viên</a></li>
+             
                             <li><a class="dropdown-item" href="create_account.php"><i class="fa-solid fa-id-card"></i> Tạo tài khoản nhân viên</a></li>
-                            <li><a class="dropdown-item" href="employee_roles.php"><i class="fa-solid fa-user-shield"></i> Phân quyền nhân viên</a></li>
+              
                         </ul>
                     </li>
 
@@ -257,7 +261,7 @@
                     </li>
                 </ul>
 
-                <!--  Logout nằm bên phải -->
+               
                 <div class="ms-auto">
                     <a href="logout.php" class="logout-btn"><i class="fa-solid fa-right-from-bracket"></i> Đăng xuất</a>
                 </div>
@@ -265,36 +269,36 @@
         </div>
     </nav>
 
-    <!--  Nội dung chính -->
+   
     <div class="container text-center">
         <h1 class="main-title">Chào mừng đến trang quản trị!</h1>
         <p class="text-muted">Chọn menu trên để bắt đầu quản lý dữ liệu hệ thống.</p>
     </div>
 
-    <!-- Bootstrap JS -->
+ 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"></script>
 
-    <!--  JavaScript để xử lý nested dropdown -->
+ 
     <script>
     document.addEventListener('DOMContentLoaded', function() {
-        // Xử lý dropdown lồng nhau
+     
         const dropdownSubmenus = document.querySelectorAll('.dropdown-submenu');
 
         dropdownSubmenus.forEach(function(submenu) {
             const submenuLink = submenu.querySelector('a[data-bs-toggle="dropdown"]');
             const submenuDropdown = submenu.querySelector('.dropdown-menu');
 
-            // Hiển thị submenu khi hover
+        
             submenu.addEventListener('mouseenter', function() {
                 submenuDropdown.classList.add('show');
             });
 
-            // Ẩn submenu khi rời chuột
+          
             submenu.addEventListener('mouseleave', function() {
                 submenuDropdown.classList.remove('show');
             });
 
-            // Xử lý click cho mobile
+     
             submenuLink.addEventListener('click', function(e) {
                 e.preventDefault();
                 e.stopPropagation();
@@ -302,7 +306,7 @@
             });
         });
 
-        // Đóng tất cả submenu khi click ra ngoài
+    
         document.addEventListener('click', function(e) {
             if (!e.target.closest('.dropdown-submenu')) {
                 document.querySelectorAll('.dropdown-submenu .dropdown-menu').forEach(function(menu) {

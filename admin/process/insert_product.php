@@ -17,7 +17,7 @@ if (move_uploaded_file($image["tmp_name"], $path_file)) {
           values('$name','$save_file_name',$maLoai,'$description')";
     mysqli_query($ketnoi,$sql);
     mysqli_close($ketnoi);
-    header("location: ../indexadmin.php");
+    header("location: ../view/indexadmin.php");
 } else {
     echo "Upload ảnh thất bại!";
 }

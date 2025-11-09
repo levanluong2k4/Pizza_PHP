@@ -1,6 +1,7 @@
 <?php
-require './process/check_admin.php';
-require "../includes/db_connect.php";
+// require './process/check_admin.php';
+require __DIR__ . '/../../includes/db_connect.php';
+
 $sql="SELECT ss.id, ss.Gia, sp.TenSP, ss.Anh, s.TenSize  
 FROM sanpham_size ss, sanpham sp, size s  
 WHERE ss.MaSP = sp.MaSP  
@@ -44,10 +45,10 @@ $kq=mysqli_query($ketnoi,$sql);
                 <td><?php echo $value["TenSP"] ?></td>
                 <td><?php echo $value["TenSize"] ?></td>
                 <td><?php echo $value["Gia"] ?></td>
-                <td><img src="../<?php echo $value["Anh"] ?>" alt="" width="50px" height="auto"></td>
+                <td><img src="../../<?php echo $value["Anh"] ?>" alt="" width="50px" height="auto"></td>
 
                 <td><a href="update_product.php?ma=<?php echo $value["id"] ?>">Sữa </a></td>
-                <td><a href="./process/delete.php?id=<?php echo $value["id"]?>"
+                <td><a href="../process/delete.php?id=<?php echo $value["id"]?>"
                         onclick="return confirm('Bạn có chắc chắn muốn xóa sản phẩm này không?');">Xóa </a></td>
             </tr>
             <?php } ?>

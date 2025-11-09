@@ -1,8 +1,9 @@
 <?php
 
-require './process/check_admin.php';
+// require './process/check_admin.php';
 $id=$_GET['ma'];
-require "../includes/db_connect.php";
+require __DIR__ . '/../../includes/db_connect.php';
+
 $sql="select * from loaisanpham";
 $list_loaisp=mysqli_query($ketnoi,$sql);
 $sql="select * from sanpham where MaSP=$id";
@@ -27,7 +28,7 @@ mysqli_close($ketnoi);
 
 <body>
 
-    <form action="../admin/process/update_process.php" method="post" enctype="multipart/form-data">
+    <form action="../../admin/process/update_process.php" method="post" enctype="multipart/form-data">
         <table>
            <tr>
                 
@@ -48,7 +49,7 @@ mysqli_close($ketnoi);
                 <td>
                     <input type="file" name="Anhnew">
                     <br>
-                    <img src="../<?php echo $inforSP['Anh'] ?>" alt="" width="50px" height="auto" name="Anhold">
+                    <img src="../../<?php echo $inforSP['Anh'] ?>" alt="" width="50px" height="auto" name="Anhold">
                 </td>
             </tr>
             <tr>

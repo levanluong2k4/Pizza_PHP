@@ -32,6 +32,6 @@ $sql = "UPDATE sanpham
 mysqli_query($ketnoi, $sql);
 mysqli_close($ketnoi);
 
-header("location: ../indexadmin.php");
+header("location: ../view/indexadmin.php");
 exit;
 ?>
