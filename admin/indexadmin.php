@@ -1,5 +1,5 @@
 <?php
-require './process/check_admin.php';
+// require './process/check_admin.php';
 
 require "../includes/db_connect.php";
 $sql="select * from sanpham";
