@@ -59,25 +59,44 @@ try {
         ]);
         
     } else {
-        // User chưa đăng nhập - Lưu vào session
+        // ===== User chưa đăng nhập - Lưu vào session =====
         
         if (!isset($_SESSION['cart'])) {
             $_SESSION['cart'] = [];
         }
         
-        $key = $product_id . '_' . $size_id;
+        $cart_key = $product_id . '_' . $size_id;
         
-        if (isset($_SESSION['cart'][$key])) {
-            $_SESSION['cart'][$key]['quantity'] += $quantity;
+       
+        $sql_price = "SELECT Gia FROM sanpham_size 
+                     WHERE MaSP='$product_id' AND MaSize='$size_id'";
+        $result_price = mysqli_query($ketnoi, $sql_price);
+        $price_data = mysqli_fetch_array($result_price);
+        
+        if (!$price_data) {
+            echo json_encode([
+                'status' => 'error',
+                'message' => 'Không tìm thấy thông tin giá sản phẩm'
+            ]);
+            exit;
+        }
+        
+        // Kiểm tra sản phẩm đã có trong giỏ chưa
+        if (isset($_SESSION['cart'][$cart_key])) {
+            $_SESSION['cart'][$cart_key]['quantity'] += $quantity;
         } else {
-            $_SESSION['cart'][$key] = [
+            $_SESSION['cart'][$cart_key] = [
                 'masp' => $product_id,
                 'size_id' => $size_id,
-                'quantity' => $quantity
+                'quantity' => $quantity,
+                'price' => $price_data['Gia'] ,
+                'subtotal'=>$quantity * $price_data['Gia'] ,
             ];
         }
         
-        // Tính tổng số lượng
+        
+        
+        // Tính tổng số lượng trong giỏ
         $total_quantity = 0;
         foreach ($_SESSION['cart'] as $item) {
             $total_quantity += $item['quantity'];

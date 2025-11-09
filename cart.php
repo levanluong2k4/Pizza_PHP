@@ -4,7 +4,11 @@
 session_start();
 $ketnoi = mysqli_connect("localhost", "root", "", "php_pizza");
 mysqli_set_charset($ketnoi, "utf8");
-   
+print_r($_SESSION) ;
+echo '<pre>';
+print_r($_SESSION['cart']);
+
+echo '</pre>';
 $hoten = trim($_POST['hoten'] ?? '');
 $sodt = trim($_POST['sodt'] ?? '');
 $so_nha = trim($_POST['so_nha'] ?? '');
@@ -12,6 +16,13 @@ $diachi_full = trim($_POST['diachi'] ?? ''); // có thể là chuỗi tổng h�
 $province_code = $_POST['province'] ?? '';
 $district_code = $_POST['district'] ?? '';
 $ward_name = $_POST['ward'] ?? ''; // frontend đang gửi tên xã/phường (theo api script của bạn)
+
+
+
+
+
+
+
 
 // Lưu tạm old_address (giữ codes để frontend có thể prefill select)
 $_SESSION['old_address'] = [
@@ -31,9 +42,7 @@ function getLocationNameFromCode($endpoint) {
     if (!$json) return null;
     $data = json_decode($json, true);
     if (!$data) return null;
-    // các endpoint trả về cấu trúc khác nhau:
-    // - p/{code} => { "code": "...", "name": "...", ... }
-    // - d/{code} => { "code": "...", "name": "...", ... }
+
     return $data['name'] ?? null;
 }
 
@@ -147,7 +156,7 @@ if (isset($_SESSION['user_id'])) {
             $subtotal = $item['Gia'] * $item['Quantity'];
             $cartItems[] = [
                 'masp' => $item['MaSP'],
-                'masize' => $item['MaSize'],
+                'size_id' => $item['MaSize'],
                 'tensp' => $item['TenSP'],
                 'tensize' => $item['TenSize'],
                 'price' => $item['Gia'],
@@ -163,17 +172,28 @@ if (isset($_SESSION['user_id'])) {
 else {
     if (isset($_SESSION['cart']) && !empty($_SESSION['cart'])) {
         foreach ($_SESSION['cart'] as $key => $item) {
+           $sql = "SELECT sp.TenSP, ss.Gia, ss.Anh, s.TenSize, s.MaSize
+        FROM sanpham_size ss
+        JOIN sanpham sp ON ss.MaSP = sp.MaSP
+        JOIN size s ON ss.MaSize = s.MaSize
+        WHERE ss.MaSP = {$item['masp']}
+        AND ss.MaSize = {$item['size_id']}";
+        $result_item=mysqli_query($ketnoi,$sql);
+        $sanphamsize=mysqli_fetch_array($result_item);
+            
+            $subtotal = $sanphamsize['Gia'] * $item['quantity'];
+            print_r($subtotal);
             $cartItems[] = [
                 'masp' => $item['masp'],
-                'masize' => $item['size_id'],
-                'tensp' => $item['tensp'],
-                'tensize' => $item['tensize'],
-                'price' => $item['price'],
+                'size_id' => $item['size_id'],
+                'tensp' => $sanphamsize['TenSP'],
+                'tensize' => $sanphamsize['TenSize'],
+                'price' => $sanphamsize['Gia'],
                 'quantity' => $item['quantity'],
-                'anh' => $item['anh'],
-                'subtotal' => $item['subtotal']
+                'anh' => $sanphamsize['Anh'],
+                'subtotal' => $subtotal,
             ];
-            $tongtien += $item['subtotal'];
+            $tongtien += $subtotal;
         }
     }
 }
@@ -234,7 +254,7 @@ mysqli_close($ketnoi);
                     <div class="card-body scrollable-menu" style="max-height: 500px; overflow-y: auto;">
                       <?php foreach ($cartItems as $item): ?>
 <div class="row cart-item mb-3 pb-3 border-bottom align-items-center" 
-     id="cart-item-<?php echo $item['masp']; ?>-<?php echo $item['masize']; ?>">
+     id="cart-item-<?php echo $item['masp']; ?>-<?php echo $item['size_id']; ?>">
     <div class="col-md-2">
         <img src="<?php echo $item['anh']; ?>" class="img-fluid rounded" alt="<?php echo $item['tensp']; ?>">
     </div>
@@ -248,7 +268,7 @@ mysqli_close($ketnoi);
             <!-- ❌ XÓA CÁC THẺ <a> CŨ VÀ THAY BẰNG <button> -->
             <button type="button" class="btn btn-outline-secondary btn-sm btn-update-cart" 
                     data-masp="<?php echo $item['masp']; ?>"
-                    data-masize="<?php echo $item['masize']; ?>"
+                    data-masize="<?php echo $item['size_id']; ?>"
                     data-type="decrease">
                 -
             </button>
@@ -256,7 +276,7 @@ mysqli_close($ketnoi);
                    value="<?php echo $item['quantity']; ?>" min="1" readonly>
             <button type="button" class="btn btn-outline-secondary btn-sm btn-update-cart"
                     data-masp="<?php echo $item['masp']; ?>"
-                    data-masize="<?php echo $item['masize']; ?>"
+                    data-masize="<?php echo $item['size_id']; ?>"
                     data-type="increase">
                 +
             </button>
@@ -271,7 +291,7 @@ mysqli_close($ketnoi);
         <!-- ❌ XÓA THẺ <a> CŨ VÀ THAY BẰNG <button> -->
         <button type="button" class="btn btn-danger btn-sm btn-delete-cart" 
                 data-masp="<?php echo $item['masp']; ?>"
-                data-masize="<?php echo $item['masize']; ?>">
+                data-masize="<?php echo $item['size_id']; ?>">
             <i class="fas fa-trash"></i>
         </button>
     </div>
@@ -368,7 +388,7 @@ mysqli_close($ketnoi);
                         <form action="./cart/process_order.php" method="post">
                         <div class="d-flex justify-content-between mb-2">
                             <span>Tạm tính:</span>
-                            <span id="total-amount"><?php echo number_format($tongtien); ?> VNĐ</span>
+                            <span class="total-amount"><?php echo number_format($tongtien); ?> VNĐ</span>
                         </div>
                         <div class="d-flex justify-content-between mb-2">
                             <span>Phí vận chuyển:</span>
@@ -377,7 +397,7 @@ mysqli_close($ketnoi);
                         <hr>
                         <div class="d-flex justify-content-between mb-3">
                             <strong>Tổng cộng:</strong>
-                            <strong class="text-danger" id="total-amount"><?php echo number_format($tongtien); ?> VNĐ</strong>
+                            <strong class="text-danger total-amount" id=""><?php echo number_format($tongtien); ?> VNĐ</strong>
                         </div>
                         
                         <button name="order" type="submit"  

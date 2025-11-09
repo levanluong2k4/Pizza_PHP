@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Máy chủ: 127.0.0.1
--- Thời gian đã tạo: Th10 08, 2025 lúc 03:10 PM
+-- Thời gian đã tạo: Th10 09, 2025 lúc 02:23 PM
 -- Phiên bản máy phục vụ: 10.4.32-MariaDB
 -- Phiên bản PHP: 8.2.12
 
@@ -98,7 +98,14 @@ INSERT INTO `chitietdonhang` (`id`, `MaDH`, `MaSP`, `MaSize`, `SoLuong`, `ThanhT
 (34, 31, 35, 3, 4, 596000.00),
 (35, 31, 34, 2, 2, 238000.00),
 (36, 32, 14, 3, 1, 149000.00),
-(37, 33, 14, 2, 1, 129000.00);
+(37, 33, 14, 2, 1, 129000.00),
+(38, 34, 15, 3, 1, 139000.00),
+(39, 34, 35, 3, 1, 149000.00),
+(40, 34, 6, 11, 3, 30000.00),
+(41, 35, 7, 12, 1, 15000.00),
+(42, 35, 5, 12, 1, 24000.00),
+(43, 35, 33, 3, 1, 119000.00),
+(44, 35, 14, 3, 1, 149000.00);
 
 -- --------------------------------------------------------
 
@@ -176,7 +183,9 @@ INSERT INTO `donhang` (`MaDH`, `MaKH`, `ngaydat`, `TongTien`, `trangthai`, `diac
 (30, 11, '2025-11-03 23:57:22', 109000.00, 'Chờ xử lý', '62/11 đặng tất, Xã Minh Xuân, Huyện Lục Yên, Tỉnh Yên Bái', '0112245454', 'Luongle12', 0),
 (31, 11, '2025-11-05 15:14:43', 2175000.00, 'Chờ xử lý', '62/11 đặng tất, Xã Tiên Hội, Huyện Đại Từ, Tỉnh Thái Nguyên', '0112245454', 'Luongle12', 0),
 (32, 11, '2025-11-05 16:22:34', 149000.00, 'Chờ xử lý', '64gg, Xã Đông Quan', '0112245454', 'Luongle12', 0),
-(33, 24, '2025-11-08 15:08:24', 129000.00, 'Chờ xử lý', '62/11 đặng tất, Xã Vạn Phái, Thành phố Phổ Yên, Tỉnh Thái Nguyên', '9989898989', 't565', 0);
+(33, 24, '2025-11-08 15:08:24', 129000.00, 'Chờ xử lý', '62/11 đặng tất, Xã Vạn Phái, Thành phố Phổ Yên, Tỉnh Thái Nguyên', '9989898989', 't565', 0),
+(34, 24, '2025-11-08 22:20:38', 318000.00, 'Chờ xử lý', '62/11 đặng tất, Phường Tứ Liên, Quận Tây Hồ, Thành phố Hà Nội', '0799462980', 't565', 0),
+(35, 24, '2025-11-08 22:38:14', 307000.00, 'Chờ xử lý', '62/11 đặng tất, Xã Vạn Phái, Thành phố Phổ Yên, Tỉnh Thái Nguyên', '0112245454', 'Luongle12', 0);
 
 -- --------------------------------------------------------
 
@@ -229,7 +238,7 @@ INSERT INTO `khachhang` (`MaKH`, `HoTen`, `Email`, `SoDT`, `MatKhau`, `ngaytao`,
 (12, '[value-2]', 'levanluong1t@gmail.com', '[value-4]', '123', '2025-10-25 16:16:25', 0, '[value-9]', '[value-10]', '[value-11]', '[value-12]'),
 (16, '[value-2]', 'levanluongt@gmail.com', '[value-4]', '1', '2025-10-25 16:32:25', 0, '[value-9]', '[value-10]', '[value-11]', '[value-12]'),
 (17, '[value-2]', 'levanluong@gmail.com', '[value-4]', '123', '2025-10-30 05:17:14', 0, '[value-9]', '[value-10]', '[value-11]', '[value-12]'),
-(24, 't565', 'tranthuhuon55ntu@gmail.com', '9989898989', '$2y$10$WuG6aqMdZ6R870bjxVGYNufLea5xa8sLXoQQPxtgu4EFuFY0W.d6i', '2025-11-07 16:09:43', 0, 'Tỉnh Thái Nguyên', 'Thành phố Phổ Yên', 'Xã Vạn Phái', '62/11 đặng tất');
+(24, 'Luongle12', 'tranthuhuon55ntu@gmail.com', '0112245454', '$2y$10$WuG6aqMdZ6R870bjxVGYNufLea5xa8sLXoQQPxtgu4EFuFY0W.d6i', '2025-11-07 16:09:43', 0, 'Tỉnh Thái Nguyên', 'Thành phố Phổ Yên', 'Xã Vạn Phái', '62/11 đặng tất');
 
 -- --------------------------------------------------------
 
@@ -520,19 +529,19 @@ ALTER TABLE `admin`
 -- AUTO_INCREMENT cho bảng `chitietdonhang`
 --
 ALTER TABLE `chitietdonhang`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=38;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=45;
 
 --
 -- AUTO_INCREMENT cho bảng `donhang`
 --
 ALTER TABLE `donhang`
-  MODIFY `MaDH` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=34;
+  MODIFY `MaDH` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=36;
 
 --
 -- AUTO_INCREMENT cho bảng `giohang`
 --
 ALTER TABLE `giohang`
-  MODIFY `CartID` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=34;
+  MODIFY `CartID` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=36;
 
 --
 -- AUTO_INCREMENT cho bảng `khachhang`
