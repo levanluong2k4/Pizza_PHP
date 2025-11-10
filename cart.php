@@ -4,11 +4,16 @@
 session_start();
 $ketnoi = mysqli_connect("localhost", "root", "", "php_pizza");
 mysqli_set_charset($ketnoi, "utf8");
-print_r($_SESSION) ;
+$user_id = $_SESSION['user_id'];
 echo '<pre>';
-print_r($_SESSION['cart']);
+print_r($_SESSION);
+print_r($_POST);
 
 echo '</pre>';
+
+
+
+
 $hoten = trim($_POST['hoten'] ?? '');
 $sodt = trim($_POST['sodt'] ?? '');
 $so_nha = trim($_POST['so_nha'] ?? '');
@@ -24,13 +29,7 @@ $ward_name = $_POST['ward'] ?? ''; // frontend đang gửi tên xã/phường (t
 
 
 
-// Lưu tạm old_address (giữ codes để frontend có thể prefill select)
-$_SESSION['old_address'] = [
-    'province' => $province_code,
-    'district' => $district_code,
-    'ward' => $ward_name,
-    'so_nha' => $so_nha,
-];
+
 
 // Helper: lấy tên tỉnh/huyện từ API provinces.open-api.vn theo code
 function getLocationNameFromCode($endpoint) {
@@ -78,7 +77,7 @@ if (!empty($diachi_full)) {
 }
 
 // Kiểm tra thiếu thông tin (dùng để disable nút đặt hàng)
-$thieuThongTin = empty($_SESSION['temp_hoten']) || empty($_SESSION['temp_sodt']) || empty($_SESSION['temp_so_nha']) || empty($_SESSION['temp_diachi']);
+$thieuThongTin = empty($_SESSION['temp_hoten']) || empty($_SESSION['temp_sodt']) || empty($_SESSION['temp_so_nha']) || empty($_SESSION['temp_province'])|| empty($_SESSION['temp_district'])|| empty($_SESSION['temp_ward']);
 
 // Lưu vào DB khi nhấn Lưu
 $saved = false;
@@ -86,9 +85,19 @@ $updateMessage = '';
 
 if (isset($_POST['save_address'])) {
 
+
+    // Lưu tạm old_address (giữ codes để frontend có thể prefill select)
+        $_SESSION['old_address'] = [
+            'province' => $province_code,
+            'district' => $district_code,
+            'ward' => $ward_name,
+            'so_nha' => $so_nha,
+        ];
     // Nếu user đăng nhập, cập nhật vào bảng khachhang
     if (isset($_SESSION['user_id'])) {
-        $user_id = $_SESSION['user_id'];
+        
+
+        
 
         // Chuẩn bị giá trị an toàn
         $hoten_safe = mysqli_real_escape_string($ketnoi, $_SESSION['temp_hoten']);
@@ -100,13 +109,16 @@ if (isset($_POST['save_address'])) {
         $xaphuong_safe = mysqli_real_escape_string($ketnoi, $ward_name);
 
         // UPDATE: lưu cả tên tỉnh/huyện/xã và số nhà. Nếu bạn vẫn muốn giữ cột Diachi (chuỗi tổng hợp), cũng lưu luôn.
+         // UPDATE: lưu CẢ code VÀ name
             $sql_update = "
                 UPDATE khachhang SET
                     HoTen = '$hoten_safe',
                     SoDT = '$sodt_safe',
                     sonha = '$sonha_safe',
                     tinhthanhpho = '$tinh_safe',
+                    tinh_code = '$province_code',
                     huyenquan = '$huyen_safe',
+                    huyen_code = '$district_code',
                     xaphuong = '$xaphuong_safe'
                 WHERE MaKH = '$user_id'
             ";
@@ -135,6 +147,8 @@ $tongtien = 0;
 
 // Trường hợp 1: Người dùng đã đăng nhập
 if (isset($_SESSION['user_id'])) {
+    
+    
     
 
 
@@ -314,9 +328,10 @@ mysqli_close($ketnoi);
                                 <span style="min-width: 150px;">Tên người nhận</span>
                                 <span id="hoten_display" style="flex: 1; text-align: center;">
                                     <?php 
-                                    if(isset($_SESSION['temp_hoten'])){
+                                   if(isset($_SESSION['temp_hoten'])){
                                         echo htmlspecialchars($_SESSION['temp_hoten']);
-                                    } else {
+                                    }
+                                    else  {
                                         echo "<span class='text-danger'>Vui lòng nhập tên người nhận</span>";
                                     }
                                     ?>
