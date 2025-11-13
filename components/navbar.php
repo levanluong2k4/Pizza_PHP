@@ -216,7 +216,7 @@ $loaisp=mysqli_query($ketnoi,$sqlloaisp);
                             <li>
                                 <hr class="dropdown-divider">
                             </li>
-                            <li class="dropdown-item"><a href="#">Quên mật khẩu</a></li>
+                            <li class="dropdown-item"><a href="">Quên mật khẩu</a></li>
                         </ul>
                     </li>
 

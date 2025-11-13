@@ -32,7 +32,7 @@ $email = trim($_POST['email']);
 $user_id = $_SESSION['user_id'];
 $user = $_SESSION['name'] ?? 'Khách';
 
-// ✅ Debug: Kiểm tra email sau trim
+
 error_log("Email after trim: '$email'");
 error_log("Email length: " . strlen($email));
 
@@ -46,18 +46,18 @@ if (empty($email)) {
     exit;
 }
 
-// ✅ Kiểm tra email hợp lệ
+
 if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
     echo json_encode([
         'success' => false,
         'error_type' => 'email_format',
         'message' => 'Email không hợp lệ. Định dạng đúng: example@domain.com',
-        'debug_email' => $email // ✅ Gửi về để xem email nhận được là gì
+        'debug_email' => $email 
     ]);
     exit;
 }
 
-// ✅ Kiểm tra trùng email (LOẠI TRỪ email của chính user hiện tại)
+
 $email_safe = mysqli_real_escape_string($ketnoi, $email);
 $sql = "SELECT COUNT(*) AS dem FROM khachhang WHERE Email='$email_safe' AND MaKH != '$user_id'";
 $result = mysqli_query($ketnoi, $sql);

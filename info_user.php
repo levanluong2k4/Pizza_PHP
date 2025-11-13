@@ -449,7 +449,7 @@ if($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['change_password'])){
                                             <button type="submit" name="change_password" class="btn btn-save">
                                                 <i class="fas fa-key"></i> Đổi mật khẩu
                                             </button>
-                                               <button type="submit" name="forget_password" class="btn btn-save">
+                                            <button type="submit" name="forget_password" class="btn btn-save">
                                                 <i class="fa-solid fa-unlock-keyhole"></i> Quên mật khẩu
                                             </button>
                                         </div>
