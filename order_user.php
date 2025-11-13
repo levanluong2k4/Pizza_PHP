@@ -106,10 +106,10 @@ $result = mysqli_query($ketnoi, $sql);
         $danhSachAnh = explode(',', $value['DanhSachAnh']);
     ?>
     
-    <div class="order-item mb-3 p-3 border rounded">
+    <div class="order-item mb-3 p-3 pb-0 border rounded">
       <div class="d-flex justify-content-between mb-2">
         <b>Đơn hàng #<?php echo $value["MaDH"]; ?></b>
-        <a href="detailt_order.php?madon=<?php echo $value["MaDH"]; ?>">Xem chi tiết</a>
+        <a href="detail_order_user.php?madon=<?php echo $value["MaDH"]; ?>">Xem chi tiết ></a>
       </div>
       
       <div class="d-flex justify-content-between mb-2">
@@ -140,6 +140,17 @@ $result = mysqli_query($ketnoi, $sql);
             <span>+<?php echo (count($danhSachAnh) - 3); ?></span>
           </div>
         <?php endif; ?>
+      </div>
+
+      <div class="align-content-end d-flex p-0">
+        <?php if($value["trangthai"]=="Chờ xử lý"): ?>
+        <button data-order_id="<?php echo $value["MaDH"]; ?>" class="col-6 btn-cancel_order">Hủy đơn hàng</button>
+        <button class="col-6">Thanh toán</button>
+        <?php else: ?>
+           
+        <button class="col-12 border-end-0">Thanh toán</button>
+        <?php endif; ?>
+        
       </div>
     </div>
     
@@ -180,9 +191,12 @@ $result = mysqli_query($ketnoi, $sql);
     <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/slick-carousel@1.8.1/slick/slick.min.js"></script>
 
 <script>
-   $(document).ready(function(){
+$(document).ready(function(){
   const btn_order = $(".inner-order");
+  
+ 
 
+  // Filter orders
   btn_order.click(function(){
     let trangthai = $(this).data("order");
     btn_order.removeClass("active");
@@ -193,7 +207,7 @@ $result = mysqli_query($ketnoi, $sql);
       type: "POST",
       data: { trangthai: trangthai },
       success: function(response) {
-        $("#order-list").html(response); // ✅ Cập nhật nội dung bảng
+        $("#order-list").html(response);
       },
       error: function(xhr, status, error) {
         console.log("error:", error);
@@ -204,7 +218,7 @@ $result = mysqli_query($ketnoi, $sql);
 
 </script>
 
-
+  <script src="./js/cancel_order.js"></script>
     <script src="./js/wow.min.js"></script>
 </body>
 </html>

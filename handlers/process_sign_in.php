@@ -81,6 +81,7 @@ if (mysqli_num_rows($result_user) > 0) {
         $_SESSION['temp_so_nha'] = $user['sonha'];
         $_SESSION['temp_sodt'] = $user['SoDT'];
         $_SESSION['temp_hoten'] = $user['HoTen'];
+        $_SESSION['temp_diachi'] =$user['sonha'].",".$user['xaphuong'].",".$user['huyenquan'].",".$user['tinhthanhpho'] ;
         
         // Lưu CODE để prefill select (nếu có cột mới)
         $_SESSION['old_address'] = [

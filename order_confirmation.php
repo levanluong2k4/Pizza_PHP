@@ -71,7 +71,17 @@ if(!isset($_GET['order_id'])){
 
     <div class="actions">
       <a class="btn btn-primary" href="trangchu.php">Tiếp tục mua sắm</a>
+      <?php if(isset($_SESSION['is_guest'])&&$_SESSION['is_guest']==1):
+            
+       ?>
+        <a class="btn btn-ghost" href="search_order.php">Tra cứu đơn hàng</a>
+      <?php
+      else :
+        
+      
+      ?>
       <a class="btn btn-ghost" href="order_user.php">Xem lịch sử đơn hàng</a>
+      <?php endif; ?>
     </div>
 
     <p class="small-note">Bạn sẽ nhận được email / SMS xác nhận trong vài phút. Nếu cần hỗ trợ, vui lòng liên hệ hotline hoặc trả lời email này.</p>

@@ -187,7 +187,7 @@ $loaisp=mysqli_query($ketnoi,$sqlloaisp);
 
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link " aria-current="page" href="#">Đặt hàng</a>
+                    <a class="nav-link " aria-current="page" href="./order_user.php">Đặt hàng</a>
                 </li>
                 <li class="nav-item">
                     <a class="nav-link" href="#">Liên lạc</a>
@@ -210,7 +210,7 @@ $loaisp=mysqli_query($ketnoi,$sqlloaisp);
                             <img src="./img/user.png" alt="" height="30px">
                         </a>
                         <ul class="dropdown-menu bg-global p-0 text-md-center text-lg-center">
-                            <li class="dropdown-item"><a href="#">Thông tin cá nhân</a></li>
+                            <li class="dropdown-item"><a href="info_user.php">Thông tin cá nhân</a></li>
 
                             <li class="dropdown-item"><a href="handlers/process_sign_out.php">Đăng xuất</a></li>
                             <li>
@@ -233,7 +233,7 @@ $loaisp=mysqli_query($ketnoi,$sqlloaisp);
                             <li>
                                 <hr class="dropdown-divider">
                             </li>
-                            <li class="dropdown-item"><a href="#">Quên mật khẩu</a></li>
+                     
                         </ul>
                     </li>
                     <?php endif; ?>

@@ -31,6 +31,7 @@ if (isset($_POST['order_guest'])) {
                   VALUES ('$total_price', '$diachinguoinhan', '$sdtnguoinhan', '$tennguoinhan', 1)";
     mysqli_query($ketnoi, $sql_order);
     $order_id = mysqli_insert_id($ketnoi);
+    $_SESSION['is_guest']=1;
 
     foreach ($_SESSION['cart'] as $item) {
         $maSP = $item['masp'];
@@ -49,6 +50,7 @@ if (isset($_POST['order_guest'])) {
     unset($_SESSION['cart']);
     header("Location: ../order_confirmation.php?order_id=$order_id");
     exit();
+    
 }
 
 // --- Trường hợp khách đăng nhập ---
@@ -92,7 +94,7 @@ else {
     mysqli_query($ketnoi, "DELETE FROM chitietgiohang WHERE CartID='$cartId'");
     mysqli_query($ketnoi, "DELETE FROM giohang WHERE MaKH='$user_id'");
 
-    unset($_SESSION['temp_hoten'], $_SESSION['temp_sodt'], $_SESSION['temp_diachi'], $_SESSION['temp_so_nha']);
+    
 
     header("Location: ../order_confirmation.php?order_id=$order_id");
     exit();

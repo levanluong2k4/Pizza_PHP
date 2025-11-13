@@ -1,7 +1,7 @@
 <!-- Modal luôn tồn tại, nhưng để trống, sẽ được điền bằng AJAX -->
 <div class="modal fade" id="sizeModal" tabindex="-1" aria-labelledby="sizeModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-lg">
-        <div class="modal-content" style="margin-top: 117px;">
+    <div class="modal-dialog modal-lg bg-icon">
+        <div class="modal-content" style="margin-top: 117px; background:none">
             <div class="modal-header">
                 <h5 class="modal-title" id="sizeModalLabel">Chọn size</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>

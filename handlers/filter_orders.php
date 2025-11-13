@@ -51,42 +51,50 @@ if ($trangthai == "all" || strtolower($trangthai) == "all") {
 $result = mysqli_query($ketnoi, $sql);
 
 if (mysqli_num_rows($result) > 0) {
-    while ($row = mysqli_fetch_assoc($result)) {
-        // Tách danh sách ảnh
-        $danhSachAnh = explode(',', $row['DanhSachAnh']);
-        
-        echo '<div class="order-item mb-3 p-3 border rounded">
-            <div class="d-flex justify-content-between mb-2">
-                <b>Đơn hàng #' . $row['MaDH'] . '</b>
-                <a href="detailt_order.php?madon=' . $row['MaDH'] . '">Xem chi tiết</a>
-            </div>
-            <div class="d-flex justify-content-between mb-2">
-                <div><p class="mb-0">'.'<b>thời gian đặt hàng:</b>' ."thời gian đặt hàng:". date('d/m/Y H:i', strtotime($row['ngaydat'])) . '</p></div>
-                <div><p class="mb-0"><span class="badge text-success fw-bolder  fs-6 ">' . $row['trangthai'] . '</span></p></div>
-            </div>
-            <div class="d-flex justify-content-between mb-2">
-                <div><strong>Tổng tiền:</strong> ' . number_format($row['TongTien'], 0, ',', '.') . '₫</div>
-            </div>
-            <div class="d-flex gap-2">';
-        
-        // Hiển thị tối đa 3 ảnh đầu tiên
-        $count = 0;
-        foreach ($danhSachAnh as $anh) {
-            if ($count >= 3) break;
-            echo '<img src="./' . trim($anh) . '" alt="Product" class="img-thumbnail" style="width: 80px; height: 80px; object-fit: cover;">';
-            $count++;
-        }
-        
-        // Hiển thị số lượng sản phẩm còn lại
-        if (count($danhSachAnh) > 3) {
-            echo '<div class="d-flex align-items-center justify-content-center img-thumbnail" style="width: 80px; height: 80px;">
-                <span>+' . (count($danhSachAnh) - 3) . '</span>
-            </div>';
-        }
-        
-        echo '</div>
-        </div>';
+while ($row = mysqli_fetch_assoc($result)) {
+    $danhSachAnh = explode(',', $row['DanhSachAnh']);
+
+    echo '<div class="order-item mb-3 p-3 border rounded">';
+    echo '<div class="d-flex justify-content-between mb-2">';
+    echo '<b>Đơn hàng #' . $row['MaDH'] . '</b>';
+    echo '<a href="detailt_order.php?madon=' . $row['MaDH'] . '">Xem chi tiết</a>';
+    echo '</div>';
+
+    echo '<div class="d-flex justify-content-between mb-2">';
+    echo '<div><p class="mb-0"><b>Thời gian đặt hàng:</b> ' . date('d/m/Y H:i', strtotime($row['ngaydat'])) . '</p></div>';
+    echo '<div><p class="mb-0"><span class="badge text-success fw-bolder fs-6">' . $row['trangthai'] . '</span></p></div>';
+    echo '</div>';
+
+    echo '<div class="d-flex justify-content-between mb-2">';
+    echo '<div><strong>Tổng tiền:</strong> ' . number_format($row['TongTien'], 0, ',', '.') . '₫</div>';
+    echo '</div>';
+
+    echo '<div class="d-flex gap-2">';
+    $count = 0;
+    foreach ($danhSachAnh as $anh) {
+        if ($count >= 3) break;
+        echo '<img src="./' . trim($anh) . '" alt="Product" class="img-thumbnail" style="width: 80px; height: 80px; object-fit: cover;">';
+        $count++;
     }
+    if (count($danhSachAnh) > 3) {
+        echo '<div class="d-flex align-items-center justify-content-center img-thumbnail" style="width: 80px; height: 80px;">
+                <span>+' . (count($danhSachAnh) - 3) . '</span>
+              </div>';
+    }
+    echo '</div>'; // đóng danh sách ảnh
+
+    
+    echo '<div class="align-content-end d-flex p-0">';
+    if ($row["trangthai"] == "Chờ xử lý") {
+        echo '<button class="col-6">Hủy đơn hàng</button>';
+        echo '<button class="col-6">Thanh toán</button>';
+    } else {
+        echo '<button class="col-12 border-end-0">Thanh toán</button>';
+    }
+    echo '</div>';
+    echo '</div>';
+}
+
 } else {
     echo '<div class="text-center mt-4 p-4">
         <p class="text-muted">Không có đơn hàng nào với trạng thái này.</p>

@@ -4,7 +4,7 @@ unset($_SESSION['user_id']);
 unset($_SESSION['temp_hoten']);
 unset($_SESSION['temp_sodt']);
 unset($_SESSION['temp_diachi']);
-        unset($_SESSION['temp_temp_ward']);
+        unset($_SESSION['temp_ward']);
         unset($_SESSION['temp_district']);
         unset($_SESSION['temp_province']);
         unset($_SESSION['temp_so_nha']);
