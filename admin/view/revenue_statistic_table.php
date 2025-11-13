@@ -1,14 +1,41 @@
 <?php
 require __DIR__ . '/../../includes/db_connect.php';
 
+// === LẤY GIÁ TRỊ TỪ FORM ===
 $from = $_GET['from_date'] ?? null;
 $to = $_GET['to_date'] ?? null;
+$filter = $_GET['filter'] ?? '5nam'; // mặc định: 5 năm đổ lại
 
+// === XỬ LÝ LOGIC ĐIỀU KIỆN THỜI GIAN ===
 if ($from && $to) {
+    // Nếu người dùng chọn khoảng ngày cụ thể
     $condition = "AND DATE(dh.NgayDat) BETWEEN '$from' AND '$to'";
 } else {
-    // mặc định 7 ngày
-    $condition = "AND DATE(dh.NgayDat) >= DATE_SUB(CURDATE(), INTERVAL 7 DAY)";
+    // Nếu chọn theo bộ lọc
+    switch ($filter) {
+        case 'homnay':
+            $condition = "AND DATE(dh.NgayDat) = CURDATE()";
+            break;
+
+        case '12thang':
+            $condition = "AND dh.NgayDat >= DATE_SUB(CURDATE(), INTERVAL 12 MONTH)";
+            break;
+
+        case 'nam':
+            $year = $_GET['year'] ?? date('Y');
+            $condition = "AND YEAR(dh.NgayDat) = $year";
+            break;
+
+        case 'thang':
+            $month = $_GET['month'] ?? date('m');
+            $year = $_GET['year'] ?? date('Y');
+            $condition = "AND YEAR(dh.NgayDat) = $year AND MONTH(dh.NgayDat) = $month";
+            break;
+
+        default:
+            $condition = "AND YEAR(dh.NgayDat) = YEAR(CURDATE())";
+            break;
+    }
 }
 
 $sql = "
@@ -90,7 +117,6 @@ if (isset($_GET['export'])) {
         $writer = new Xlsx($spreadsheet);
         $writer->save('php://output');
         exit;
-
     } elseif ($exportType === 'pdf') {
         // --- XUẤT PDF ---
         $pdf = new TCPDF();
@@ -397,40 +423,94 @@ $tong = mysqli_fetch_assoc(mysqli_query($ketnoi, $sql_tong))["TongDoanhThu"] ?? 
     <!-- ===== NỘI DUNG CHÍNH: BẢNG THỐNG KÊ ===== -->
     <div class="container mt-4">
         <form method="GET" class="row g-3 align-items-end">
+            <!-- Bộ lọc khoảng thời gian -->
             <div class="col-auto">
                 <label for="from_date" class="form-label">Từ ngày:</label>
                 <input type="date" id="from_date" name="from_date" class="form-control"
-                    value="<?php echo isset($_GET['from_date']) ? $_GET['from_date'] : ''; ?>">
+                    value="<?php echo $_GET['from_date'] ?? ''; ?>">
             </div>
 
             <div class="col-auto">
                 <label for="to_date" class="form-label">Đến ngày:</label>
                 <input type="date" id="to_date" name="to_date" class="form-control"
-                    value="<?php echo isset($_GET['to_date']) ? $_GET['to_date'] : ''; ?>">
+                    value="<?php echo $_GET['to_date'] ?? ''; ?>">
             </div>
 
             <div class="col-auto">
-                <button class="btn btn-success" type="submit"><i class="fa-solid fa-filter"></i> Lọc</button>
+                <button class="btn btn-success" type="submit">
+                    <i class="fa-solid fa-filter"></i> Lọc
+                </button>
             </div>
 
+            <!-- Các nút nhanh -->
+            <div class="col-auto d-flex gap-2 flex-wrap">
+                <!-- Hôm nay -->
+                <button type="button" class="btn btn-outline-success"
+                    onclick="window.location.href='?filter=homnay'">
+                    Hôm nay
+                </button>
+
+                <!-- 12 tháng gần nhất -->
+                <button type="button" class="btn btn-outline-success"
+                    onclick="window.location.href='?filter=12thang'">
+                    12 tháng gần nhất
+                </button>
+
+                <!-- Chọn năm -->
+                <div class="dropdown">
+                    <button class="btn btn-outline-success dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                        Chọn năm
+                    </button>
+                    <ul class="dropdown-menu">
+                        <?php
+                        $yearNow = date('Y');
+                        for ($i = 0; $i < 5; $i++) {
+                            $y = $yearNow - $i;
+                            echo "<li><a class='dropdown-item' href='?filter=nam&year=$y'>$y</a></li>";
+                        }
+                        ?>
+                    </ul>
+                </div>
+
+                <!-- Chọn tháng -->
+                <div class="dropdown">
+                    <button class="btn btn-outline-success dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                        Chọn tháng
+                    </button>
+                    <ul class="dropdown-menu">
+                        <?php
+                        $now = new DateTime();
+                        for ($i = 0; $i < 12; $i++) {
+                            $month = $now->format('m');
+                            $year = $now->format('Y');
+                            echo "<li><a class='dropdown-item' href='?filter=thang&month=$month&year=$year'>Tháng $month/$year</a></li>";
+                            $now->modify('-1 month');
+                        }
+                        ?>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Nút xuất file -->
             <div class="col-auto">
-    <a href="?<?php echo http_build_query(array_merge($_GET, ['export' => 'excel'])); ?>" class="btn btn-primary">
-        <i class="fa-solid fa-file-excel"></i> Xuất Excel
-    </a>
-</div>
-
-<div class="col-auto">
-    <a href="?<?php echo http_build_query(array_merge($_GET, ['export' => 'pdf'])); ?>" class="btn btn-danger">
-        <i class="fa-solid fa-file-pdf"></i> Xuất PDF
-    </a>
-</div>
-
+                <a href="?<?php echo http_build_query(array_merge($_GET, ['export' => 'excel'])); ?>"
+                    class="btn btn-primary">
+                    <i class="fa-solid fa-file-excel"></i> Xuất Excel
+                </a>
+            </div>
+            <div class="col-auto">
+                <a href="?<?php echo http_build_query(array_merge($_GET, ['export' => 'pdf'])); ?>"
+                    class="btn btn-danger">
+                    <i class="fa-solid fa-file-pdf"></i> Xuất PDF
+                </a>
+            </div>
         </form>
+
     </div>
 
 
     <div class="container mt-5">
-        <h2 class="main-title"><i class="fa-solid fa-fire"></i> Thống kê doanh thu</h2>
+        <h2 class="main-title"><i class="fa-solid "></i> Thống kê doanh theo số liệu</h2>
         <div class="table-responsive mt-4">
             <table class="table table-bordered table-hover align-middle">
                 <thead>

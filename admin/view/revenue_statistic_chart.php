@@ -1,13 +1,46 @@
 <?php
 require __DIR__ . '/../../includes/db_connect.php';
 
+date_default_timezone_set('Asia/Ho_Chi_Minh');
+$now = new DateTime();
+$currentYear = (int)$now->format('Y');
+$currentMonth = (int)$now->format('m');
+
+$filter = $_GET['filter'] ?? 'year';
+$selectedYear = $_GET['year'] ?? $currentYear;
+$selectedMonth = $_GET['month'] ?? null;
 $from = $_GET['from_date'] ?? null;
 $to = $_GET['to_date'] ?? null;
 
+// Xác định điều kiện lọc
 if ($from && $to) {
     $condition = "AND DATE(dh.NgayDat) BETWEEN '$from' AND '$to'";
+    $title = "Doanh thu từ $from đến $to";
 } else {
-    $condition = "AND DATE(dh.NgayDat) >= DATE_SUB(CURDATE(), INTERVAL 7 DAY)";
+    switch ($filter) {
+        case 'today':
+            $condition = "AND DATE(dh.NgayDat) = CURDATE()";
+            $title = "Doanh thu hôm nay (" . $now->format('d/m/Y') . ")";
+            break;
+        case '12months':
+            $condition = "AND dh.NgayDat >= DATE_SUB(CURDATE(), INTERVAL 12 MONTH)";
+            $title = "Doanh thu 12 tháng gần nhất";
+            break;
+        case 'year':
+            $condition = "AND YEAR(dh.NgayDat) = $selectedYear";
+            $title = "Doanh thu năm $selectedYear";
+            break;
+        case 'month':
+            $start = sprintf("%04d-%02d-01", $selectedYear, $selectedMonth);
+            $end = date("Y-m-t", strtotime($start));
+            $condition = "AND dh.NgayDat BETWEEN '$start' AND '$end'";
+            $title = "Doanh thu tháng $selectedMonth/$selectedYear";
+            break;
+        default:
+            $condition = "AND YEAR(dh.NgayDat) = $currentYear";
+            $title = "Doanh thu năm $currentYear";
+            break;
+    }
 }
 
 $sql = "
@@ -24,24 +57,9 @@ ORDER BY Ngay ASC;
 ";
 
 $kq = mysqli_query($ketnoi, $sql);
-
-// Lưu dữ liệu biểu đồ
 $chartData = [];
-while ($row = mysqli_fetch_assoc($kq)) {
-    $chartData[] = $row;
-}
-// Reset lại con trỏ để hiển thị bảng
+while ($row = mysqli_fetch_assoc($kq)) $chartData[] = $row;
 mysqli_data_seek($kq, 0);
-
-// Tổng doanh thu
-$sql_tong = "
-SELECT SUM(ctdh.ThanhTien) AS TongDoanhThu
-FROM donhang dh
-JOIN chitietdonhang ctdh ON dh.MaDH = ctdh.MaDH
-WHERE dh.trangthai = 'Giao thành công'
-$condition;
-";
-$tong = mysqli_fetch_assoc(mysqli_query($ketnoi, $sql_tong))["TongDoanhThu"] ?? 0;
 ?>
 
 <!DOCTYPE html>
@@ -274,7 +292,7 @@ $tong = mysqli_fetch_assoc(mysqli_query($ketnoi, $sql_tong))["TongDoanhThu"] ?? 
     </nav>
 
     <div class="container">
-        <h2 class="main-title">Thống kê doanh thu</h2>
+        <h2 class="main-title">Thống kê doanh thu theo biểu đồ</h2>
 
         <form method="GET" class="row g-3 align-items-end mb-4">
             <div class="col-auto">
@@ -290,7 +308,43 @@ $tong = mysqli_fetch_assoc(mysqli_query($ketnoi, $sql_tong))["TongDoanhThu"] ?? 
             <div class="col-auto">
                 <button class="btn btn-success" type="submit"><i class="fa-solid fa-filter"></i> Lọc</button>
             </div>
+
+            <!-- Các nút lọc nhanh -->
+            <div class="col-auto ms-auto d-flex flex-wrap gap-2">
+                <a href="?filter=today" class="btn btn-outline-success <?php if($filter=='today') echo 'active'; ?>">Hôm nay</a>
+                <a href="?filter=12months" class="btn btn-outline-success <?php if($filter=='12months') echo 'active'; ?>">12 tháng gần nhất</a>
+
+                <!-- Năm -->
+                <div class="dropdown">
+                    <button class="btn btn-outline-success dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                        Năm <?php echo $selectedYear; ?>
+                    </button>
+                    <ul class="dropdown-menu">
+                        <?php for ($y = $currentYear; $y >= $currentYear - 5; $y--): ?>
+                            <li><a class="dropdown-item" href="?filter=year&year=<?php echo $y; ?>">Năm <?php echo $y; ?></a></li>
+                        <?php endfor; ?>
+                    </ul>
+                </div>
+
+                <!-- Tháng -->
+                <div class="dropdown">
+                    <button class="btn btn-outline-success dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                        Tháng <?php echo $selectedMonth ?: $currentMonth; ?>
+                    </button>
+                    <ul class="dropdown-menu">
+                        <?php for ($m = 1; $m <= 12; $m++): ?>
+                            <li>
+                                <a class="dropdown-item" href="?filter=month&year=<?php echo $selectedYear; ?>&month=<?php echo $m; ?>">
+                                    Tháng <?php echo $m; ?>/<?php echo $selectedYear; ?>
+                                </a>
+                            </li>
+                        <?php endfor; ?>
+                    </ul>
+                </div>
+            </div>
         </form>
+
+        <h5 class="text-center text-success fw-bold mb-3"><?php echo $title; ?></h5>
 
         <!-- Biểu đồ -->
         <div class="mt-5">
@@ -306,10 +360,11 @@ $tong = mysqli_fetch_assoc(mysqli_query($ketnoi, $sql_tong))["TongDoanhThu"] ?? 
 
         const ctx = document.getElementById('revenueChart').getContext('2d');
         new Chart(ctx, {
-            type: 'bar', // Có thể đổi sang 'line'
+            type: 'bar',
             data: {
-                labels: labels,
-                datasets: [{
+                labels,
+                datasets: [
+                    {
                         label: 'Doanh thu (VNĐ)',
                         data: doanhThu,
                         backgroundColor: 'rgba(40,167,69,0.6)',
@@ -328,28 +383,19 @@ $tong = mysqli_fetch_assoc(mysqli_query($ketnoi, $sql_tong))["TongDoanhThu"] ?? 
             },
             options: {
                 responsive: true,
-                interaction: {
-                    mode: 'index',
-                    intersect: false
-                },
+                interaction: { mode: 'index', intersect: false },
                 stacked: false,
                 plugins: {
                     title: {
                         display: true,
                         text: 'Biểu đồ doanh thu & số lượng bán theo ngày',
-                        font: {
-                            size: 18
-                        }
+                        font: { size: 18 }
                     },
                     tooltip: {
                         callbacks: {
-                            label: function(context) {
-                                let value = context.parsed.y;
-                                if (context.dataset.label.includes('Doanh thu')) {
-                                    return value.toLocaleString('vi-VN') + '₫';
-                                }
-                                return value;
-                            }
+                            label: ctx => ctx.dataset.label.includes('Doanh thu')
+                                ? ctx.parsed.y.toLocaleString('vi-VN') + '₫'
+                                : ctx.parsed.y
                         }
                     }
                 },
@@ -357,24 +403,14 @@ $tong = mysqli_fetch_assoc(mysqli_query($ketnoi, $sql_tong))["TongDoanhThu"] ?? 
                     y: {
                         type: 'linear',
                         position: 'left',
-                        title: {
-                            display: true,
-                            text: 'Doanh thu (VNĐ)'
-                        },
-                        ticks: {
-                            callback: val => val.toLocaleString('vi-VN')
-                        }
+                        title: { display: true, text: 'Doanh thu (VNĐ)' },
+                        ticks: { callback: val => val.toLocaleString('vi-VN') }
                     },
                     y1: {
                         type: 'linear',
                         position: 'right',
-                        title: {
-                            display: true,
-                            text: 'Số lượng bán'
-                        },
-                        grid: {
-                            drawOnChartArea: false
-                        }
+                        title: { display: true, text: 'Số lượng bán' },
+                        grid: { drawOnChartArea: false }
                     }
                 }
             }
