@@ -222,8 +222,8 @@
                                     <i class="fa-solid fa-box"></i> Thống kê sản phẩm
                                 </a>
                                 <ul class="dropdown-menu">
-                                    <li><a class="dropdown-item" href="#"><i class="fa-solid fa-fire"></i> Sản phẩm bán chạy</a></li>
-                                    <li><a class="dropdown-item" href="#"><i class="fa-solid fa-layer-group"></i> Loại sản phẩm bán chạy</a></li>
+                                    <li><a class="dropdown-item" href="/admin/view/best_selling_product.php"><i class="fa-solid fa-fire"></i> Sản phẩm bán chạy</a></li>
+                                    <li><a class="dropdown-item" href="/admin/view/best_selling_category.php"><i class="fa-solid fa-layer-group"></i> Loại sản phẩm bán chạy</a></li>
                                     <li><a class="dropdown-item" href="#"><i class="fa-solid fa-box-open"></i> Tồn kho sản phẩm</a></li>
                                     <li><a class="dropdown-item" href="#"><i class="fa-solid fa-exclamation-triangle"></i> Sản phẩm sắp hết hàng</a></li>
                                 </ul>
@@ -235,8 +235,8 @@
                                     <i class="fa-solid fa-money-bill-wave"></i> Thống kê doanh thu
                                 </a>
                                 <ul class="dropdown-menu">
-                                    <li><a class="dropdown-item" href="#"><i class="fa-solid fa-table"></i> Doanh thu theo số liệu</a></li>
-                                    <li><a class="dropdown-item" href="#"><i class="fa-solid fa-chart-bar"></i> Doanh thu theo biểu đồ</a></li>
+                                    <li><a class="dropdown-item" href="/admin/view/revenue_statistic_table.php"><i class="fa-solid fa-table"></i> Doanh thu theo số liệu</a></li>
+                                    <li><a class="dropdown-item" href="/admin/view/revenue_statistic_chart.php"><i class="fa-solid fa-chart-bar"></i> Doanh thu theo biểu đồ</a></li>
                                 </ul>
                             </li>
 
