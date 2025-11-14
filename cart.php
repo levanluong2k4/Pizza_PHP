@@ -4,7 +4,9 @@
 session_start();
 $ketnoi = mysqli_connect("localhost", "root", "", "php_pizza");
 mysqli_set_charset($ketnoi, "utf8");
-$user_id = $_SESSION['user_id'];
+if(isset($_SESSION['user_id'])){
+    $user_id = $_SESSION['user_id'];
+}
 echo '<pre>';
 print_r($_SESSION);
 print_r($_POST);
@@ -68,13 +70,8 @@ $_SESSION['temp_so_nha'] = $so_nha !== '' ? $so_nha : ($_SESSION['temp_so_nha'] 
 $_SESSION['temp_province'] = $province_name ?? ($_SESSION['temp_province'] ?? '');
 $_SESSION['temp_district'] = $district_name ?? ($_SESSION['temp_district'] ?? '');
 $_SESSION['temp_ward'] = $ward_name !== '' ? $ward_name : ($_SESSION['temp_ward'] ?? '');
-// Nếu client gửi chuỗi diachi (hidden), ưu tiên dùng chuỗi đó; nếu rỗng, ghép từ các phần
-if (!empty($diachi_full)) {
-    $_SESSION['temp_diachi'] = $diachi_full;
-} else {
-    $parts = array_filter([$so_nha, $ward_name, $district_name, $province_name]);
-    $_SESSION['temp_diachi'] = implode(', ', $parts);
-}
+$_SESSION['temp_diachi'] =$_SESSION['temp_so_nha'].",".$_SESSION['temp_ward'].",".$_SESSION['temp_district'].",".$_SESSION['temp_province'] ;
+
 
 // Kiểm tra thiếu thông tin (dùng để disable nút đặt hàng)
 $thieuThongTin = empty($_SESSION['temp_hoten']) || empty($_SESSION['temp_sodt']) || empty($_SESSION['temp_so_nha']) || empty($_SESSION['temp_province'])|| empty($_SESSION['temp_district'])|| empty($_SESSION['temp_ward']);
@@ -226,14 +223,15 @@ else {
 mysqli_close($ketnoi);
 ?>
 <?php if ($updateMessage): ?>
-    <div class="alert alert-<?php echo $saved ? 'success' : 'danger'; ?>">
-        <?php echo $updateMessage; ?>
-    </div>
+<div class="alert alert-<?php echo $saved ? 'success' : 'danger'; ?>">
+    <?php echo $updateMessage; ?>
+</div>
 <?php endif; ?>
 
 
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <title>Giỏ hàng - Pizza</title>
     <meta charset="utf-8" />
@@ -253,91 +251,91 @@ mysqli_close($ketnoi);
     <header class="bg-icon pt-5">
         <?php include 'components/navbar.php'; ?>
 
-        
-    <main class="container my-5">
-        <h2 class="text-center mb-4">Giỏ hàng của bạn</h2>
 
-        <?php if (empty($cartItems)): ?>
-        <div class="text-center">
-            <img src="./img/cart.png" alt=""style="width: 150px; height: 150px; object-fit: contain;">
-            <h4>Giỏ hàng của bạn đang trống</h4>
-            <p class="text-muted">Hãy thêm một số sản phẩm vào giỏ hàng để tiếp tục mua sắm</p>
-            <a href="trangchu.php" class="btn btn-outline-success">Tiếp tục mua sắm</a>
-        </div>
+        <main class="container my-5">
+            <h2 class="text-center mb-4">Giỏ hàng của bạn</h2>
 
-
-
-
-        <?php else: ?>
-        <div class="row">
-            <div class="col-lg-8">
-                <div class="card">
-                    <div class="card-header">
-                        <h5 class="mb-0">Sản phẩm trong giỏ hàng (<?php echo count($cartItems); ?> sản phẩm)</h5>
-                    </div>
-                    <div class="card-body scrollable-menu" style="max-height: 500px; overflow-y: auto;">
-                      <?php foreach ($cartItems as $item): ?>
-<div class="row cart-item mb-3 pb-3 border-bottom align-items-center" 
-     id="cart-item-<?php echo $item['masp']; ?>-<?php echo $item['size_id']; ?>">
-    <div class="col-md-2">
-        <img src="<?php echo $item['anh']; ?>" class="img-fluid rounded" alt="<?php echo $item['tensp']; ?>">
-    </div>
-    <div class="col-md-4">
-        <h6><?php echo $item['tensp']; ?></h6>
-        <p class="text-muted mb-1">Size: <?php echo $item['tensize']; ?></p>
-        <p class="text-success mb-0"><?php echo number_format($item['price']); ?> VNĐ</p>
-    </div>
-    <div class="col-md-3">
-        <div class="input-group">
-            <!-- ❌ XÓA CÁC THẺ <a> CŨ VÀ THAY BẰNG <button> -->
-            <button type="button" class="btn btn-outline-secondary btn-sm btn-update-cart" 
-                    data-masp="<?php echo $item['masp']; ?>"
-                    data-masize="<?php echo $item['size_id']; ?>"
-                    data-type="decrease">
-                -
-            </button>
-            <input type="number" class="form-control form-control-sm text-center quantity-display" 
-                   value="<?php echo $item['quantity']; ?>" min="1" readonly>
-            <button type="button" class="btn btn-outline-secondary btn-sm btn-update-cart"
-                    data-masp="<?php echo $item['masp']; ?>"
-                    data-masize="<?php echo $item['size_id']; ?>"
-                    data-type="increase">
-                +
-            </button>
-        </div>
-    </div>
-    <div class="col-md-2">
-        <p class="mb-0 subtotal-display">
-            <strong><?php echo number_format($item['subtotal']); ?> VNĐ</strong>
-        </p>
-    </div>
-    <div class="col-md-1">
-        <!-- ❌ XÓA THẺ <a> CŨ VÀ THAY BẰNG <button> -->
-        <button type="button" class="btn btn-danger btn-sm btn-delete-cart" 
-                data-masp="<?php echo $item['masp']; ?>"
-                data-masize="<?php echo $item['size_id']; ?>">
-            <i class="fas fa-trash"></i>
-        </button>
-    </div>
-</div>
-<?php endforeach; ?>
-                    </div>
-                </div>
+            <?php if (empty($cartItems)): ?>
+            <div class="text-center">
+                <img src="./img/cart.png" alt="" style="width: 150px; height: 150px; object-fit: contain;">
+                <h4>Giỏ hàng của bạn đang trống</h4>
+                <p class="text-muted">Hãy thêm một số sản phẩm vào giỏ hàng để tiếp tục mua sắm</p>
+                <a href="trangchu.php" class="btn btn-outline-success">Tiếp tục mua sắm</a>
             </div>
 
-            <div class="col-lg-4">
-                <div class="card">
-                    <div class="card-header">
-                        <h5 class="mb-0">Thông tin người nhận</h5>
-                    </div>
-                    <div class="card-body">
 
-                         <form method="POST" action="">
-                            <!-- Tên người nhận -->
-                            <div class="d-flex justify-content-between align-items-center mb-3">
-                                <span style="min-width: 150px;">Tên người nhận</span>
-                                <span id="hoten_display" style="flex: 1; text-align: center;">
-                                    <?php 
+
+
+            <?php else: ?>
+            <div class="row">
+                <div class="col-lg-8">
+                    <div class="card">
+                        <div class="card-header">
+                            <h5 class="mb-0">Sản phẩm trong giỏ hàng (<?php echo count($cartItems); ?> sản phẩm)</h5>
+                        </div>
+                        <div class="card-body scrollable-menu" style="max-height: 500px; overflow-y: auto;">
+                            <?php foreach ($cartItems as $item): ?>
+                            <div class="row cart-item mb-3 pb-3 border-bottom align-items-center"
+                                id="cart-item-<?php echo $item['masp']; ?>-<?php echo $item['size_id']; ?>">
+                                <div class="col-md-2">
+                                    <img src="<?php echo $item['anh']; ?>" class="img-fluid rounded"
+                                        alt="<?php echo $item['tensp']; ?>">
+                                </div>
+                                <div class="col-md-4">
+                                    <h6><?php echo $item['tensp']; ?></h6>
+                                    <p class="text-muted mb-1">Size: <?php echo $item['tensize']; ?></p>
+                                    <p class="text-success mb-0"><?php echo number_format($item['price']); ?> VNĐ</p>
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="input-group">
+                                        <!-- ❌ XÓA CÁC THẺ <a> CŨ VÀ THAY BẰNG <button> -->
+                                        <button type="button" class="btn btn-outline-secondary btn-sm btn-update-cart"
+                                            data-masp="<?php echo $item['masp']; ?>"
+                                            data-masize="<?php echo $item['size_id']; ?>" data-type="decrease">
+                                            -
+                                        </button>
+                                        <input type="number"
+                                            class="form-control form-control-sm text-center quantity-display"
+                                            value="<?php echo $item['quantity']; ?>" min="1" readonly>
+                                        <button type="button" class="btn btn-outline-secondary btn-sm btn-update-cart"
+                                            data-masp="<?php echo $item['masp']; ?>"
+                                            data-masize="<?php echo $item['size_id']; ?>" data-type="increase">
+                                            +
+                                        </button>
+                                    </div>
+                                </div>
+                                <div class="col-md-2">
+                                    <p class="mb-0 subtotal-display">
+                                        <strong><?php echo number_format($item['subtotal']); ?> VNĐ</strong>
+                                    </p>
+                                </div>
+                                <div class="col-md-1">
+                                    <!-- ❌ XÓA THẺ <a> CŨ VÀ THAY BẰNG <button> -->
+                                    <button type="button" class="btn btn-danger btn-sm btn-delete-cart"
+                                        data-masp="<?php echo $item['masp']; ?>"
+                                        data-masize="<?php echo $item['size_id']; ?>">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                </div>
+                            </div>
+                            <?php endforeach; ?>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-lg-4">
+                    <div class="card">
+                        <div class="card-header">
+                            <h5 class="mb-0">Thông tin người nhận</h5>
+                        </div>
+                        <div class="card-body">
+
+                            <form method="POST" action="">
+                                <!-- Tên người nhận -->
+                                <div class="d-flex justify-content-between align-items-center mb-3">
+                                    <span style="min-width: 150px;">Tên người nhận</span>
+                                    <span id="hoten_display" style="flex: 1; text-align: center;">
+                                        <?php 
                                    if(isset($_SESSION['temp_hoten'])){
                                         echo htmlspecialchars($_SESSION['temp_hoten']);
                                     }
@@ -345,106 +343,163 @@ mysqli_close($ketnoi);
                                         echo "<span class='text-danger'>Vui lòng nhập tên người nhận</span>";
                                     }
                                     ?>
-                                </span>
-                                <input type="text" name="hoten" id="hoten_input" class="form-control mx-2" value="<?php echo isset($_SESSION['temp_hoten']) ? htmlspecialchars($_SESSION['temp_hoten']) : ''; ?>" style="display: none; flex: 1;">
-                                <i class="fa-solid fa-pen-to-square edit-btn" style="color: #30d952; cursor: pointer;" data-field="hoten"></i>
-                            </div>
+                                    </span>
+                                    <input type="text" name="hoten" id="hoten_input" class="form-control mx-2"
+                                        value="<?php echo isset($_SESSION['temp_hoten']) ? htmlspecialchars($_SESSION['temp_hoten']) : ''; ?>"
+                                        style="display: none; flex: 1;">
+                                    <i class="fa-solid fa-pen-to-square edit-btn"
+                                        style="color: #30d952; cursor: pointer;" data-field="hoten"></i>
+                                </div>
 
-                            <!-- Số điện thoại -->
-                            <div class="d-flex justify-content-between align-items-center mb-3">
-                                <span style="min-width: 150px;">Số điện thoại</span>
-                                <span id="sodt_display" style="flex: 1; text-align: center;">
-                                    <?php 
+                                <!-- Số điện thoại -->
+                                <div class="d-flex justify-content-between align-items-center mb-3">
+                                    <span style="min-width: 150px;">Số điện thoại</span>
+                                    <span id="sodt_display" style="flex: 1; text-align: center;">
+                                        <?php 
                                     if(isset($_SESSION['temp_sodt'])){
                                         echo htmlspecialchars($_SESSION['temp_sodt']);
                                     } else {
                                         echo "<span class='text-danger'>Vui lòng nhập số điện thoại</span>";
                                     }
                                     ?>
-                                </span>
-                                <input 
-                                oninput="this.value = this.value.replace(/[^0-9]/g, '')"
-                                type="number" maxlenght='10' name="sodt" id="sodt_input" class="form-control mx-2" value="<?php echo isset($_SESSION['temp_sodt']) ? htmlspecialchars($_SESSION['temp_sodt']) : ''; ?>" style="display: none; flex: 1;">
-                                <i class="fa-solid fa-pen-to-square edit-btn" style="color: #30d952; cursor: pointer;" data-field="sodt"></i>
-                            </div>
+                                    </span>
+                                    <input oninput="this.value = this.value.replace(/[^0-9]/g, '')" type="number"
+                                        maxlenght='10' name="sodt" id="sodt_input" class="form-control mx-2"
+                                        value="<?php echo isset($_SESSION['temp_sodt']) ? htmlspecialchars($_SESSION['temp_sodt']) : ''; ?>"
+                                        style="display: none; flex: 1;">
+                                    <i class="fa-solid fa-pen-to-square edit-btn"
+                                        style="color: #30d952; cursor: pointer;" data-field="sodt"></i>
+                                </div>
 
-                            <!-- Địa chỉ -->
-                            <div class="flex-column justify-content-between align-items-center mb-3">
-                                <span style="min-width: 150px;">Địa chỉ</span>
-                                <div id="address_container" style="flex: 1; text-align: center;">
-                                    <div class="d-flex gap-2 mb-2">
-                                        <select name="province" id="province" class="form-select" style="flex: 1;">
-                                            <option value="">-- Chọn Tỉnh/Thành phố --</option>
-                                        </select>
-                                        <select name="district" id="district" class="form-select" style="flex: 1;" disabled>
-                                            <option value="">-- Chọn Quận/Huyện --</option>
-                                        </select>
-                                        <select name="ward" id="ward" class="form-select" style="flex: 1;" disabled>
-                                            <option value="">-- Chọn Xã/Phường --</option>
-                                        </select>
+                                <!-- Địa chỉ -->
+                                <div class="flex-column justify-content-between align-items-center mb-3">
+                                    <span style="min-width: 150px;">Địa chỉ</span>
+                                    <div id="address_container" style="flex: 1; text-align: center;">
+                                        <div class="d-flex gap-2 mb-2">
+                                            <select name="province" id="province" class="form-select" style="flex: 1;">
+                                                <option value="">-- Chọn Tỉnh/Thành phố --</option>
+                                            </select>
+                                            <select name="district" id="district" class="form-select" style="flex: 1;"
+                                                disabled>
+                                                <option value="">-- Chọn Quận/Huyện --</option>
+                                            </select>
+                                            <select name="ward" id="ward" class="form-select" style="flex: 1;" disabled>
+                                                <option value="">-- Chọn Xã/Phường --</option>
+                                            </select>
+                                        </div>
+
+                                        <input type="text" id="so_nha_input" name="so_nha"
+                                            placeholder="Nhập số nhà, tên đường..." class="form-control mb-2"
+                                            value="<?php echo isset($_SESSION['temp_so_nha']) ? $_SESSION['temp_so_nha'] : ''; ?>" />
+
+                                        <input type="hidden" name="diachi" id="diachi_input"
+                                            value="<?php echo isset($_SESSION['temp_diachi']) ? $_SESSION['temp_diachi'] : ''; ?>">
+
+                                        <p id="full_address" class="text-muted mt-2">
+                                            <?php echo isset($_SESSION['temp_diachi']) ? "🏠 " . $_SESSION['temp_diachi'] : ''; ?>
+                                        </p>
+                                    </div>
+                                </div>
+
+                                <div class="d-flex justify-content-end">
+                                    <button type="submit" name="save_address" id="saveBtn" class="btn btn-success"
+                                        style="width:100%; <?php echo $saved ? 'display:none;' : ''; ?>">
+                                        <i class="fa-solid fa-floppy-disk"></i> Lưu thông tin
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+
+                    <hr>
+
+                    <div class="card">
+                        <div class="card-header">
+                            <h5 class="mb-0">Tổng kết đơn hàng</h5>
+                        </div>
+                        <div class="card-body">
+                            <form action="./cart/process_order.php" method="post">
+                                <div class="d-flex justify-content-between mb-2">
+                                    <span>Tạm tính:</span>
+                                    <span class="total-amount"><?php echo number_format($tongtien); ?> VNĐ</span>
+                                </div>
+                                <div class="d-flex justify-content-between mb-2">
+                                    <span>Phí vận chuyển:</span>
+                                    <span class="text-success">Miễn phí</span>
+                                </div>
+                                <hr>
+                                <div class="d-flex justify-content-between mb-3">
+                                    <strong>Tổng cộng:</strong>
+                                    <strong class="text-danger total-amount"><?php echo number_format($tongtien); ?>
+                                        VNĐ</strong>
+                                </div>
+
+                                <!-- Phương thức thanh toán -->
+                                <div class="mb-3">
+                                    <label class="form-label"><strong>Phương thức thanh toán:</strong></label>
+
+                                    <!-- Tiền mặt -->
+                                    <div class="form-check mb-2">
+                                        <input class="form-check-input" type="radio" name="payment_method" id="cash"
+                                            value="Tiền mặt" checked>
+                                        <label class="form-check-label" for="cash">
+                                            <i class="fas fa-money-bill-wave text-success"></i> Thanh toán tiền mặt khi
+                                            nhận hàng (COD)
+                                        </label>
                                     </div>
 
-                                    <input type="text" id="so_nha_input" name="so_nha" placeholder="Nhập số nhà, tên đường..." class="form-control mb-2" value="<?php echo isset($_SESSION['temp_so_nha']) ? $_SESSION['temp_so_nha'] : ''; ?>" />
-                                    
-                                    <input type="hidden" name="diachi" id="diachi_input" value="<?php echo isset($_SESSION['temp_diachi']) ? $_SESSION['temp_diachi'] : ''; ?>">
+                                    <!-- Chuyển khoản -->
+                                    <div class="form-check mb-2">
+                                        <input class="form-check-input" type="radio" name="payment_method" id="transfer"
+                                            value="Chuyển khoản">
+                                        <label class="form-check-label" for="transfer">
+                                            <i class="fas fa-credit-card text-primary"></i> Chuyển khoản ngân hàng
+                                        </label>
+                                    </div>
 
-                                    <p id="full_address" class="text-muted mt-2">
-                                        <?php echo isset($_SESSION['temp_diachi']) ? "🏠 " . $_SESSION['temp_diachi'] : ''; ?>
-                                    </p>
+                                    <!-- Tùy chọn chuyển khoản (ẩn mặc định) -->
+                                    <div id="transfer-options" class="ms-4 mt-2" style="display: none;">
+                                        <div class="form-check mb-2">
+                                            <input class="form-check-input" type="radio" name="transfer_method"
+                                                id="momo" value="momo"  >
+                                            <label class="form-check-label" for="momo">
+                                                <img src="https://upload.wikimedia.org/wikipedia/vi/f/fe/MoMo_Logo.png"
+                                                    alt="MoMo" style="height: 20px; vertical-align: middle;"> MoMo
+                                            </label>
+                                        </div>
+                                        <div class="form-check mb-2">
+                                            <input class="form-check-input" type="radio" name="transfer_method"
+                                                id="vnpay" value="vnpay">
+                                            <label class="form-check-label" for="vnpay">
+                                                <img src="https://vnpay.vn/s1/statics.vnpay.vn/2023/6/0oxhzjmxbksr1686814746087.png"
+                                                    alt="VNPay" style="height: 20px; vertical-align: middle;"> VNPay
+                                            </label>
+                                        </div>
+                                    </div>
                                 </div>
-                            </div>
-                            
-                            <div class="d-flex justify-content-end">
-                                <button type="submit" name="save_address" id="saveBtn" class="btn btn-success" style="width:100%; <?php echo $saved ? 'display:none;' : ''; ?>">
-                                    <i class="fa-solid fa-floppy-disk"></i> Lưu thông tin
+
+                                <hr>
+
+                                <button name="order" type="submit"
+                                    class="btn btn-success w-100 mb-2 <?php echo $thieuThongTin && isset($_SESSION['user_id']) ? 'disabled' : ''; ?>"
+                                    <?php echo $thieuThongTin && isset($_SESSION['user_id']) ? 'style="opacity:0.5; pointer-events:none;"' : ''; ?>>
+                                    <i class="fas fa-shopping-bag"></i> Đặt hàng
                                 </button>
-                            </div>
-                       </form>
-                      </div>
-                </div>
 
-                <hr>
-
-                <div class="card">
-                    <div class="card-header">
-                        <h5 class="mb-0">Tổng kết đơn hàng</h5>
-                    </div>
-                    <div class="card-body ">
-                        <form action="./cart/process_order.php" method="post">
-                        <div class="d-flex justify-content-between mb-2">
-                            <span>Tạm tính:</span>
-                            <span class="total-amount"><?php echo number_format($tongtien); ?> VNĐ</span>
+                                <?php if(!isset($_SESSION['user_id'])): ?>
+                                <button name="order_guest" type="submit"
+                                    class="btn btn-warning order-guest w-100 mb-2 <?php echo $thieuThongTin ? 'disabled' : ''; ?>"
+                                    <?php echo $thieuThongTin ? 'style="opacity:0.5; pointer-events:none;"' : ''; ?>>
+                                    <i class="fas fa-shopping-bag"></i> Đặt hàng không cần đăng nhập
+                                </button>
+                                <?php endif; ?>
+                            </form>
                         </div>
-                        <div class="d-flex justify-content-between mb-2">
-                            <span>Phí vận chuyển:</span>
-                            <span class="text-success">Miễn phí</span>
-                        </div>
-                        <hr>
-                        <div class="d-flex justify-content-between mb-3">
-                            <strong>Tổng cộng:</strong>
-                            <strong class="text-danger total-amount" id=""><?php echo number_format($tongtien); ?> VNĐ</strong>
-                        </div>
-                        
-                        <button name="order" type="submit"  
-                           class="btn btn-success w-100 mb-2 <?php echo $thieuThongTin && isset($_SESSION['user_id']) ? 'disabled' : ''; ?>"
-                           <?php echo $thieuThongTin && isset($_SESSION['user_id']) ? 'style="opacity:0.5; pointer-events:none;"' : ''; ?>>
-                            <i class="fas fa-shopping-bag"></i> Đặt hàng
-                        </button>
-
-                        <?php if(!isset($_SESSION['user_id'])): ?>
-                        <button name="order_guest" type="submit" 
-                           class="btn btn-warning order-guest w-100 mb-2 <?php echo $thieuThongTin ? 'disabled' : ''; ?>"
-                           <?php echo $thieuThongTin ? 'style="opacity:0.5; pointer-events:none;"' : ''; ?>>
-                            <i class="fas fa-shopping-bag"></i> Đặt hàng không cần đăng nhập
-                        </button>
-                        <?php endif; ?>
-                        </form>
                     </div>
                 </div>
             </div>
-        </div>
-        <?php endif; ?>
-    </main>
+            <?php endif; ?>
+        </main>
     </header>
 
 
@@ -486,9 +541,9 @@ mysqli_close($ketnoi);
                     this.classList.remove('fa-pen-to-square');
                     this.classList.add('fa-check');
                     this.style.color = '#ffc107';
-                }
-                else {
-                    display.textContent = input.value || (field === 'hoten' ? 'Vui lòng nhập tên người nhận' : 'Vui lòng nhập số điện thoại');
+                } else {
+                    display.textContent = input.value || (field === 'hoten' ?
+                        'Vui lòng nhập tên người nhận' : 'Vui lòng nhập số điện thoại');
 
                     display.style.display = 'block';
                     input.style.display = 'none';
@@ -508,44 +563,66 @@ mysqli_close($ketnoi);
         });
     });
     </script>
-    
+
     <script>
-const oldAddress = <?php echo json_encode($_SESSION['old_address'] ?? []); ?>;
+    const oldAddress = <?php echo json_encode($_SESSION['old_address'] ?? []); ?>;
 
-window.addEventListener('load', function() {
-    if (oldAddress.province) {
-        document.getElementById('province').value = oldAddress.province;
-        const event = new Event('change');
-        document.getElementById('province').dispatchEvent(event);
+    window.addEventListener('load', function() {
+        if (oldAddress.province) {
+            document.getElementById('province').value = oldAddress.province;
+            const event = new Event('change');
+            document.getElementById('province').dispatchEvent(event);
 
-        if (oldAddress.district) {
-            setTimeout(() => {
-                document.getElementById('district').value = oldAddress.district;
-                const eventDistrict = new Event('change');
-                document.getElementById('district').dispatchEvent(eventDistrict);
+            if (oldAddress.district) {
+                setTimeout(() => {
+                    document.getElementById('district').value = oldAddress.district;
+                    const eventDistrict = new Event('change');
+                    document.getElementById('district').dispatchEvent(eventDistrict);
 
-                if (oldAddress.ward) {
-                    setTimeout(() => {
-                        document.getElementById('ward').value = oldAddress.ward;
-                    }, 500);
-                }
-            }, 500);
+                    if (oldAddress.ward) {
+                        setTimeout(() => {
+                            document.getElementById('ward').value = oldAddress.ward;
+                        }, 500);
+                    }
+                }, 500);
+            }
         }
-    }
+    });
+    </script>
+ <script>
+// JavaScript để hiển thị/ẩn tùy chọn chuyển khoản
+document.addEventListener('DOMContentLoaded', function() {
+    const cashRadio = document.getElementById('cash');
+    const transferRadio = document.getElementById('transfer');
+    const transferOptions = document.getElementById('transfer-options');
+    const momoRadio = document.getElementById('momo');
+    const vnpayRadio = document.getElementById('vnpay');
+
+    // Lắng nghe sự thay đổi phương thức thanh toán
+    transferRadio.addEventListener('change', function() {
+        if (this.checked) {
+            transferOptions.style.display = 'block';
+            // Tự động chọn MoMo làm mặc định
+            momoRadio.checked = true;
+        }
+    });
+
+    cashRadio.addEventListener('change', function() {
+        if (this.checked) {
+            transferOptions.style.display = 'none';
+            // Bỏ chọn các phương thức chuyển khoản
+            momoRadio.checked = false;
+            vnpayRadio.checked = false;
+        }
+    });
 });
-
-
-
-
-
-
-
 </script>
 
 
 
-  <script src="./js/cart.js"></script>
+    <script src="./js/cart.js"></script>
     <script src="./API/api_address.js"></script>
 
 </body>
+
 </html>

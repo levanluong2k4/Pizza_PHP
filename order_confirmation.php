@@ -1,10 +1,35 @@
 <?php 
+session_start();
+require "includes/db_connect.php";
 
-$order_id=$_GET['order_id'] ?? null;
+$order_id = $_GET['order_id'] ?? null;
+$order_id = str_replace("'", "", $order_id); // hoặc trim($order_id, "'")
+
+
 if(!isset($_GET['order_id'])){
     header("Location: trangchu.php");
     exit();
 } 
+
+// Lấy thông tin đơn hàng từ database
+$sql = "SELECT phuongthucthanhtoan, trangthaithanhtoan FROM donhang WHERE MaDHcode = '$order_id'";
+$result = mysqli_query($ketnoi, $sql);
+$order = mysqli_fetch_assoc($result);
+
+$phuongthucchuyenkhoan = $order['phuongthucthanhtoan'] ;
+$payment_status = $order['trangthaithanhtoan'];
+
+// Xác định trạng thái thanh toán
+if ($phuongthucchuyenkhoan == 'Chuyển khoản') {
+    $trangthaithanhtoan = ($payment_status == 'Chưa thanh toán') ? 'Đã thanh toán' : 'Chưa thanh toán';
+    $status_class = ($payment_status == 'Chưa thanh toán') ? 'success' : 'warning';
+} else {
+    $trangthaithanhtoan = 'Chưa thanh toán';
+    $status_class = 'info';
+}
+
+// Tên phương thức thanh toán
+$payment_method_name = ($phuongthucchuyenkhoan == 'Chuyển khoản') ? 'Chuyển khoản (MoMo)' : 'Tiền mặt (COD)';
 
 ?>
 
@@ -36,19 +61,55 @@ if(!isset($_GET['order_id'])){
         integrity="sha512-SnH5WK+bZxgPHs44uWIX+LLJAJ9/2PkPKZ5QiAj6Ta86w+fsb2TkcmfRyVX3pBnMFcV7oQPJkl9QevSCWr3W6A=="
         crossorigin="anonymous" referrerpolicy="no-referrer" />
 
-
+    <style>
+        .payment-info {
+            background: #f8f9fa;
+            border-radius: 8px;
+            padding: 15px;
+            margin: 20px 0;
+        }
+        .payment-info .row {
+            margin-bottom: 10px;
+        }
+        .payment-info .label {
+            font-weight: 600;
+            color: #495057;
+        }
+        .payment-info .value {
+            color: #212529;
+        }
+        .badge-success {
+            background-color: #28a745;
+            color: white;
+            padding: 5px 12px;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+        .badge-warning {
+            background-color: #ffc107;
+            color: #212529;
+            padding: 5px 12px;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+        .badge-info {
+            background-color: #17a2b8;
+            color: white;
+            padding: 5px 12px;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+    </style>
 </head>
 
 <body>
     <header class="bg-icon">
         <?php include 'components/navbar.php'; ?>
 
-
     <div class="row">
          
-  <div class="order-success" role="status" aria-live="polite"  >
-    <div class="success-badge" style="padding: ; " aria-hidden="true">
-
+  <div class="order-success" role="status" aria-live="polite">
+    <div class="success-badge" style="padding: ;" aria-hidden="true">
       <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
         <circle cx="12" cy="12" r="11" stroke="rgba(34,197,94,0.25)" stroke-width="2"/>
         <path d="M7.5 12.5l2.5 2.5 6-7" stroke="#16a34a" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
@@ -63,6 +124,49 @@ if(!isset($_GET['order_id'])){
         <div class="chip">Mã đơn hàng: <strong>#<?=htmlspecialchars($order_id)?></strong></div>
         <div class="chip">Trạng thái: Đang xử lý</div>
       </div>
+
+      <!-- Thông tin thanh toán -->
+      <div class="payment-info">
+        <div class="row">
+          <div class="col-6 label">
+            <i class="fas fa-credit-card me-2"></i>Phương thức thanh toán:
+          </div>
+          <div class="col-6 value text-end">
+            <strong><?= $payment_method_name ?></strong>
+          </div>
+        </div>
+        <div class="row">
+          <div class="col-6 label">
+            <i class="fas fa-check-circle me-2"></i>Trạng thái thanh toán:
+          </div>
+          <div class="col-6 value text-end">
+            <span class="badge-<?= $status_class ?>">
+              <?= $trangthaithanhtoan ?>
+            </span>
+          </div>
+        </div>
+        
+        <?php if ($phuongthucchuyenkhoan == 'transfer' && $payment_status == 'paid'): ?>
+        <div class="row mt-2">
+          <div class="col-12 text-center">
+            <small class="text-success">
+              <i class="fas fa-info-circle"></i> 
+              Giao dịch đã được xác nhận thành công qua MoMo
+            </small>
+          </div>
+        </div>
+        <?php elseif ($phuongthucchuyenkhoan == 'cash'): ?>
+        <div class="row mt-2">
+          <div class="col-12 text-center">
+            <small class="text-info">
+              <i class="fas fa-info-circle"></i> 
+              Vui lòng thanh toán khi nhận hàng
+            </small>
+          </div>
+        </div>
+        <?php endif; ?>
+      </div>
+
     <?php else: ?>
       <div class="order-info">
         <div class="chip">Mã đơn hàng: <strong>Không xác định</strong></div>
@@ -71,16 +175,10 @@ if(!isset($_GET['order_id'])){
 
     <div class="actions">
       <a class="btn btn-primary" href="trangchu.php">Tiếp tục mua sắm</a>
-      <?php if(isset($_SESSION['is_guest'])&&$_SESSION['is_guest']==1):
-            
-       ?>
+      <?php if(isset($_SESSION['is_guest']) && $_SESSION['is_guest']==1): ?>
         <a class="btn btn-ghost" href="search_order.php">Tra cứu đơn hàng</a>
-      <?php
-      else :
-        
-      
-      ?>
-      <a class="btn btn-ghost" href="order_user.php">Xem lịch sử đơn hàng</a>
+      <?php else: ?>
+        <a class="btn btn-ghost" href="order_user.php">Xem lịch sử đơn hàng</a>
       <?php endif; ?>
     </div>
 
@@ -89,7 +187,6 @@ if(!isset($_GET['order_id'])){
         </div>
 
     </header>
-
 
     <?php include './components/footer.php'; ?>
 
@@ -136,21 +233,16 @@ if(!isset($_GET['order_id'])){
     });
     </script>
 
-   
- 
-
-
- 
-   <script>
-          document.addEventListener("DOMContentLoaded", function() {
+    <script>
+    document.addEventListener("DOMContentLoaded", function() {
         const urlParams = new URLSearchParams(window.location.search);
         if (urlParams.has('id')) {
-            
             const modal = new bootstrap.Modal(document.getElementById('sizeModal'));
             modal.show();
         }
     });
-   document.addEventListener("DOMContentLoaded", function() {
+
+    document.addEventListener("DOMContentLoaded", function() {
         const radios = document.querySelectorAll('.size-radio');
         const quantityInput = document.getElementById('quantity');
         const totalPriceSpan = document.getElementById('totalPrice');
@@ -164,7 +256,6 @@ if(!isset($_GET['order_id'])){
             const selected = document.querySelector('.size-radio:checked');
             const quantity = parseInt(quantityInput.value) || 1;
 
-            // Nếu chưa chọn size, reset lại hiển thị
             if (!selected) {
                 totalPriceSpan.textContent = "0 VNĐ";
                 selectedInfo.style.display = 'none';
@@ -175,7 +266,6 @@ if(!isset($_GET['order_id'])){
             const name = selected.dataset.name;
             const price = parseFloat(selected.dataset.price);
 
-            // Nếu giá không hợp lệ => ngăn lỗi NaN
             if (isNaN(price)) {
                 totalPriceSpan.textContent = "0 VNĐ";
                 return;
@@ -187,10 +277,10 @@ if(!isset($_GET['order_id'])){
             selectedPriceSpan.textContent = price.toLocaleString('vi-VN');
             totalPriceSpan.textContent = total.toLocaleString('vi-VN') + " VNĐ";
             selectedInfo.style.display = 'block';
-             addToCartBtn.disabled = false;
-               const sizeId = selected.value;
-    const productId = "<?php echo $sp_info['MaSP']; ?>";
-    addToCartBtn.href = `./cart/add_to_cart.php?id=${productId}&masize=${sizeId}&soluong=${quantity}`;
+            addToCartBtn.disabled = false;
+            const sizeId = selected.value;
+            const productId = "<?php echo $sp_info['MaSP'] ?? ''; ?>";
+            addToCartBtn.href = `./cart/add_to_cart.php?id=${productId}&masize=${sizeId}&soluong=${quantity}`;
         }
 
         radios.forEach(radio => radio.addEventListener('change', updateTotal));
@@ -206,21 +296,8 @@ if(!isset($_GET['order_id'])){
             quantityInput.value = parseInt(quantityInput.value) + 1;
             updateTotal();
         });
-
-
-
-        fetch(`./cart/add_to_cart.php?id=${maSP}&masize=${maSize}&soluong=${quantity}`)
-  .then(response => response.text())
-  .then(total => {
-      document.querySelector(".cart-count").textContent = total;
-      alert("Đã thêm sản phẩm vào giỏ hàng!");
-  });
-
-
-
     });
-  
-   </script>
+    </script>
     <script src="js/search.js"></script>
 
 </body>
