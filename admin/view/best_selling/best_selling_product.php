@@ -1,10 +1,29 @@
+<?php
+require __DIR__ . '/../../../includes/db_connect.php';
+
+$sql = "
+    SELECT 
+        sp.MaSP,
+        sp.TenSP,
+        sp.MoTa,
+        sp.Anh,
+        IFNULL(SUM(ctdh.SoLuong), 0) AS TongSoLuongBan
+    FROM sanpham sp
+    LEFT JOIN chitietdonhang ctdh ON sp.MaSP = ctdh.MaSP
+    LEFT JOIN donhang dh ON ctdh.MaDH = dh.MaDH
+    WHERE dh.TrangThai = 'Giao thành công'
+    GROUP BY sp.MaSP, sp.TenSP, sp.MoTa, sp.Anh
+    ORDER BY TongSoLuongBan DESC;
+";
+$kq = mysqli_query($ketnoi, $sql);
+?>
 <!DOCTYPE html>
 <html lang="vi">
 
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Admin Panel</title>
+    <title>Thống kê sản phẩm bán chạy - Admin Panel</title>
 
     <!-- Bootstrap CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet">
@@ -12,109 +31,125 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" />
 
     <style>
-    body {
-        background-color: #f9fafb;
-        font-family: "Segoe UI", sans-serif;
-    }
+        body {
+            background-color: #f9fafb;
+            font-family: "Segoe UI", sans-serif;
+        }
 
- 
-    .navbar {
-        background: linear-gradient(90deg, #28a745, #66bb6a);
-        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
-    }
+        .navbar {
+            background: linear-gradient(90deg, #28a745, #66bb6a);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+        }
 
-    .navbar-brand {
-        font-weight: bold;
-        color: #fff !important;
-    }
+        .navbar-brand {
+            font-weight: bold;
+            color: #fff !important;
+        }
 
-    .navbar-nav .nav-link {
-        color: #fff !important;
-        font-weight: 500;
-        transition: all 0.3s ease;
-    }
+        .navbar-nav .nav-link {
+            color: #fff !important;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
 
-   
-    .navbar-nav .nav-link:hover,
-    .navbar-nav .dropdown:hover .nav-link {
-        background-color: rgba(255, 255, 255, 0.25);
-        border-radius: 8px;
-    }
+        .navbar-nav .nav-link:hover,
+        .navbar-nav .dropdown:hover .nav-link {
+            background-color: rgba(255, 255, 255, 0.25);
+            border-radius: 8px;
+        }
 
-   
-    .dropdown-menu a {
-        display: flex;
-        align-items: center;
-        gap: 8px;
-        transition: all 0.2s ease;
-    }
+        .dropdown-menu a {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.2s ease;
+        }
 
-    .dropdown-menu a:hover {
-        background-color: #e8f5e9;
-        color: #28a745;
-    }
+        .dropdown-menu a:hover {
+            background-color: #e8f5e9;
+            color: #28a745;
+        }
 
-   
-    .dropdown-submenu {
-        position: relative;
-    }
+        .dropdown-submenu {
+            position: relative;
+        }
 
-    .dropdown-submenu .dropdown-menu {
-        top: 0;
-        left: 100%;
-        margin-top: -1px;
-    }
+        .dropdown-submenu .dropdown-menu {
+            top: 0;
+            left: 100%;
+            margin-top: -1px;
+        }
 
- 
-    .navbar-nav > li:last-child .dropdown-submenu .dropdown-menu {
-        left: auto;
-        right: 100%;
-    }
+        .navbar-nav>li:last-child .dropdown-submenu .dropdown-menu {
+            left: auto;
+            right: 100%;
+        }
 
-  
-    .dropdown-submenu>a::after {
-        content: "\f054";
-        font-family: "Font Awesome 6 Free";
-        font-weight: 900;
-        margin-left: auto;
-        font-size: 0.8em;
-    }
+        .dropdown-submenu>a::after {
+            content: "\f054";
+            font-family: "Font Awesome 6 Free";
+            font-weight: 900;
+            margin-left: auto;
+            font-size: 0.8em;
+        }
 
+        .navbar-nav {
+            margin: 0 auto;
+        }
 
-    .navbar-nav {
-        margin: 0 auto;
-    }
+        .logout-btn {
+            color: #fff;
+            font-weight: 600;
+            text-decoration: none;
+            border: 1px solid rgba(255, 255, 255, 0.7);
+            border-radius: 6px;
+            padding: 6px 14px;
+            transition: 0.3s;
+        }
 
-  
-    .logout-btn {
-        color: #fff;
-        font-weight: 600;
-        text-decoration: none;
-        border: 1px solid rgba(255, 255, 255, 0.7);
-        border-radius: 6px;
-        padding: 6px 14px;
-        transition: 0.3s;
-    }
+        .logout-btn:hover {
+            background: white;
+            color: #28a745;
+        }
 
-    .logout-btn:hover {
-        background: white;
-        color: #28a745;
-    }
+        .main-title {
+            color: #28a745;
+            font-weight: 700;
+            margin-top: 40px;
+            text-align: center;
+        }
 
-    .main-title {
-        color: #28a745;
-        font-weight: 700;
-        margin-top: 50px;
-    }
+        table {
+            background: white;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+        }
 
-    .text-muted {
-        color: #6c757d !important;
-    }
+        th {
+            background-color: #28a745;
+            color: white;
+        }
+
+        td,
+        th {
+            vertical-align: middle;
+            text-align: center;
+        }
+
+        tr:nth-child(even) {
+            background-color: #f2f2f2;
+        }
+
+        img {
+            border-radius: 6px;
+        }
     </style>
 </head>
 
 <body>
- 
+
+    <!-- ===== NAVBAR GIỮ NGUYÊN ===== -->
     <nav class="navbar navbar-expand-lg">
         <div class="container-fluid">
             <a class="navbar-brand" href="#"><i class="fa-solid fa-leaf"></i> Admin Panel</a>
@@ -126,14 +161,11 @@
             </button>
 
             <div class="collapse navbar-collapse" id="navbarNavDropdown">
-                <!-- Menu chính căn giữa -->
                 <ul class="navbar-nav text-center">
-                    <!-- Quản lý sản phẩm -->
+                    <!-- Giữ nguyên tất cả các option -->
                     <li class="nav-item dropdown">
                         <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown"
-                            aria-expanded="false">
-                            <i class="fa-solid fa-box-open"></i> Quản lý sản phẩm
-                        </a>
+                            aria-expanded="false"><i class="fa-solid fa-box-open"></i> Quản lý sản phẩm</a>
                         <ul class="dropdown-menu">
                             <li class="dropdown-submenu">
                                 <a class="dropdown-item" href="#" data-bs-toggle="dropdown">
@@ -145,8 +177,6 @@
                                     <li><a class="dropdown-item" href="#"><i class="fa-solid fa-layer-group"></i> Danh mục loại sản phẩm</a></li>
                                 </ul>
                             </li>
-
-                            <!-- ✅ NESTED DROPDOWN: Quản lý size sản phẩm -->
                             <li class="dropdown-submenu">
                                 <a class="dropdown-item" href="#" data-bs-toggle="dropdown">
                                     <i class="fa-solid fa-ruler-combined"></i> Quản lý size sản phẩm
@@ -156,7 +186,6 @@
                                     <li><a class="dropdown-item" href="#"><i class="fa-solid fa-plus-circle"></i> Thêm size sản phẩm</a></li>
                                 </ul>
                             </li>
-                            
                             <li class="dropdown-submenu">
                                 <a class="dropdown-item" href="#" data-bs-toggle="dropdown">
                                     <i class="fa-solid fa-tags"></i> Quản lý giá theo size
@@ -169,38 +198,28 @@
                         </ul>
                     </li>
 
-                    <!-- Quản lý nhân viên -->
+                    <!-- Các mục khác giữ nguyên -->
                     <li class="nav-item dropdown">
                         <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown"
-                            aria-expanded="false">
-                            <i class="fa-solid fa-user-tie"></i> Quản lý tài khoản
-                        </a>
+                            aria-expanded="false"><i class="fa-solid fa-user-tie"></i> Quản lý tài khoản</a>
                         <ul class="dropdown-menu">
-             
                             <li><a class="dropdown-item" href="create_account.php"><i class="fa-solid fa-id-card"></i> Tạo tài khoản nhân viên</a></li>
-              
                         </ul>
                     </li>
 
-                    <!-- Quản lý khách hàng -->
                     <li class="nav-item dropdown">
                         <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown"
-                            aria-expanded="false">
-                            <i class="fa-solid fa-users"></i> Quản lý khách hàng
-                        </a>
+                            aria-expanded="false"><i class="fa-solid fa-users"></i> Quản lý khách hàng</a>
                         <ul class="dropdown-menu">
                             <li><a class="dropdown-item" href="list_customer.php"><i class="fa-solid fa-list"></i> Danh sách khách hàng</a></li>
-                            <li><a class="dropdown-item" href="add_customer.php"><i class="fa-solid fa-crown"></i> Khách hàng mua nhiều nhất</a></li>
-                            <li><a class="dropdown-item" href="add_customer.php"><i class="fa-solid fa-map-marked-alt"></i> Khu vực KH mua nhiều nhất</a></li>
+                            <li><a class="dropdown-item" href="#"><i class="fa-solid fa-crown"></i> Khách hàng mua nhiều nhất</a></li>
+                            <li><a class="dropdown-item" href="#"><i class="fa-solid fa-map-marked-alt"></i> Khu vực KH mua nhiều nhất</a></li>
                         </ul>
                     </li>
 
-                    <!-- Quản lý đơn hàng -->
                     <li class="nav-item dropdown">
                         <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown"
-                            aria-expanded="false">
-                            <i class="fa-solid fa-receipt"></i> Quản lý đơn hàng
-                        </a>
+                            aria-expanded="false"><i class="fa-solid fa-receipt"></i> Quản lý đơn hàng</a>
                         <ul class="dropdown-menu">
                             <li><a class="dropdown-item" href="list_orders.php"><i class="fa-solid fa-clipboard-list"></i> Danh sách đơn hàng</a></li>
                             <li><a class="dropdown-item" href="#"><i class="fa-solid fa-hourglass-half"></i> Đơn hàng chờ xử lý</a></li>
@@ -212,34 +231,24 @@
                     <!-- Thống kê -->
                     <li class="nav-item dropdown">
                         <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown"
-                            aria-expanded="false">
-                            <i class="fa-solid fa-chart-line"></i> Thống kê
-                        </a>
+                            aria-expanded="false"><i class="fa-solid fa-chart-line"></i> Thống kê</a>
                         <ul class="dropdown-menu">
-                            <!-- Thống kê sản phẩm -->
                             <li class="dropdown-submenu">
-                                <a class="dropdown-item" href="#" data-bs-toggle="dropdown">
-                                    <i class="fa-solid fa-box"></i> Thống kê sản phẩm
-                                </a>
+                                <a class="dropdown-item" href="#" data-bs-toggle="dropdown"><i class="fa-solid fa-box"></i> Thống kê sản phẩm</a>
                                 <ul class="dropdown-menu">
-                                    <li><a class="dropdown-item" href="./view/best_selling/best_selling_product.php"><i class="fa-solid fa-fire"></i> Sản phẩm bán chạy</a></li>
-                                    <li><a class="dropdown-item" href="./view/best_selling/best_selling_category.php"><i class="fa-solid fa-layer-group"></i> Loại sản phẩm bán chạy</a></li>
+                                    <li><a class="dropdown-item" href="./best_selling_product.php"><i class="fa-solid fa-fire"></i> Sản phẩm bán chạy</a></li>
+                                    <li><a class="dropdown-item" href="./best_selling_category.php"><i class="fa-solid fa-layer-group"></i> Loại sản phẩm bán chạy</a></li>
                                     <li><a class="dropdown-item" href="#"><i class="fa-solid fa-box-open"></i> Tồn kho sản phẩm</a></li>
                                     <li><a class="dropdown-item" href="#"><i class="fa-solid fa-exclamation-triangle"></i> Sản phẩm sắp hết hàng</a></li>
                                 </ul>
                             </li>
-
-                            <!-- Thống kê doanh thu -->
                             <li class="dropdown-submenu">
-                                <a class="dropdown-item" href="#" data-bs-toggle="dropdown">
-                                    <i class="fa-solid fa-money-bill-wave"></i> Thống kê doanh thu
-                                </a>
+                                <a class="dropdown-item" href="#" data-bs-toggle="dropdown"><i class="fa-solid fa-money-bill-wave"></i> Thống kê doanh thu</a>
                                 <ul class="dropdown-menu">
-                                    <li><a class="dropdown-item" href="./view/revenue_statistic/revenue_statistic_table.php"><i class="fa-solid fa-table"></i> Doanh thu theo số liệu</a></li>
-                                    <li><a class="dropdown-item" href="./view/revenue_statistic/revenue_statistic_chart.php"><i class="fa-solid fa-chart-bar"></i> Doanh thu theo biểu đồ</a></li>
+                                    <li><a class="dropdown-item" href="../revenue_statistic/revenue_statistic_table.php"><i class="fa-solid fa-table"></i> Doanh thu theo số liệu</a></li>
+                                    <li><a class="dropdown-item" href="../revenue_statistic/revenue_statistic_chart.php"><i class="fa-solid fa-chart-bar"></i> Doanh thu theo biểu đồ</a></li>
                                 </ul>
                             </li>
-
                             <!-- Thống kê đơn hàng -->
                             <li class="dropdown-submenu">
                                 <a class="dropdown-item" href="#" data-bs-toggle="dropdown">
@@ -251,17 +260,12 @@
                                     <li><a class="dropdown-item" href="#"><i class="fa-solid fa-clock"></i> Đơn hàng theo thời gian</a></li>
                                 </ul>
                             </li>
-
-                            <!-- Thống kê tổng hợp -->
-                            <li><hr class="dropdown-divider"></li>
-                            <li><a class="dropdown-item" href="#"><i class="fa-solid fa-chart-area"></i> Báo cáo tổng hợp</a></li>
-                            <li><a class="dropdown-item" href="#"><i class="fa-solid fa-file-export"></i> Xuất báo cáo Excel</a></li>
-                            <li><a class="dropdown-item" href="#"><i class="fa-solid fa-file-pdf"></i> Xuất báo cáo PDF</a></li>
                         </ul>
                     </li>
+
+                    
                 </ul>
 
-               
                 <div class="ms-auto">
                     <a href="logout.php" class="logout-btn"><i class="fa-solid fa-right-from-bracket"></i> Đăng xuất</a>
                 </div>
@@ -269,52 +273,56 @@
         </div>
     </nav>
 
-   
-    <div class="container text-center">
-        <h1 class="main-title">Chào mừng đến trang quản trị!</h1>
-        <p class="text-muted">Chọn menu trên để bắt đầu quản lý dữ liệu hệ thống.</p>
+    <!-- ===== NỘI DUNG CHÍNH: BẢNG THỐNG KÊ ===== -->
+    <div class="container mt-5">
+        <h2 class="main-title"><i class="fa-solid "></i> Thống kê sản phẩm bán chạy</h2>
+        <div class="table-responsive mt-4">
+            <table class="table table-bordered table-hover align-middle">
+                <thead>
+                    <tr>
+                        <th>Mã sản phẩm</th>
+                        <th>Tên sản phẩm</th>
+                        <th>Mô tả</th>
+                        <th>Ảnh</th>
+                        <th>Đã bán</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <?php foreach ($kq as $value) { ?>
+                        <tr>
+                            <td><?php echo $value["MaSP"]; ?></td>
+                            <td><?php echo $value["TenSP"]; ?></td>
+                            <td><?php echo $value["MoTa"]; ?></td>
+                            <td><img src="../../<?php echo $value["Anh"]; ?>" alt="" width="60"></td>
+                            <td><b><?php echo $value["TongSoLuongBan"]; ?></b></td>
+                        </tr>
+                    <?php } ?>
+                </tbody>
+            </table>
+        </div>
     </div>
 
- 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"></script>
-
- 
     <script>
-    document.addEventListener('DOMContentLoaded', function() {
-     
-        const dropdownSubmenus = document.querySelectorAll('.dropdown-submenu');
-
-        dropdownSubmenus.forEach(function(submenu) {
-            const submenuLink = submenu.querySelector('a[data-bs-toggle="dropdown"]');
-            const submenuDropdown = submenu.querySelector('.dropdown-menu');
-
-        
-            submenu.addEventListener('mouseenter', function() {
-                submenuDropdown.classList.add('show');
-            });
-
-          
-            submenu.addEventListener('mouseleave', function() {
-                submenuDropdown.classList.remove('show');
-            });
-
-     
-            submenuLink.addEventListener('click', function(e) {
-                e.preventDefault();
-                e.stopPropagation();
-                submenuDropdown.classList.toggle('show');
-            });
-        });
-
-    
-        document.addEventListener('click', function(e) {
-            if (!e.target.closest('.dropdown-submenu')) {
-                document.querySelectorAll('.dropdown-submenu .dropdown-menu').forEach(function(menu) {
-                    menu.classList.remove('show');
+        document.addEventListener('DOMContentLoaded', function() {
+            const dropdownSubmenus = document.querySelectorAll('.dropdown-submenu');
+            dropdownSubmenus.forEach(function(submenu) {
+                const submenuLink = submenu.querySelector('a[data-bs-toggle="dropdown"]');
+                const submenuDropdown = submenu.querySelector('.dropdown-menu');
+                submenu.addEventListener('mouseenter', () => submenuDropdown.classList.add('show'));
+                submenu.addEventListener('mouseleave', () => submenuDropdown.classList.remove('show'));
+                submenuLink.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    submenuDropdown.classList.toggle('show');
                 });
-            }
+            });
+            document.addEventListener('click', function(e) {
+                if (!e.target.closest('.dropdown-submenu')) {
+                    document.querySelectorAll('.dropdown-submenu .dropdown-menu').forEach(menu => menu.classList.remove('show'));
+                }
+            });
         });
-    });
     </script>
 </body>
 
