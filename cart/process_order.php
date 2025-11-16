@@ -1,7 +1,8 @@
 <?php 
 session_start();
 require "../includes/db_connect.php";
-
+require "../handlers/atm_momo.php";
+require "../handlers/atm_vpay.php";
 if (!isset($_SESSION['user_id']) && (!isset($_POST['order_guest']) || !isset($_SESSION['cart']))) {
     header("Location: ../sign_in.php");
     exit();
@@ -13,80 +14,7 @@ $diachinguoinhan = $_SESSION['temp_diachi'];
 $phuongthucchuyenkhoan = $_POST['payment_method'] ;
 $chuyenkhoan = $_POST['transfer_method'] ?? null;
 
-// Hàm gửi request đến MoMo
-function execPostRequest($url, $data)
-{
-    $ch = curl_init($url);
-    curl_setopt($ch, CURLOPT_CUSTOMREQUEST, "POST");
-    curl_setopt($ch, CURLOPT_POSTFIELDS, $data);
-    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-    curl_setopt($ch, CURLOPT_HTTPHEADER, array(
-        'Content-Type: application/json',
-        'Content-Length: ' . strlen($data))
-    );
-    curl_setopt($ch, CURLOPT_TIMEOUT, 5);
-    curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 5);
-    $result = curl_exec($ch);
-    curl_close($ch);
-    return $result;
-}
 
-// Hàm xử lý thanh toán MoMo
-function processmomoPayment($order_id, $total_price, $orderInfo) {
-    // Cấu hình MoMo - Môi trường TEST
-    $endpoint = "https://test-payment.momo.vn/v2/gateway/api/create";
-    $partnerCode = 'MOMOBKUN20180529';
-    $accessKey = 'klm05TvNBzhg7h7j';
-    $secretKey = 'at67qH6mk8w5Y1nAyMoYKMWACiEi2bsa';
-    
-    // Thông tin giao dịch
-    $orderId = $order_id ; // Mã đơn hàng unique
-    $amount = (string)$total_price;
-    $requestId = time() . "";
-    $requestType = "payWithATM";
-    
-    // URL callback - Thay bằng domain thật của bạn
-    $redirectUrl = "http://localhost/unitop/backend/lesson/school/project_pizza/order_confirmation.php?order_id=$orderId&phuongthucthanhtoan=$phuongthucchuyenkhoan"; // Trang xác nhận thanh toán
-    $ipnUrl = "http://localhost/unitop/backend/lesson/school/project_pizza/order_confirmation.php?order_id=$orderId&phuongthucthanhtoan=$phuongthucchuyenkhoan"; // Webhook nhận thông báo từ MoMo
-    $extraData = "";
-    
-    // Tạo chữ ký
-    $rawHash = "accessKey=" . $accessKey . 
-               "&amount=" . $amount . 
-               "&extraData=" . $extraData . 
-               "&ipnUrl=" . $ipnUrl . 
-               "&orderId=" . $orderId . 
-               "&orderInfo=" . $orderInfo . 
-               "&partnerCode=" . $partnerCode . 
-               "&redirectUrl=" . $redirectUrl . 
-               "&requestId=" . $requestId . 
-               "&requestType=" . $requestType;
-    
-    $signature = hash_hmac("sha256", $rawHash, $secretKey);
-    
-    // Dữ liệu gửi đến MoMo
-    $data = array(
-        'partnerCode' => $partnerCode,
-        'partnerName' => "YourShopName",
-        "storeId" => "YourShopStore",
-        'requestId' => $requestId,
-        'amount' => $amount,
-        'orderId' => $orderId,
-        'orderInfo' => $orderInfo,
-        'redirectUrl' => $redirectUrl,
-        'ipnUrl' => $ipnUrl,
-        'lang' => 'vi',
-        'extraData' => $extraData,
-        'requestType' => $requestType,
-        'signature' => $signature
-    );
-    
-    // Gửi request đến MoMo
-    $result = execPostRequest($endpoint, json_encode($data));
-    $jsonResult = json_decode($result, true);
-    
-    return $jsonResult;
-}
 
 // --- Trường hợp khách vãng lai ---
 if (isset($_POST['order_guest'])) {
@@ -131,7 +59,7 @@ if (isset($_POST['order_guest'])) {
     // Xử lý thanh toán MoMo
     if ($phuongthucchuyenkhoan === 'Chuyển khoản' && $chuyenkhoan === 'momo') {
         $orderInfo = "Thanh toan don hang #" . $order_id;
-        $momoResult = processmomoPayment($order_id, $total_price, $orderInfo);
+        $momoResult = processmomoPayment($order_id, $total_price, $orderInfo,$phuongthucchuyenkhoan);
         
         if (isset($momoResult['payUrl'])) {
             
@@ -144,8 +72,26 @@ if (isset($_POST['order_guest'])) {
             header("Location: ../cart.php");
             exit();
         }
+    } else if($phuongthucchuyenkhoan === 'Chuyển khoản' && $chuyenkhoan === 'vnpay') {
+            $orderInfo = "Thanh toan don hang #" . $order_id;
+
+    // Gọi hàm xử lý VNPAY giống như momo
+    $vnpayResult = processVnpayPayment($order_id, $total_price, $orderInfo,$phuongthucchuyenkhoan);
+
+    if (isset($vnpayResult['payment_url'])) {
+        // Chuyển hướng đến trang thanh toán VNPAY
+        header("Location: " . $vnpayResult['payment_url']);
+        exit();
     } else {
-        // Thanh toán tiền mặt
+        // Lỗi khi tạo thanh toán
+        $_SESSION['error'] = "Không thể kết nối đến VNPAY. Vui lòng thử lại.";
+        header("Location: ../cart.php");
+        exit();
+    }
+      
+    }
+    else {
+          // Thanh toán tiền mặt
         header("Location: ../order_confirmation.php?order_id=$order_id&phuongthucthanhtoan=$phuongthucchuyenkhoan");
         exit();
     }
@@ -197,7 +143,7 @@ else {
     // Xử lý thanh toán MoMo
     if ($phuongthucchuyenkhoan === 'Chuyển khoản' && $chuyenkhoan === 'momo') {
         $orderInfo = "Thanh toan don hang #" . $order_id;
-        $momoResult = processmomoPayment($order_id, $total_price, $orderInfo);
+        $momoResult = processmomoPayment($order_id, $total_price, $orderInfo,$phuongthucchuyenkhoan);
         
         if (isset($momoResult['payUrl'])) {
             
@@ -211,8 +157,25 @@ else {
             header("Location: ../cart.php");
             exit();
         }
+    } else if($phuongthucchuyenkhoan === 'Chuyển khoản' && $chuyenkhoan === 'momo') {
+            $orderInfo = "Thanh toan don hang #" . $order_id;
+
+    // Gọi hàm xử lý VNPAY giống như momo
+    $vnpayResult = processVnpayPayment($order_id, $total_price, $orderInfo);
+
+    if (isset($vnpayResult['payment_url'])) {
+        // Chuyển hướng đến trang thanh toán VNPAY
+        header("Location: " . $vnpayResult['payment_url']);
+        exit();
     } else {
-        // Thanh toán tiền mặt
+        // Lỗi khi tạo thanh toán
+        $_SESSION['error'] = "Không thể kết nối đến VNPAY. Vui lòng thử lại.";
+        header("Location: ../cart.php");
+        exit();
+        }
+    }
+    else{
+           // Thanh toán tiền mặt
         header("Location: ../order_confirmation.php?order_id=$order_id&phuongthucthanhtoan=$phuongthucchuyenkhoan");
         exit();
     }

@@ -29,7 +29,7 @@ if ($phuongthucchuyenkhoan == 'Chuyển khoản') {
 }
 
 // Tên phương thức thanh toán
-$payment_method_name = ($phuongthucchuyenkhoan == 'Chuyển khoản') ? 'Chuyển khoản (MoMo)' : 'Tiền mặt (COD)';
+$payment_method_name = ($phuongthucchuyenkhoan == 'Chuyển khoản') ? 'Chuyển khoản ' : 'Tiền mặt (COD)';
 
 ?>
 
@@ -146,7 +146,7 @@ $payment_method_name = ($phuongthucchuyenkhoan == 'Chuyển khoản') ? 'Chuyể
           </div>
         </div>
         
-        <?php if ($phuongthucchuyenkhoan == 'transfer' && $payment_status == 'paid'): ?>
+        <?php if ($phuongthucchuyenkhoan == 'Chuyển khoản' && $payment_status == 'Đã thanh toán'): ?>
         <div class="row mt-2">
           <div class="col-12 text-center">
             <small class="text-success">
@@ -155,7 +155,7 @@ $payment_method_name = ($phuongthucchuyenkhoan == 'Chuyển khoản') ? 'Chuyể
             </small>
           </div>
         </div>
-        <?php elseif ($phuongthucchuyenkhoan == 'cash'): ?>
+        <?php elseif ($phuongthucchuyenkhoan == 'Tiền mặt'): ?>
         <div class="row mt-2">
           <div class="col-12 text-center">
             <small class="text-info">

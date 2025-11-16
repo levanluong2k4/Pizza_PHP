@@ -100,7 +100,8 @@ if (!empty($_SESSION['cart'])) {
 
 $sqlloaisp="SELECT * FROM loaisanpham";
 $loaisp=mysqli_query($ketnoi,$sqlloaisp);
-
+$sqlcombo="SELECT * FROM combo";
+$combo=mysqli_query($ketnoi,$sqlcombo);
 
 
 
@@ -121,17 +122,18 @@ $loaisp=mysqli_query($ketnoi,$sqlloaisp);
         </button>
 
         <div class="d-flex flex-column align-align-items-end">
-            <a class=" inner-logo me-lg-3" href="trangchu.php"><img src="./img/logo.png" alt="logo"></a>
-                <?php if (isset($_SESSION['user_id'])): ?>
-               <p class="m-0">
-        <span class=" fw-bolder me-2" style="color:#1F6C11">Xin chào, <?php echo htmlspecialchars($_SESSION['name']); ?>!</span>
+            <a class=" inner-logo me-lg-3" href="/unitop/backend/lesson/school/project_pizza/trangchu.php"><img src="/unitop/backend/lesson/school/project_pizza/img/logo.png" alt="logo"></a>
+            <?php if (isset($_SESSION['user_id'])): ?>
+            <p class="m-0">
+                <span class=" fw-bolder me-2" style="color:#1F6C11">Xin chào,
+                    <?php echo htmlspecialchars($_SESSION['name']); ?>!</span>
             </p>
-        <?php endif; ?>
+            <?php endif; ?>
         </div>
 
         <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent1"
             aria-controls="navbarSupportedContent1" aria-expanded="false" aria-label="Toggle navigation">
-            <img src="./img/user.png" alt height="30px">
+            <img src="/unitop/backend/lesson/school/project_pizza/img/user.png" alt height="30px">
         </button>
         <button class="button_cart navbar-toggler" type="button" data-bs-toggle="collapse"
             data-bs-target="#navbarSupportedContent2" aria-controls="navbarSupportedContent2" aria-expanded="false"
@@ -178,7 +180,7 @@ $loaisp=mysqli_query($ketnoi,$sqlloaisp);
                     <ul class="dropdown-menu bg-global p-0 text-md-center text-lg-start scrollable-menu">
                         <?php foreach($loaisp as $value): ?>
                         <li class="dropdown-item">
-                            <a href="research.php?category_id=<?php echo $value['MaLoai'] ?>">
+                            <a href="/unitop/backend/lesson/school/project_pizza/research.php?category_id=<?php echo $value['MaLoai'] ?>">
                                 <?php echo $value['TenLoai'] ?>
                             </a>
                         </li>
@@ -187,63 +189,89 @@ $loaisp=mysqli_query($ketnoi,$sqlloaisp);
 
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link " aria-current="page" href="./order_user.php">Đặt hàng</a>
+                    <a class="nav-link " aria-current="page" href="/unitop/backend/lesson/school/project_pizza/order_user.php">Đặt hàng</a>
                 </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="#">Liên lạc</a>
+                <li class="nav-item dropdown col-md-12 col-lg-3 text-md-center">
+                    <a class="nav-link dropdown-toggle text-warning" href="#" role="button" data-bs-toggle="dropdown"
+                        aria-expanded="false">
+                        Đặt bàn
+                    </a>
+                    <ul class="dropdown-menu bg-global p-0 text-md-center text-lg-start scrollable-menu">
+
+                        <li class="dropdown-item ">
+                            <a href="/unitop/backend/lesson/school/project_pizza/datban/info_datban.php?loaidatban=thuong">
+                                Bàn thường
+                            </a>
+                        </li>
+                       
+
+                        <li class="dropdown-item">
+                            <a  class="#">🎉Đặt bàn tiệc</a>
+                            <ul class="  p-0 text-md-center text-lg-start ">
+                                <?php foreach($combo as $value): ?>
+                                <li class="dropdown-item">
+                                    <a href="/unitop/backend/lesson/school/project_pizza/research.php?combo_id=<?php echo $value['MaCombo']?>&loaidatban=tiec">
+                                        <?php echo $value['Tencombo'] ?>
+                                    </a>
+                                </li>
+                                <?php endforeach; ?>
+                            </ul>
+                        </li>
+
+                    </ul>
                 </li>
             </ul>
 
         </div>
 
         <div class="collapse navbar-collapse   " id="navbarSupportedContent1">
-          
 
-                <ul class="navbar-nav me-auto mb-2 mb-lg-0 bg-global listmenu ms-lg-auto">
 
-                    <?php if (isset($_SESSION['user_id'])): ?>
-                    <!-- Nếu đã đăng nhập -->
+            <ul class="navbar-nav me-auto mb-2 mb-lg-0 bg-global listmenu ms-lg-auto">
 
-                    <li class="nav-item dropdown col-12 col-md-12 text-center text-md-center">
-                        <a class="nav-link dropdown-toggle text-warning p-0" href="#" role="button"
-                            data-bs-toggle="dropdown" aria-expanded="false">
-                            <img src="./img/user.png" alt="" height="30px">
-                        </a>
-                        <ul class="dropdown-menu bg-global p-0 text-md-center text-lg-center">
-                            <li class="dropdown-item"><a href="info_user.php">Thông tin cá nhân</a></li>
+                <?php if (isset($_SESSION['user_id'])): ?>
+                <!-- Nếu đã đăng nhập -->
 
-                            <li class="dropdown-item"><a href="handlers/process_sign_out.php">Đăng xuất</a></li>
-                            <li>
-                                <hr class="dropdown-divider">
-                            </li>
-                            <li class="dropdown-item"><a href="">Quên mật khẩu</a></li>
-                        </ul>
-                    </li>
+                <li class="nav-item dropdown col-12 col-md-12 text-center text-md-center">
+                    <a class="nav-link dropdown-toggle text-warning p-0" href="#" role="button"
+                        data-bs-toggle="dropdown" aria-expanded="false">
+                        <img src="/unitop/backend/lesson/school/project_pizza/img/user.png" alt="" height="30px">
+                    </a>
+                    <ul class="dropdown-menu bg-global p-0 text-md-center text-lg-center">
+                        <li class="dropdown-item"><a href="info_user.php">Thông tin cá nhân</a></li>
 
-                    <?php else: ?>
-                    <!-- Nếu chưa đăng nhập -->
-                    <li class="nav-item dropdown col-12 col-md-12 text-center text-md-center">
-                        <a class="nav-link dropdown-toggle text-warning p-0" href="#" role="button"
-                            data-bs-toggle="dropdown" aria-expanded="false">
-                            <img src="./img/user.png" alt="" height="30px">
-                        </a>
-                        <ul class="dropdown-menu bg-global p-0 text-md-center text-lg-center">
-                            <li class="dropdown-item"><a href="./sign_in.php">Đăng nhập</a></li>
-                            <li class="dropdown-item"><a href="./sign_up.php">Đăng ký</a></li>
-                            <li>
-                                <hr class="dropdown-divider">
-                            </li>
-                     
-                        </ul>
-                    </li>
-                    <?php endif; ?>
+                        <li class="dropdown-item"><a href="handlers/process_sign_out.php">Đăng xuất</a></li>
+                        <li>
+                            <hr class="dropdown-divider">
+                        </li>
+                        <li class="dropdown-item"><a href="">Quên mật khẩu</a></li>
+                    </ul>
+                </li>
 
-                </ul>
+                <?php else: ?>
+                <!-- Nếu chưa đăng nhập -->
+                <li class="nav-item dropdown col-12 col-md-12 text-center text-md-center">
+                    <a class="nav-link dropdown-toggle text-warning p-0" href="#" role="button"
+                        data-bs-toggle="dropdown" aria-expanded="false">
+                        <img src="/unitop/backend/lesson/school/project_pizza/img/user.png" alt="" height="30px">
+                    </a>
+                    <ul class="dropdown-menu bg-global p-0 text-md-center text-lg-center">
+                        <li class="dropdown-item"><a href="./sign_in.php">Đăng nhập</a></li>
+                        <li class="dropdown-item"><a href="./sign_up.php">Đăng ký</a></li>
+                        <li>
+                            <hr class="dropdown-divider">
+                        </li>
 
-         
+                    </ul>
+                </li>
+                <?php endif; ?>
+
+            </ul>
+
+
 
         </div>
-        
+
         <a href="cart.php" class="button_cart d-md-none d-sm-none d-lg-block">
             <svg viewBox="0 0 16 16" class="bi bi-cart-check" height="24" width="24" xmlns="http://www.w3.org/2000/svg"
                 fill="#fff">
