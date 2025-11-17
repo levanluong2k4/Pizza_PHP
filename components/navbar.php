@@ -206,16 +206,9 @@ $combo=mysqli_query($ketnoi,$sqlcombo);
                        
 
                         <li class="dropdown-item">
-                            <a  class="#">🎉Đặt bàn tiệc</a>
-                            <ul class="  p-0 text-md-center text-lg-start ">
-                                <?php foreach($combo as $value): ?>
-                                <li class="dropdown-item">
-                                    <a href="/unitop/backend/lesson/school/project_pizza/research.php?combo_id=<?php echo $value['MaCombo']?>&loaidatban=tiec">
-                                        <?php echo $value['Tencombo'] ?>
-                                    </a>
-                                </li>
-                                <?php endforeach; ?>
-                            </ul>
+                            <a  href="/unitop/backend/lesson/school/project_pizza/research.php?loaidatban=tiec">
+                                🎉Đặt bàn tiệc</a>
+                            
                         </li>
 
                     </ul>

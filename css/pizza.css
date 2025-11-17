@@ -259,6 +259,19 @@ ease-in-out !important;
   transform: rotate(10deg) !important;
 }
 
+.card-combo{
+   transition: 0.3s all 
+ease-in-out !important;
+
+ border-radius: 10px;
+  border: 2px solid #f0f0f004;
+}
+ .card-combo:hover{
+    border: 2px solid #20c997;
+    border-radius: 10px;
+     
+ } 
+
 
 /* nav & tab */
 .inner-nav-tab .nav-item .nav-link {
