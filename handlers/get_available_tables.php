@@ -23,7 +23,7 @@ try {
                     SELECT db.MaBan FROM datban db
                     WHERE db.MaBan IS NOT NULL
                     AND DATE(db.NgayGio) = ?
-                    AND db.TrangThaiDatBan IN ('cho_xac_nhan', 'da_xac_nhan', 'dang_su_dung')
+                    AND db.TrangThaiDatBan IN ('da_dat', 'da_xac_nhan', 'dang_su_dung')
                 )
                 AND ba.TrangThai != 'bao_tri'
                 ORDER BY ba.SoBan";
@@ -45,7 +45,7 @@ try {
                     SELECT db.MaPhong FROM datban db
                     WHERE db.MaPhong IS NOT NULL
                     AND DATE(db.NgayGio) = ?
-                    AND db.TrangThaiDatBan IN ('cho_xac_nhan', 'da_xac_nhan', 'dang_su_dung')
+                    AND db.TrangThaiDatBan IN ('da_dat', 'da_xac_nhan', 'dang_su_dung')
                 )
                 AND pt.TrangThai != 'bao_tri'
                 ORDER BY pt.SoPhong";

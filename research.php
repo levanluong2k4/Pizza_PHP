@@ -209,8 +209,18 @@ require 'includes/query_products.php';
                                 <i class="fas fa-receipt me-2"></i>
                                 Tổng giá trị sản phẩm:
                             </span>
+                         <span class="text-decoration-line-through text-muted fs-4">
+                        <?php echo number_format($total_combo, 0, ',', '.'); ?> VNĐ
+                    </span>
+
+                        </div>
+                          <div class="d-flex justify-content-between align-items-center">
+                            <span class="combo-total-label">
+                                <i class="fas fa-receipt me-2"></i>
+                                Chỉ còn:
+                            </span>
                             <span class="combo-total-price">
-                                <?php echo number_format($total_combo, 0, ',', '.'); ?> VNĐ
+                                <?php echo number_format($total_combo - ($total_combo * ($combos_id['giamgia']/100)), 0, ',', '.'); ?> VNĐ
                             </span>
                         </div>
 
@@ -222,7 +232,7 @@ require 'includes/query_products.php';
                                     Tiết kiệm được:
                                 </span>
                                 <span class="combo-savings-text" style="font-size: 22px;">
-                                    <?php echo number_format($total_combo - $combos_id['giamgia'], 0, ',', '.'); ?> VNĐ
+                                    <?php echo number_format( ($total_combo * ($combos_id['giamgia']/100)), 0, ',', '.'); ?> VNĐ
                                 </span>
                             </div>
                         </div>
@@ -325,10 +335,9 @@ require 'includes/query_products.php';
                                     INNER JOIN sanpham_size sps ON ct.MaSP = sps.MaSP AND ct.MaSize = sps.MaSize 
                                     WHERE ct.MaCombo=$macombo";
                                         $result_detail=mysqli_query($ketnoi,$sql_detail_combo);
-                                    $tongtien=0;
+                                   
                                     foreach ($result_detail as $value) :
-                                    $tien= $value['ThanhTien'] * $value['SoLuong'];
-                                        $tongtien += $tien;
+                                 
                                     echo '<p class="m-0 text-start card-text" style="font-weight: 600; color:#0000004a">'
                                                 . '+' . $value['SoLuong'] . ' ' . $value["TenSP"] .
                                             '</p>';
@@ -341,7 +350,7 @@ require 'includes/query_products.php';
 
                                     <span class="combo-total-price">
 
-                                        <?php echo number_format($tongtien, 0, ',', '.'); ?> VNĐ
+                                        <?php echo number_format($sp['Tongtien'] , 0, ',', '.'); ?> VNĐ
                                     </span>
                                     <a class="inner-btn mt-2  py-2 px-5"
                                         href="./datban/info_datban.php?combo_id=<?php echo $sp['MaCombo'] ?>&loaidatban=tiec">

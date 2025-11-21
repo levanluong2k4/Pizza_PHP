@@ -57,70 +57,73 @@ $(document).ready(function() {
     console.log("🚀 Script initialized");
     
     // ==================== UPDATE MODAL ====================
-    function updateModal(data) {
-        console.log("📦 Updating modal with:", data);
-        
-        if (!data || !data.product) {
-            console.error("❌ Invalid data:", data);
-            alert("Không thể tải thông tin sản phẩm!");
-            return;
-        }
-        
-        // Cập nhật tiêu đề
-        $('#sizeModalLabel').text('Chọn size cho ' + data.product.TenSP);
-        
-        // Cập nhật hình ảnh
-        let imagePath = data.product.Anh;
-        if (!imagePath.startsWith('./') && !imagePath.startsWith('http')) {
-            imagePath = './' + imagePath;
-        }
-        $('.product-image').attr('src', imagePath).attr('alt', data.product.TenSP);
-        
-        // Cập nhật tên và mô tả
-        $('.product-name').text(data.product.TenSP);
-        $('.product-description').text(data.product.MoTa || '');
-        
-        // Cập nhật sizes
-        let sizeHTML = '';
-        if (data.sizes && data.sizes.length > 0) {
-            data.sizes.forEach(function(size) {
-                let sizeImagePath = size.Anh;
-                if (!sizeImagePath.startsWith('./') && !sizeImagePath.startsWith('http')) {
-                    sizeImagePath = './' + sizeImagePath;
-                }
-                
-                sizeHTML += `
-                    <div class="form-check">
-                        <input class="form-check-input size-radio" type="radio" 
-                               name="size" id="size-${size.MaSize}"
-                               value="${size.MaSize}" 
-                               data-name="${size.TenSize}" 
-                               data-price="${size.Gia}">
-                        <label class="form-check-label" for="size-${size.MaSize}">
-                            <img src="${sizeImagePath}" alt="" height="30px" class="me-2">
-                            ${size.TenSize} - ${parseInt(size.Gia).toLocaleString('vi-VN')} VNĐ
-                        </label>
-                    </div>
-                `;
-            });
-        } else {
-            sizeHTML = '<p class="text-danger">Sản phẩm này hiện chưa có size.</p>';
-        }
-        
-        $('.size-container').html(sizeHTML);
-        
-        // Reset
-        $('#quantity').val(1);
-        $('#totalPrice').text('0 VNĐ');
-        $('.selected-info').hide();
-        $('#addToCartBtn').attr('disabled', true);
-        
-        // Lưu product ID
-        $('#sizeModal').data('product-id', data.product.MaSP);
-        
-        // Bind events cho size radio mới
-        bindSizeEvents();
+ function updateModal(data) {
+    console.log("📦 Updating modal with:", data);
+    
+    if (!data || !data.product) {
+        console.error("❌ Invalid data:", data);
+        alert("Không thể tải thông tin sản phẩm!");
+        return;
     }
+    
+    // Cập nhật tiêu đề
+    $('#sizeModalLabel').text('Chọn size cho ' + data.product.TenSP);
+    
+    // Cập nhật hình ảnh
+    let imagePath = data.product.Anh;
+    if (!imagePath.startsWith('./') && !imagePath.startsWith('http')) {
+        imagePath = './' + imagePath;
+    }
+    $('.product-image').attr('src', imagePath).attr('alt', data.product.TenSP);
+    
+    // Cập nhật tên và mô tả
+    $('.product-name').text(data.product.TenSP);
+    $('.product-description').text(data.product.MoTa || '');
+    
+    // Cập nhật sizes
+    let sizeHTML = '';
+    if (data.sizes && data.sizes.length > 0) {
+        data.sizes.forEach(function(size, index) {
+            let sizeImagePath = size.Anh;
+            if (!sizeImagePath.startsWith('./') && !sizeImagePath.startsWith('http')) {
+                sizeImagePath = './' + sizeImagePath;
+            }
+            
+            sizeHTML += `
+                <div class="form-check">
+                    <input class="form-check-input size-radio" type="radio" 
+                           name="size" id="size-${size.MaSize}"
+                           value="${size.MaSize}" 
+                           data-name="${size.TenSize}" 
+                           data-price="${size.Gia}"
+                           ${index === 0 ? 'checked' : ''}>
+                    <label class="form-check-label" for="size-${size.MaSize}">
+                        <img src="${sizeImagePath}" alt="" height="30px" class="me-2">
+                        ${size.TenSize} - ${parseInt(size.Gia).toLocaleString('vi-VN')} VNĐ
+                    </label>
+                </div>
+            `;
+        });
+    } else {
+        sizeHTML = '<p class="text-danger">Sản phẩm này hiện chưa có size.</p>';
+    }
+    
+    $('.size-container').html(sizeHTML);
+    
+    // Reset
+    $('#quantity').val(1);
+    $('#totalPrice').text('0 VNĐ');
+    $('.selected-info').hide();
+    
+    // Lưu product ID
+    $('#sizeModal').data('product-id', data.product.MaSP);
+    
+    // Bind events cho size radio mới
+    bindSizeEvents();
+    
+    // ✅ THÊM DÒNG NÀY: Kích hoạt updateTotal() cho size đầu tiên
+    updateTotal();
+}
     
 
 function updateTotal() {

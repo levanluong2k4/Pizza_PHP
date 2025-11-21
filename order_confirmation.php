@@ -3,34 +3,59 @@ session_start();
 require "includes/db_connect.php";
 
 $order_id = $_GET['order_id'] ?? null;
-$order_id = str_replace("'", "", $order_id); // hoặc trim($order_id, "'")
-
+$resultCode = $_GET['resultCode'] ?? null;
+$phuongthucchuyenkhoan=$_GET['phuongthucthanhtoan'];
+$order_id = str_replace("'", "", $order_id);
 
 if(!isset($_GET['order_id'])){
     header("Location: trangchu.php");
     exit();
 } 
 
-// Lấy thông tin đơn hàng từ database
+
+if($resultCode == 0){
+   $update_sql = "UPDATE `donhang` 
+                   SET `trangthaithanhtoan`='dathanhtoan',
+                       `phuongthucthanhtoan`='Chuyển khoản' 
+                   WHERE MaDHcode = '$order_id'";
+  
+  
+} 
+
+if(!isset($_GET['resultCode'])||(isset($_GET['resultCode'])&&$resultCode != 0)) {
+   
+     $update_sql = "UPDATE `donhang` 
+                   SET `trangthaithanhtoan`='chuathanhtoan',
+                       `phuongthucthanhtoan`='Tiền mặt' 
+                   WHERE MaDHcode = '$order_id'";
+}
+mysqli_query($ketnoi, $update_sql);
+
+
 $sql = "SELECT phuongthucthanhtoan, trangthaithanhtoan FROM donhang WHERE MaDHcode = '$order_id'";
 $result = mysqli_query($ketnoi, $sql);
 $order = mysqli_fetch_assoc($result);
 
-$phuongthucchuyenkhoan = $order['phuongthucthanhtoan'] ;
+$phuongthucchuyenkhoan = $order['phuongthucthanhtoan'];
 $payment_status = $order['trangthaithanhtoan'];
 
-// Xác định trạng thái thanh toán
-if ($phuongthucchuyenkhoan == 'Chuyển khoản') {
-    $trangthaithanhtoan = ($payment_status == 'Chưa thanh toán') ? 'Đã thanh toán' : 'Chưa thanh toán';
-    $status_class = ($payment_status == 'Chưa thanh toán') ? 'success' : 'warning';
+
+if ($payment_status == 'dathanhtoan') {
+  
+    $trangthaithanhtoan = 'Đã thanh toán';
+    $status_class = 'success';
 } else {
-    $trangthaithanhtoan = 'Chưa thanh toán';
-    $status_class = 'info';
+ 
+    $trangthaithanhtoan = 'chuathanhtoan';
+    $status_class = 'warning';
 }
 
-// Tên phương thức thanh toán
-$payment_method_name = ($phuongthucchuyenkhoan == 'Chuyển khoản') ? 'Chuyển khoản ' : 'Tiền mặt (COD)';
 
+if ($phuongthucchuyenkhoan == 'Chuyển khoản') {
+    $payment_method_name = 'Chuyển khoản ';
+} else {
+    $payment_method_name = 'Tiền mặt (COD)';
+}
 ?>
 
 <!doctype html>

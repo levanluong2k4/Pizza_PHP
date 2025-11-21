@@ -14,44 +14,44 @@ $trangthai = $_POST["trangthai"] ?? "all";
 if ($trangthai == "all" || strtolower($trangthai) == "all") {
     // Lấy tất cả đơn hàng
     $sql = "SELECT 
-        donhang.MaDH,
-        donhang.MaDHcode,
-        donhang.phuongthucthanhtoan,
-        donhang.trangthaithanhtoan,
-        donhang.ngaydat,
-        donhang.trangthai,
-        donhang.is_guest,
-        donhang.TongTien,
+      
+        datban.MaDatBan,
+        datban.NgayTao,
+        datban.TrangThaiDatBan,
+        datban.TrangThaiThanhToan,
+      
+        datban.is_guest,
+        datban.Tongtien,
         GROUP_CONCAT(DISTINCT sanpham_size.Anh SEPARATOR ',') as DanhSachAnh
-    FROM donhang, chitietdonhang, sanpham_size, khachhang
-    WHERE donhang.MaDH = chitietdonhang.MaDH
-        AND chitietdonhang.MaSP = sanpham_size.MaSP
-        AND chitietdonhang.MaSize = sanpham_size.MaSize
-        AND donhang.MaKH = khachhang.MaKH
-        AND donhang.MaKH = '$id'
-    GROUP BY donhang.MaDH
-    ORDER BY donhang.ngaydat DESC";
+    FROM datban, chitietdatban, sanpham_size, khachhang
+    WHERE datban.MaDatBan = chitietdatban.MaDatBan
+        AND chitietdatban.MaSP = sanpham_size.MaSP
+        AND chitietdatban.MaSize = sanpham_size.MaSize
+        AND datban.MaKH = khachhang.MaKH
+        AND datban.MaKH = '$id'
+    GROUP BY datban.MaDatBan
+    ORDER BY datban.NgayTao DESC";
 } else {
     // Lọc theo trạng thái
     $sql = "SELECT 
-        donhang.MaDH,
-        donhang.ngaydat,
-        donhang.trangthai,
-        donhang.MaDHcode,
-        donhang.phuongthucthanhtoan,
-        donhang.trangthaithanhtoan,
-        donhang.is_guest,
-        donhang.TongTien,
+      
+        datban.MaDatBan,
+        datban.NgayTao,
+        datban.TrangThaiDatBan,
+        datban.TrangThaiThanhToan,
+      
+        datban.is_guest,
+        datban.Tongtien,
         GROUP_CONCAT(DISTINCT sanpham_size.Anh SEPARATOR ',') as DanhSachAnh
-    FROM donhang, chitietdonhang, sanpham_size, khachhang
-    WHERE donhang.MaDH = chitietdonhang.MaDH
-        AND chitietdonhang.MaSP = sanpham_size.MaSP
-        AND chitietdonhang.MaSize = sanpham_size.MaSize
-        AND donhang.MaKH = khachhang.MaKH
-        AND donhang.MaKH = '$id'
-        AND donhang.trangthai = '$trangthai'
-    GROUP BY donhang.MaDH
-    ORDER BY donhang.ngaydat DESC";
+    FROM datban, chitietdatban, sanpham_size, khachhang
+    WHERE datban.MaDatBan = chitietdatban.MaDatBan
+        AND chitietdatban.MaSP = sanpham_size.MaSP
+        AND chitietdatban.MaSize = sanpham_size.MaSize
+        AND datban.MaKH = khachhang.MaKH
+        AND datban.MaKH = '$id'
+        AND datban.TrangThaiDatBan = '$trangthai'
+    GROUP BY datban.MaDatBan
+    ORDER BY datban.NgayTao DESC";
 }
 
 $result = mysqli_query($ketnoi, $sql);
@@ -63,17 +63,17 @@ while ($row = mysqli_fetch_assoc($result)) {
    echo '<div class="order-item mb-3 p-3 border rounded">';
 
 echo '<div class="d-flex justify-content-between mb-2">
-        <b>Đơn hàng #' . $row['MaDHcode'] . '</b>
-        <a href="detail_order_user.php?madon=' . $row['MaDHcode'] . '">Xem chi tiết</a>
+        <b>Đơn hàng #' . $row['MaDatBan'] . '</b>
+        <a href="detail_order_user.php?madon=' . $row['MaDatBan'] . '">Xem chi tiết</a>
       </div>';
 
 echo '<div class="d-flex justify-content-between mb-2">
-        <div><p class="mb-0"><b>Thời gian đặt hàng:</b> ' . date('d/m/Y H:i', strtotime($row['ngaydat'])) . '</p></div>
-        <div><p class="mb-0"><span class="badge text-success fw-bolder fs-6">' . $row['trangthai'] . '</span></p></div>
+        <div><p class="mb-0"><b>Thời gian đặt hàng:</b> ' . date('d/m/Y H:i', strtotime($row['NgayTao'])) . '</p></div>
+        <div><p class="mb-0"><span class="badge text-success fw-bolder fs-6">' . $row['TrangThaiDatBan'] . '</span></p></div>
       </div>';
 
 echo '<div class="d-flex justify-content-between mb-2">
-        <strong>Tổng tiền:</strong><div class="text-danger"> ' . number_format($row['TongTien'], 0, ',', '.') . '₫</div>
+        <strong>Tổng tiền:</strong><div class="text-danger"> ' . number_format($row['Tongtien'], 0, ',', '.') . '₫</div>
      
      
         </div>';
@@ -84,11 +84,14 @@ echo '<div class="d-flex justify-content-between mb-2">
         <div><strong>Phương thức thanh toán:</strong></div>
         <div>';
 
-echo '<div class="fw-bold">' . $row["phuongthucthanhtoan"] . '</div>';
+echo '<div class="fw-bold">' . $row["TrangThaiThanhToan"] . '</div>';
 
-if ($row["trangthaithanhtoan"] == "chuathanhtoan") {
+if ($row["TrangThaiThanhToan"] == "chuathanhtoan") {
     echo '<div class="text-danger fw-bold">Chưa thanh toán</div>';
-} else {
+} else if ($row["TrangThaiThanhToan"] == "da_coc") {
+    echo '<div class="text-success fw-bold">Đã cọc</div>';
+}
+else{
     echo '<div class="text-success fw-bold">Đã thanh toán</div>';
 }
 
@@ -113,9 +116,9 @@ echo '</div>'; // đóng ảnh
 
 // Form thanh toán
 echo '<form action="./handlers/pay_order.php" method="post">
-        <input type="hidden" name="order_id" value="' . $row["MaDHcode"] . '">';
+        <input type="hidden" name="order_id" value="' . $row["MaDatBan"] . '">';
 
-if ($row["trangthaithanhtoan"] == "chuathanhtoan") {
+if ($row["TrangThaiThanhToan"] == "chuathanhtoan") {
     echo '<div class="form-section">
             <div class="form-section-title fw-bold">
                 <i class="fa-solid fa-credit-card"></i> Thanh toán trực tuyến
@@ -141,14 +144,14 @@ if ($row["trangthaithanhtoan"] == "chuathanhtoan") {
 
 echo '<div class="align-content-end d-flex p-0">';
 
-if ($row["trangthai"] == "Chờ xử lý" && $row["trangthaithanhtoan"] != "chuathanhtoan") {
-    echo '<button data-order_id="' . $row["MaDH"] . '" class="col-12 btn-cancel_order">Hủy đơn hàng</button>';
+if ($row["trangthai"] == "da_dat" && $row["TrangThaiThanhToan"] != "chuathanhtoan") {
+    echo '<button data-order_id="' . $row["MaDatBan"] . '" class="col-12 btn-cancel_order">Hủy đơn hàng</button>';
 
-} else if ($row["trangthai"] == "Chờ xử lý" && $row["trangthaithanhtoan"] == "chuathanhtoan") {
-    echo '<button data-order_id="' . $row["MaDH"] . '" class="col-6 btn-cancel_order">Hủy đơn hàng</button>
+} else if ($row["trangthai"] == "da_dat" && $row["TrangThaiThanhToan"] == "chuathanhtoan") {
+    echo '<button data-order_id="' . $row["MaDatBan"] . '" class="col-6 btn-cancel_order">Hủy đơn hàng</button>
           <button type="submit" name="btn_pay_order" class="col-6 btn-pay_order">Thanh toán</button>';
 
-} else if ($row["trangthai"] != "Chờ xử lý" && $row["trangthaithanhtoan"] == "chuathanhtoan") {
+} else if ($row["trangthai"] != "da_dat" && $row["TrangThaiThanhToan"] == "chuathanhtoan") {
     echo '<button type="submit" name="btn_pay_order" class="col-12 btn-pay_order">Thanh toán</button>';
 }
 

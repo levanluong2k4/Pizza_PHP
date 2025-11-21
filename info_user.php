@@ -22,13 +22,13 @@ $result_user = mysqli_query($ketnoi, $sql_user);
 $user = mysqli_fetch_array($result_user);
 
     // Lưu thông tin địa chỉ (NAME để hiển thị)
-        $_SESSION['KH_ward'] = $user['xaphuong'];
-        $_SESSION['KH_district'] = $user['huyenquan'];
-        $_SESSION['KH_province'] = $user['tinhthanhpho'];
-        $_SESSION['KH_so_nha'] = $user['sonha'];
-        $_SESSION['KH_sodt'] = $user['SoDT'];
-        $_SESSION['KH_hoten'] = $user['HoTen'];
-        $_SESSION['KH_diachi'] =$user['sonha'].",".$user['xaphuong'].",".$user['huyenquan'].",".$user['tinhthanhpho'] ;
+        $_SESSION['temp_ward'] = $user['xaphuong'];
+        $_SESSION['temp_district'] = $user['huyenquan'];
+        $_SESSION['temp_province'] = $user['tinhthanhpho'];
+        $_SESSION['temp_so_nha'] = $user['sonha'];
+        $_SESSION['temp_sodt'] = $user['SoDT'];
+        $_SESSION['temp_hoten'] = $user['HoTen'];
+        $_SESSION['temp_diachi'] =$user['sonha'].",".$user['xaphuong'].",".$user['huyenquan'].",".$user['tinhthanhpho'] ;
         
         // Lưu CODE để prefill select (nếu có cột mới)
         $_SESSION['old_address2'] = [
@@ -91,22 +91,22 @@ if (!empty($district_code)) {
 }
 
 // Lưu dữ liệu tạm vào SESSION (dùng tên để hiển thị)
-$_SESSION['KH_hoten'] = $hoten !== '' ? $hoten : ($_SESSION['KH_hoten'] ?? '');
-$_SESSION['KH_sodt'] = $sodt !== '' ? $sodt : ($_SESSION['KH_sodt'] ?? '');
-$_SESSION['KH_so_nha'] = $so_nha !== '' ? $so_nha : ($_SESSION['KH_so_nha'] ?? '');
-$_SESSION['KH_province'] = $province_name ?? ($_SESSION['KH_province'] ?? '');
-$_SESSION['KH_district'] = $district_name ?? ($_SESSION['KH_district'] ?? '');
-$_SESSION['KH_ward'] = $ward_name !== '' ? $ward_name : ($_SESSION['KH_ward'] ?? '');
+$_SESSION['temp_hoten'] = $hoten !== '' ? $hoten : ($_SESSION['temp_hoten'] ?? '');
+$_SESSION['temp_sodt'] = $sodt !== '' ? $sodt : ($_SESSION['temp_sodt'] ?? '');
+$_SESSION['temp_so_nha'] = $so_nha !== '' ? $so_nha : ($_SESSION['temp_so_nha'] ?? '');
+$_SESSION['temp_province'] = $province_name ?? ($_SESSION['temp_province'] ?? '');
+$_SESSION['temp_district'] = $district_name ?? ($_SESSION['temp_district'] ?? '');
+$_SESSION['temp_ward'] = $ward_name !== '' ? $ward_name : ($_SESSION['temp_ward'] ?? '');
 // Nếu client gửi chuỗi diachi (hidden), ưu tiên dùng chuỗi đó; nếu rỗng, ghép từ các phần
 if (!empty($diachi_full)) {
-    $_SESSION['KH_diachi'] = $diachi_full;
+    $_SESSION['temp_diachi'] = $diachi_full;
 } else {
     $parts = array_filter([$so_nha, $ward_name, $district_name, $province_name]);
-    $_SESSION['KH_diachi'] = implode(', ', $parts);
+    $_SESSION['temp_diachi'] = implode(', ', $parts);
 }
 
 // Kiểm tra thiếu thông tin (dùng để disable nút đặt hàng)
-$thieuThongTin = empty($_SESSION['KH_hoten']) || empty($_SESSION['KH_sodt']) || empty($_SESSION['KH_so_nha']) || empty($_SESSION['KH_province'])|| empty($_SESSION['KH_district'])|| empty($_SESSION['KH_ward']);
+$thieuThongTin = empty($_SESSION['temp_hoten']) || empty($_SESSION['temp_sodt']) || empty($_SESSION['temp_so_nha']) || empty($_SESSION['temp_province'])|| empty($_SESSION['temp_district'])|| empty($_SESSION['temp_ward']);
 
 // Lưu vào DB khi nhấn Lưu
 $saved = false;
@@ -122,6 +122,7 @@ if (isset($_POST['save_address'])) {
             'ward' => $ward_name,
             'so_nha' => $so_nha,
         ];
+
     // Nếu user đăng nhập, cập nhật vào bảng khachhang
     if (isset($_SESSION['user_id'])) {
         
@@ -129,9 +130,9 @@ if (isset($_POST['save_address'])) {
         
 
         // Chuẩn bị giá trị an toàn
-        $hoten_safe = mysqli_real_escape_string($ketnoi, $_SESSION['KH_hoten']);
-        $sodt_safe = mysqli_real_escape_string($ketnoi, $_SESSION['KH_sodt']);
-        $diachi_safe = mysqli_real_escape_string($ketnoi, $_SESSION['KH_diachi']);
+        $hoten_safe = mysqli_real_escape_string($ketnoi, $_SESSION['temp_hoten']);
+        $sodt_safe = mysqli_real_escape_string($ketnoi, $_SESSION['temp_sodt']);
+        $diachi_safe = mysqli_real_escape_string($ketnoi, $_SESSION['temp_diachi']);
         $sonha_safe = mysqli_real_escape_string($ketnoi, $so_nha);
         $tinh_safe = mysqli_real_escape_string($ketnoi, $province_name ?? '');
         $huyen_safe = mysqli_real_escape_string($ketnoi, $district_name ?? '');
@@ -159,16 +160,10 @@ if (isset($_POST['save_address'])) {
             $sql_user = "SELECT * FROM `khachhang` WHERE MaKH='$user_id'";
             $result_user = mysqli_query($ketnoi, $sql_user);
             $user = mysqli_fetch_array($result_user);
-        unset($_SESSION['KH_hoten']);
-        unset($_SESSION['KH_sodt']);
-        unset($_SESSION['KH_diachi']);
-        unset($_SESSION['KH_ward']);
-        unset($_SESSION['KH_district']);
-        unset($_SESSION['KH_province']);
-        unset($_SESSION['KH_so_nha']);
+
      
         
-        unset($_SESSION['old_address2'] );
+        
 
     } else {
         $updateMessage = 'Lỗi khi lưu: ' . mysqli_error($ketnoi);
@@ -253,13 +248,24 @@ if($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['change_password'])){
 
     <section class="profile-section bg-icon">
         <div class="container">
-            <?php if($message): ?>
-            <div class="alert alert-<?php echo $message_type; ?> alert-dismissible fade show" role="alert">
-                <i
-                    class="fas fa-<?php echo $message_type == 'success' ? 'check-circle' : 'exclamation-triangle'; ?>"></i>
-                <?php echo $message; ?>
-                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-            </div>
+           <?php if($message): ?>
+<div class="alert alert-<?php echo $message_type; ?> alert-dismissible fade show" role="alert" id="autoCloseAlert">
+    <i class="fas fa-<?php echo $message_type == 'success' ? 'check-circle' : 'exclamation-triangle'; ?>"></i>
+    <?php echo $message; ?>
+    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+</div>
+
+            <script>
+                // Tự động đóng sau 3 giây
+                setTimeout(function() {
+                    var alertElement = document.getElementById('autoCloseAlert');
+                    if(alertElement) {
+                        // Sử dụng Bootstrap's fade out
+                        var bsAlert = new bootstrap.Alert(alertElement);
+                        bsAlert.close();
+                    }
+                }, 3000);
+            </script>
             <?php endif; ?>
 
             <div class="profile-card">
@@ -345,8 +351,8 @@ if($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['change_password'])){
                                             <span style="min-width: 150px;">Tên khách hàng</span>
                                             <span id="hoten_display" style="flex: 1; text-align: center;">
                                                 <?php 
-                                   if(isset($_SESSION['KH_hoten'])){
-                                        echo htmlspecialchars($_SESSION['KH_hoten']);
+                                   if(isset($_SESSION['temp_hoten'])){
+                                        echo htmlspecialchars($_SESSION['temp_hoten']);
                                     }
                                     else  {
                                         echo "<span class='text-danger'>Vui lòng nhập tên người nhận</span>";
@@ -354,7 +360,7 @@ if($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['change_password'])){
                                     ?>
                                             </span>
                                             <input type="text" name="hoten" id="hoten_input" class="form-control mx-2"
-                                                value="<?php echo isset($_SESSION['KH_hoten']) ? htmlspecialchars($_SESSION['KH_hoten']) : ''; ?>"
+                                                value="<?php echo isset($_SESSION['temp_hoten']) ? htmlspecialchars($_SESSION['temp_hoten']) : ''; ?>"
                                                 style="display: none; flex: 1;">
                                             <i class="fa-solid fa-pen-to-square edit-btn"
                                                 style="color: #30d952; cursor: pointer;" data-field="hoten"></i>
@@ -365,8 +371,8 @@ if($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['change_password'])){
                                             <span style="min-width: 150px;">Số điện thoại</span>
                                             <span id="sodt_display" style="flex: 1; text-align: center;">
                                                 <?php 
-                                    if(isset($_SESSION['KH_sodt'])){
-                                        echo htmlspecialchars($_SESSION['KH_sodt']);
+                                    if(isset($_SESSION['temp_sodt'])){
+                                        echo htmlspecialchars($_SESSION['temp_sodt']);
                                     } else {
                                         echo "<span class='text-danger'>Vui lòng nhập số điện thoại</span>";
                                     }
@@ -375,7 +381,7 @@ if($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['change_password'])){
                                             <input oninput="this.value = this.value.replace(/[^0-9]/g, '')"
                                                 type="number" maxlenght='10' name="sodt" id="sodt_input"
                                                 class="form-control mx-2"
-                                                value="<?php echo isset($_SESSION['KH_sodt']) ? htmlspecialchars($_SESSION['KH_sodt']) : ''; ?>"
+                                                value="<?php echo isset($_SESSION['temp_sodt']) ? htmlspecialchars($_SESSION['temp_sodt']) : ''; ?>"
                                                 style="display: none; flex: 1;">
                                             <i class="fa-solid fa-pen-to-square edit-btn"
                                                 style="color: #30d952; cursor: pointer;" data-field="sodt"></i>
@@ -402,13 +408,13 @@ if($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['change_password'])){
 
                                                 <input type="text" id="so_nha_input" name="so_nha"
                                                     placeholder="Nhập số nhà, tên đường..." class="form-control mb-2"
-                                                    value="<?php echo isset($_SESSION['KH_so_nha']) ? $_SESSION['KH_so_nha'] : ''; ?>" />
+                                                    value="<?php echo isset($_SESSION['temp_so_nha']) ? $_SESSION['temp_so_nha'] : ''; ?>" />
 
                                                 <input type="hidden" name="diachi" id="diachi_input"
-                                                    value="<?php echo isset($_SESSION['KH_diachi']) ? $_SESSION['KH_diachi'] : ''; ?>">
+                                                    value="<?php echo isset($_SESSION['temp_diachi']) ? $_SESSION['temp_diachi'] : ''; ?>">
 
                                                 <p id="full_address" class="text-muted mt-2">
-                                                    <?php echo isset($_SESSION['KH_diachi']) ? "🏠 " . $_SESSION['KH_diachi'] : ''; ?>
+                                                    <?php echo isset($_SESSION['temp_diachi']) ? "🏠 " . $_SESSION['temp_diachi'] : ''; ?>
                                                 </p>
                                             </div>
                                         </div>
@@ -462,9 +468,19 @@ if($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['change_password'])){
                             <form method="POST" id="emailForm">
                                 <div class="row justify-content-center">
                                     <div class="col-md-8">
+
+                                         <div class="mb-3">
+                                            <label class="form-label">Email cũ *</label>
+                                      
+                                            <input type="email" class="form-control" style="background-color:#b7b7b7" id="old_email" name="old_email"
+                                                value="<?php echo $user["Email"] ?>" readonly
+                                                placeholder="example@gmail.com" >
+                                         
+                                        </div>
+
                                         <div class="mb-3">
                                             <label class="form-label">Email mới *</label>
-                                            <!-- ✅ Đổi id="email" thành "new_email" -->
+                                      
                                             <input type="email" class="form-control" id="new_email" name="email"
                                                 placeholder="example@gmail.com" required>
                                             <small id="error-new-email" class="text-danger"
@@ -485,13 +501,7 @@ if($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['change_password'])){
             </div>
         </div>
     </section>
-      <?php if($message): ?>
-    <div class="alert alert-<?php echo $message_type; ?> alert-dismissible fade show" role="alert">
-        <i class="fas fa-<?php echo $message_type == 'success' ? 'check-circle' : 'exclamation-triangle'; ?>"></i>
-        <?php echo $message; ?>
-        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-    </div>
-    <?php endif; ?>
+ 
 
 
     <?php include 'components/footer.php'; ?>
@@ -528,6 +538,54 @@ if($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['change_password'])){
         }
     });
 
+</script>
+
+
+<script>
+ 
+
+    document.addEventListener('DOMContentLoaded', function() {
+        const editBtns = document.querySelectorAll('.edit-btn');
+        const saveBtn = document.getElementById('saveBtn');
+        let isEditing = false;
+
+        editBtns.forEach(btn => {
+            btn.addEventListener('click', function() {
+                const field = this.getAttribute('data-field');
+                const display = document.getElementById(field + '_display');
+                const input = document.getElementById(field + '_input');
+
+                if (!isEditing) {
+                    display.style.display = 'none';
+                    input.style.display = 'block';
+                    input.focus();
+                    saveBtn.style.display = 'block';
+                    isEditing = true;
+
+                    this.classList.remove('fa-pen-to-square');
+                    this.classList.add('fa-check');
+                    this.style.color = '#ffc107';
+                } else {
+                    display.textContent = input.value || (field === 'hoten' ?
+                        'Vui lòng nhập tên người nhận' : 'Vui lòng nhập số điện thoại');
+
+                    display.style.display = 'block';
+                    input.style.display = 'none';
+                    saveBtn.style.display = 'block';
+                    isEditing = false;
+
+                    this.classList.remove('fa-check');
+                    this.classList.add('fa-pen-to-square');
+                    this.style.color = '#30d952';
+                }
+
+            });
+        });
+
+        saveBtn.addEventListener('click', function() {
+            isEditing = false;
+        });
+    });
 </script>
 <script>
     
@@ -599,7 +657,7 @@ $(document).ready(function() {
 
 // 3. LOAD ĐỊA CHỈ CŨ (nếu có)
 
-   
+  
 
 
 });

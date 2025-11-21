@@ -147,7 +147,9 @@ if ($loaidatban == 'thuong') {
                     $total1 += $subtotal;
                 endforeach;
                 ?>
-                    <h5 >Giá : <span style="text-decoration: line-through;"><?php echo number_format($total1, 0, ',', '.')?>VNĐ</span></h5>
+                    <h5>Giá : <span
+                            style="text-decoration: line-through;"><?php echo number_format($total1, 0, ',', '.')?>VNĐ</span>
+                    </h5>
                     <div class="combo-price">
                         <i class="fas fa-tags me-2"></i>
                         <?php echo "Chỉ còn : ". number_format($total1-($total1 *($combo_info['giamgia']/100)), 0, ',', '.'); ?>VNĐ
@@ -214,7 +216,7 @@ if ($loaidatban == 'thuong') {
                         <?php echo $loaidatban == 'tiec' ? 'Chọn phòng tiệc' : 'Chọn bàn'; ?>
                         <span class="required">*</span>
                     </div>
-                    
+
                     <div id="tableListContainer">
                         <?php if ($loaidatban == 'thuong'): ?>
                         <div class="alert alert-info">
@@ -231,22 +233,19 @@ if ($loaidatban == 'thuong') {
                 </div>
 
                 <!-- Tiền cọc (chỉ cho bàn tiệc) -->
-                <?php if ($loaidatban == 'tiec'): ?>
+                <?php if ($loaidatban == 'tiec'):
+                   $coc= ($total1-($total1 *($combo_info['giamgia']/100)))/2
+                    
+                    ?>
                 <div class="form-section">
-                    <div class="form-section-title">
-                        <i class="fas fa-money-bill-wave me-2"></i>
-                        Tiền cọc
-                    </div>
 
-                    <div class="mb-3">
-                        <label class="form-label">Số tiền cọc (VNĐ)</label>
-                        <input type="number" class="form-control" name="tiencoc" min="0" value="0">
-                    </div>
 
-                    <div class="deposit-info">
-                        <i class="fas fa-info-circle me-2"></i>
-                        <strong>Lưu ý:</strong> Tiền cọc sẽ được trừ vào tổng hóa đơn khi thanh toán.
-                    </div>
+
+
+                    <input type="hidden" class="form-control" name="tiencoc" min="0" value="<?php echo $coc ?>">
+
+
+
                 </div>
                 <?php endif; ?>
 
@@ -260,11 +259,37 @@ if ($loaidatban == 'thuong') {
                     <textarea class="form-control" name="ghichu" rows="3"
                         placeholder="Yêu cầu đặc biệt (nếu có)..."></textarea>
                 </div>
+                <!-- Ghi chú -->
+                <div class="form-section">
+                    <div class="form-section-title">
+                        <i class="fas fa-comment me-2"></i>
+                        Thanh toán trực tuyến
+                    </div>
+
+                    <div class=" d-flex justify-content-around align-items-center mb-2">
+                       <div class="d-flex align-items-center">
+                         <input class="form-check-input me-2" type="radio" name="transfer_method" id="momo" value="momo" checked>
+                        <label class="form-check-label" for="momo">
+                            <img src="https://upload.wikimedia.org/wikipedia/vi/f/fe/MoMo_Logo.png" alt="MoMo"
+                                style="height: 50px; vertical-align: middle;">Thanh toán qua MoMo
+                        </label>
+                       </div>
+                        <div class="d-flex align-items-center">
+                            <input class="form-check-input me-2" type="radio" name="transfer_method" id="vnpay" value="vnpay">
+                        <label class="form-check-label" for="vnpay">
+                            <img src="https://vnpay.vn/s1/statics.vnpay.vn/2023/6/0oxhzjmxbksr1686814746087.png"
+                                alt="VNPay" style="height: 50px; vertical-align: middle;">Thanh toán qua VNPay
+                        </label>
+                        </div>
+                       
+                    </div>
+                   
+                </div>
 
                 <!-- Nút submit -->
                 <button type="submit" class="btn-submit">
-                    <i class="fas fa-check-circle me-2"></i>
-                    Xác nhận đặt bàn
+                    <i class="fas fa-money-bill-wave me-2"></i>
+                    Cọc trước <?php echo  number_format($coc, 0, ',', '.'); ?> VNĐ
                 </button>
             </form>
         </div>
@@ -394,7 +419,7 @@ if ($loaidatban == 'thuong') {
             updateTimeSlots();
             $('#gioden').val(''); // Reset giờ đã chọn
             $('#selectedTable').val(''); // Reset bàn đã chọn
-            
+
             // Reload danh sách bàn/phòng theo ngày
             const selectedDate = $(this).val();
             if (selectedDate) {
@@ -447,10 +472,10 @@ if ($loaidatban == 'thuong') {
         // Hàm render danh sách bàn/phòng
         function renderTableList(data) {
             if (data.length === 0) {
-                const message = loaidatban === 'thuong' 
-                    ? 'Không có bàn trống cho ngày này. Vui lòng chọn ngày khác.'
-                    : 'Không có phòng trống cho ngày này. Vui lòng chọn ngày khác.';
-                
+                const message = loaidatban === 'thuong' ?
+                    'Không có bàn trống cho ngày này. Vui lòng chọn ngày khác.' :
+                    'Không có phòng trống cho ngày này. Vui lòng chọn ngày khác.';
+
                 $('#tableListContainer').html(`
                     <div class="alert alert-warning">
                         <i class="fas fa-exclamation-triangle me-2"></i>
@@ -461,7 +486,7 @@ if ($loaidatban == 'thuong') {
             }
 
             let html = '<div class="table-selection">';
-            
+
             if (loaidatban === 'thuong') {
                 // Render bàn thường
                 data.forEach(function(ban) {
@@ -486,7 +511,7 @@ if ($loaidatban == 'thuong') {
                     `;
                 });
             }
-            
+
             html += '</div>';
             $('#tableListContainer').html(html);
 

@@ -10,23 +10,23 @@ if (!isset($_SESSION['user_id'])) {
 $id = $_SESSION['user_id'];
 // Khi mới vào trang, luôn hiển thị tất cả đơn hàng
    $sql = "SELECT 
-        donhang.MaDH,
-        donhang.MaDHcode,
-        donhang.ngaydat,
-        donhang.trangthai,
-        donhang.phuongthucthanhtoan,
-        donhang.trangthaithanhtoan,
-        donhang.is_guest,
-        donhang.TongTien,
+      
+        datban.MaDatBan,
+        datban.NgayTao,
+        datban.TrangThaiDatBan,
+        datban.TrangThaiThanhToan,
+      
+        datban.is_guest,
+        datban.Tongtien,
         GROUP_CONCAT(DISTINCT sanpham_size.Anh SEPARATOR ',') as DanhSachAnh
-    FROM donhang, chitietdonhang, sanpham_size, khachhang
-    WHERE donhang.MaDH = chitietdonhang.MaDH
-        AND chitietdonhang.MaSP = sanpham_size.MaSP
-        AND chitietdonhang.MaSize = sanpham_size.MaSize
-        AND donhang.MaKH = khachhang.MaKH
-        AND donhang.MaKH = '$id'
-    GROUP BY donhang.MaDH
-    ORDER BY donhang.ngaydat DESC";
+    FROM datban, chitietdatban, sanpham_size, khachhang
+    WHERE datban.MaDatBan = chitietdatban.MaDatBan
+        AND chitietdatban.MaSP = sanpham_size.MaSP
+        AND chitietdatban.MaSize = sanpham_size.MaSize
+        AND datban.MaKH = khachhang.MaKH
+        AND datban.MaKH = '$id'
+    GROUP BY datban.MaDatBan
+    ORDER BY datban.NgayTao DESC";
 $result = mysqli_query($ketnoi, $sql);
 ?>
 
@@ -79,25 +79,27 @@ $result = mysqli_query($ketnoi, $sql);
                     </button>
                 </li>
                 <li class="nav-item nav-order"><button class="nav-link tab-link  inner-order
-                                     " data-order="chờ xử lý">
-                        Chờ xử lý
+                                     " data-order="da_dat">
+                        Đã đặt bàn
+                    </button></li>
+           
+                <li class="nav-item nav-order"> <button class="nav-link tab-link inner-order
+                                     " data-order="da_xac_nhan">
+                        Đã xác nhận
                     </button></li>
                 <li class="nav-item nav-order"> <button class="nav-link tab-link inner-order
-                                     " data-order="Chờ giao">
-                        Chờ giao
+                                     " data-order="dang_su_dung">
+                        Đang sử dụng
+                    </button></li>
+                      <li class="nav-item nav-order"> <button class="nav-link tab-link inner-order
+                                     " data-order="hoan_thanh">
+                        Hoàn thành
                     </button></li>
                 <li class="nav-item nav-order"> <button class="nav-link tab-link inner-order
-                                     " data-order="Đang giao">
-                        Đang giao
+                                     " data-order="da_huy">
+                        Đã hủy bàn
                     </button></li>
-                <li class="nav-item nav-order"> <button class="nav-link tab-link inner-order
-                                     " data-order="Giao thành công">
-                        Giao thành công
-                    </button></li>
-                <li class="nav-item nav-order"> <button class="nav-link tab-link inner-order
-                                     " data-order="Hủy đơn">
-                        Hủy đơn
-                    </button></li>
+              
             </ul>
 
 
@@ -111,18 +113,18 @@ $result = mysqli_query($ketnoi, $sql);
 
             <div class="order-item mb-3 p-3 pb-0 border rounded">
                         <div class="d-flex justify-content-between mb-2">
-                            <b>Đơn hàng #<?php echo $value["MaDHcode"]; ?></b>
-                            <a href="detail_order_user.php?madon=<?php echo $value["MaDH"]; ?>">Xem chi tiết ></a>
+                            <b>Đơn đặt bàn #<?php echo $value["MaDatBan"]; ?></b>
+                            <a href="detail_order_user.php?madatban=<?php echo $value["MaDatBan"]; ?>">Xem chi tiết ></a>
                         </div>
 
                         <div class="d-flex justify-content-between mb-2">
                             <div>
                                 <p class="mb-0"> <b>thời gian đặt
-                                        hàng:</b><?php echo  date('d/m/Y H:i', strtotime($value["ngaydat"])); ?></p>
+                                        hàng:</b><?php echo  date('d/m/Y H:i', strtotime($value["NgayTao"])); ?></p>
                             </div>
                             <div>
                                 <p class="mb-0"><span
-                                        class="badge text-success fw-bolder  fs-6"><?php echo $value["trangthai"]; ?></span>
+                                        class="badge text-success fw-bolder  fs-6"><?php echo $value["TrangThaiDatBan"]; ?></span>
                                 </p>
                             </div>
                         </div>
@@ -130,19 +132,21 @@ $result = mysqli_query($ketnoi, $sql);
                         <div class="d-flex justify-content-between mb-2">
                             <div><strong>Tổng tiền:</strong></div>
                             <div class="text-danger fw-bold">
-                                <?php echo number_format($value["TongTien"], 0, ',', '.'); ?>₫</div>
+                                <?php echo number_format($value["Tongtien"], 0, ',', '.'); ?>₫</div>
                         </div>
 
                         <div class="d-flex justify-content-between mb-2">
                             <div><strong>Phương thức thanh toán:</strong></div>
-                            <div>
-                                <div class=" fw-bold"><?php echo $value["phuongthucthanhtoan"] ?></div>
-                                <?php if($value["trangthaithanhtoan"]=="chuathanhtoan"): ?>
-                                <div class="text-danger fw-bold"><?php  echo "Chưa thanh toán" ?></div>
-                                <?php else :?>
-                                <div class="text-success fw-bold"><?php  echo "Đã thanh toán" ?></div>
-                                <?php endif; ?>
-                            </div>
+                    <div>
+                        <?php if($value["TrangThaiThanhToan"]=="chuathanhtoan"): ?>
+                            <div class="text-danger fw-bold">Chưa thanh toán</div>
+                        <?php elseif($value["TrangThaiThanhToan"]=="da_coc"): ?>
+                            <div class="text-success fw-bold">Đã cọc trước  <?php echo number_format($value["TienCoc"], 0, ',', '.'); ?>₫</div> </div>
+                        <?php else: ?>
+                            <div class="text-success fw-bold">Đã thanh toán</div>
+                        <?php endif; ?>
+                    </div>
+
                         </div>
 
 
@@ -169,8 +173,8 @@ $result = mysqli_query($ketnoi, $sql);
                         </div>
 
 
-                        <form action="./handlers/pay_order.php" method="post">
-                            <input type="hidden" name="order_id" value="<?php echo $value["MaDHcode"]; ?>">
+                    <form action="./handlers/pay_order.php" method="post">
+                            <input type="hidden" name="order_id" value="<?php echo $value["MaDatBan"]; ?>">
                             <?php if($value["trangthaithanhtoan"] == "chuathanhtoan"): ?>
 
                             <div class="form-section">
@@ -206,32 +210,32 @@ $result = mysqli_query($ketnoi, $sql);
 
                             <div class="align-content-end d-flex p-0">
 
-                                <?php 
-                    // TH1: Đơn chờ xử lý + chưa thanh toán → Hiện 2 nút: Hủy đơn + Thanh toán
-                    if ($value["trangthai"] == "Chờ xử lý" && $value["trangthaithanhtoan"] != "chuathanhtoan") { 
-                    ?>
-                                                <button data-order_id="<?php echo $value["MaDH"]; ?>"
+                                        <?php 
+                            // TH1: Đơn da_dat + chưa thanh toán → Hiện 2 nút: Hủy đơn + Thanh toán
+                            if ($value["trangthai"] == "da_dat" && $value["trangthaithanhtoan"] != "chuathanhtoan") { 
+                            ?>
+                                                <button data-order_id="<?php echo $value["MaDatBan"]; ?>"
                                                     class="col-12 btn-cancel_order">Hủy đơn hàng</button>
 
 
                                                       <?php 
-                          // TH2: Đơn chờ xử lý + đã thanh toán → Chỉ cho phép Hủy đơn
-                          } else if ($value["trangthai"] == "Chờ xử lý" && $value["trangthaithanhtoan"] != "dathanhtoan") { 
+                          // TH2: Đơn da_dat + đã thanh toán → Chỉ cho phép Hủy đơn
+                          } else if ($value["trangthai"] == "da_dat" && $value["trangthaithanhtoan"] != "dathanhtoan") { 
                           ?>
-                                                      <button data-order_id="<?php echo $value["MaDH"]; ?>" class="col-6 btn-cancel_order">Hủy
+                                                      <button data-order_id="<?php echo $value["MaDatBan"]; ?>" class="col-6 btn-cancel_order">Hủy
                                                           đơn hàng</button>
                                                       <button type="submit" name="btn_pay_order" class="col-6 btn-pay_order">Thanh
-                                                          toán</button>
+                                                          toán </button>
                                                       <?php 
-                          // TH3: Đơn không phải chờ xử lý + chưa thanh toán → Chỉ hiển thị "Thanh toán"
-                          } else if ($value["trangthai"] != "Chờ xử lý" && $value["trangthaithanhtoan"] == "chuathanhtoan") { 
+                          // TH3: Đơn không phải da_dat + chưa thanh toán → Chỉ hiển thị "Thanh toán"
+                          } else if ($value["trangthai"] != "da_dat" && $value["trangthaithanhtoan"] == "chuathanhtoan") { 
                           ?>
                                                       <button type="submit" name="btn_pay_order" class="col-12 btn-pay_order">Thanh
                                                           toán</button>
 
                                                       <?php } ?>
 
-                        </form>
+                    </form>
                     </div>
 
                 </div>
@@ -285,7 +289,7 @@ $result = mysqli_query($ketnoi, $sql);
             $(this).addClass("active");
 
             $.ajax({
-                url: "handlers/filter_orders.php",
+                url: "handlers/filter_orders_table.php",
                 type: "POST",
                 data: {
                     trangthai: trangthai

@@ -171,8 +171,11 @@ $combo=mysqli_query($ketnoi,$sqlcombo);
         <div class="collapse navbar-collapse text-end " id="navbarSupportedContent">
 
             <ul class="navbar-nav me-auto mb-2 mb-lg-0 bg-global listmenu ms-lg-auto  ">
-
-                <li class="nav-item dropdown col-md-12 col-lg-3  text-md-center ">
+                 <li class="nav-item col-md-12 ">
+                        <a class="nav-link " aria-current="page" href="/unitop/backend/lesson/school/project_pizza/trangchu.php">Trang chủ</a>
+                    </li>
+                <li class="nav-item dropdown col-md-12  text-md-center ">
+                   
                     <a class="nav-link dropdown-toggle text-warning" href="#" role="button" data-bs-toggle="dropdown"
                         aria-expanded="false">
                         Thực đơn
@@ -188,19 +191,23 @@ $combo=mysqli_query($ketnoi,$sqlcombo);
                     </ul>
 
                 </li>
-                <li class="nav-item">
-                    <a class="nav-link " aria-current="page" href="/unitop/backend/lesson/school/project_pizza/order_user.php">Đặt hàng</a>
+                <li class="nav-item col-md-12 ">
+                    <a class="nav-link " aria-current="page" href="/unitop/backend/lesson/school/project_pizza/order_user.php">Đơn hàng</a>
                 </li>
-                <li class="nav-item dropdown col-md-12 col-lg-3 text-md-center">
+                <li class="nav-item dropdown col-md-12  text-md-center">
                     <a class="nav-link dropdown-toggle text-warning" href="#" role="button" data-bs-toggle="dropdown"
                         aria-expanded="false">
                         Đặt bàn
                     </a>
                     <ul class="dropdown-menu bg-global p-0 text-md-center text-lg-start scrollable-menu">
-
+                         <li class="dropdown-item ">
+                            <a href="/unitop/backend/lesson/school/project_pizza/order_table_user.php">
+                               Đơn Đặt bàn 
+                            </a>
+                        </li>
                         <li class="dropdown-item ">
                             <a href="/unitop/backend/lesson/school/project_pizza/datban/info_datban.php?loaidatban=thuong">
-                                Bàn thường
+                                Đặt bàn thường
                             </a>
                         </li>
                        

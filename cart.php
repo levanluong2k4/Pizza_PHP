@@ -83,8 +83,8 @@ $updateMessage = '';
 if (isset($_POST['save_address'])) {
 
 
-    // Lưu tạm old_address (giữ codes để frontend có thể prefill select)
-        $_SESSION['old_address'] = [
+    // Lưu tạm old_address2 (giữ codes để frontend có thể prefill select)
+        $_SESSION['old_address2'] = [
             'province' => $province_code,
             'district' => $district_code,
             'ward' => $ward_name,
@@ -565,7 +565,7 @@ mysqli_close($ketnoi);
     </script>
 
     <script>
-    const oldAddress = <?php echo json_encode($_SESSION['old_address'] ?? []); ?>;
+    const oldAddress = <?php echo json_encode($_SESSION['old_address2'] ?? []); ?>;
 
     window.addEventListener('load', function() {
         if (oldAddress.province) {

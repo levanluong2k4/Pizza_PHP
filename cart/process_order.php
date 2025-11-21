@@ -77,7 +77,7 @@ if (isset($_POST['order_guest'])) {
 
     // Gọi hàm xử lý VNPAY giống như momo
     $vnpayResult = processVnpayPayment($order_id, $total_price, $orderInfo,$phuongthucchuyenkhoan);
-
+       
     if (isset($vnpayResult['payment_url'])) {
         // Chuyển hướng đến trang thanh toán VNPAY
         header("Location: " . $vnpayResult['payment_url']);
@@ -140,7 +140,7 @@ else {
     mysqli_query($ketnoi, "DELETE FROM chitietgiohang WHERE CartID='$cartId'");
     mysqli_query($ketnoi, "DELETE FROM giohang WHERE MaKH='$user_id'");
 
-    // Xử lý thanh toán MoMo
+ 
     if ($phuongthucchuyenkhoan === 'Chuyển khoản' && $chuyenkhoan === 'momo') {
         $orderInfo = "Thanh toan don hang #" . $order_id;
         $momoResult = processmomoPayment($order_id, $total_price, $orderInfo,$phuongthucchuyenkhoan);
@@ -157,12 +157,13 @@ else {
             header("Location: ../cart.php");
             exit();
         }
-    } else if($phuongthucchuyenkhoan === 'Chuyển khoản' && $chuyenkhoan === 'momo') {
-            $orderInfo = "Thanh toan don hang #" . $order_id;
-
-    // Gọi hàm xử lý VNPAY giống như momo
-    $vnpayResult = processVnpayPayment($order_id, $total_price, $orderInfo);
-
+    } 
+else if($phuongthucchuyenkhoan === 'Chuyển khoản' && $chuyenkhoan === 'vnpay') {
+    $orderInfo = "Thanh toan don hang #" . $order_id;
+    
+   
+    $vnpayResult = processVnpayPayment($order_id, $total_price, $orderInfo, $phuongthucthanhtoan);
+    
     if (isset($vnpayResult['payment_url'])) {
         // Chuyển hướng đến trang thanh toán VNPAY
         header("Location: " . $vnpayResult['payment_url']);
@@ -172,8 +173,8 @@ else {
         $_SESSION['error'] = "Không thể kết nối đến VNPAY. Vui lòng thử lại.";
         header("Location: ../cart.php");
         exit();
-        }
     }
+}
     else{
            // Thanh toán tiền mặt
         header("Location: ../order_confirmation.php?order_id=$order_id&phuongthucthanhtoan=$phuongthucchuyenkhoan");

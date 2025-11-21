@@ -2,196 +2,261 @@
 session_start();
 require __DIR__ . '/../../includes/db_connect.php';
 
-// if (!isset($_SESSION['admin'])) {
-//     header('Location: ../login.php');
-//     exit;
-// }
-
+// Kiểm tra phương thức POST
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
-    header('Location: ../datban.php');
+    $_SESSION['error'] = 'Phương thức không hợp lệ';
+    header('Location: ../quan_ly_datban.php');
     exit;
 }
 
-// Lấy dữ liệu
+// Lấy dữ liệu từ form
 $madatban = intval($_POST['madatban'] ?? 0);
 $hoten = trim($_POST['hoten'] ?? '');
 $sdt = trim($_POST['sdt'] ?? '');
+$loaidatban = $_POST['loaidatban'] ?? 'thuong';
 $ngayden = $_POST['ngayden'] ?? '';
 $gioden = $_POST['gioden'] ?? '';
-$loaidatban = $_POST['loaidatban'] ?? '';
 $table_id = $_POST['table_id'] ?? '';
 $combo_id = intval($_POST['combo_id'] ?? 0);
 $tiencoc = floatval($_POST['tiencoc'] ?? 0);
 $ghichu = trim($_POST['ghichu'] ?? '');
+$products = $_POST['products'] ?? [];
 
-// Validate
-$errors = [];
-
+// Validate dữ liệu
 if ($madatban <= 0) {
-    $errors[] = "Mã đặt bàn không hợp lệ";
+    $_SESSION['error'] = 'Mã đặt bàn không hợp lệ';
+    header('Location: ../quan_ly_datban.php');
+    exit;
 }
 
-if (empty($hoten)) {
-    $errors[] = "Vui lòng nhập họ tên";
+if (empty($hoten) || empty($sdt)) {
+    $_SESSION['error'] = 'Vui lòng điền đầy đủ thông tin khách hàng';
+    header("Location: ../edit_booking.php?id=$madatban");
+    exit;
 }
 
-if (empty($sdt) || !preg_match('/^[0-9]{10}$/', $sdt)) {
-    $errors[] = "Số điện thoại không hợp lệ";
+if (!preg_match('/^[0-9]{10}$/', $sdt)) {
+    $_SESSION['error'] = 'Số điện thoại không hợp lệ';
+    header("Location: ../edit_booking.php?id=$madatban");
+    exit;
 }
 
 if (empty($ngayden) || empty($gioden)) {
-    $errors[] = "Vui lòng chọn ngày giờ";
+    $_SESSION['error'] = 'Vui lòng chọn ngày giờ đến';
+    header("Location: ../edit_booking.php?id=$madatban");
+    exit;
 }
 
 if (empty($table_id)) {
-    $errors[] = "Vui lòng chọn bàn/phòng";
-}
-
-if (!in_array($loaidatban, ['thuong', 'tiec'])) {
-    $errors[] = "Loại đặt bàn không hợp lệ";
-}
-
-if (!empty($errors)) {
-    $_SESSION['error'] = implode('<br>', $errors);
-    header('Location: ../view/edit_booking.php?id=' . $madatban);
+    $_SESSION['error'] = 'Vui lòng chọn bàn hoặc phòng';
+    header("Location: ../edit_booking.php?id=$madatban");
     exit;
 }
 
-// Ghép ngày giờ
+// Tạo datetime
 $ngaygio = $ngayden . ' ' . $gioden . ':00';
 
-// Parse table_id (format: "ban_1" hoặc "phong_2")
-list($type_prefix, $id) = explode('_', $table_id);
-$id = intval($id);
+// Phân tích table_id
+$table_parts = explode('_', $table_id);
+if (count($table_parts) != 2) {
+    $_SESSION['error'] = 'Định dạng bàn/phòng không hợp lệ';
+    header("Location: ../edit_booking.php?id=$madatban");
+    exit;
+}
 
+$table_type = $table_parts[0]; // 'ban' hoặc 'phong'
+$table_id_num = intval($table_parts[1]);
+
+// Xác định MaBan và MaPhong
 $maban = null;
 $maphong = null;
 
-if ($type_prefix == 'ban') {
-    $maban = $id;
+if ($loaidatban == 'thuong' && $table_type == 'ban') {
+    $maban = $table_id_num;
+} elseif ($loaidatban == 'tiec' && $table_type == 'phong') {
+    $maphong = $table_id_num;
 } else {
-    $maphong = $id;
+    $_SESSION['error'] = 'Loại đặt bàn không khớp với bàn/phòng đã chọn';
+    header("Location: ../edit_booking.php?id=$madatban");
+    exit;
 }
 
-// Begin transaction
+// Kiểm tra trùng lịch (trừ booking hiện tại)
+if ($loaidatban == 'thuong' && $maban) {
+    $sql_check = "SELECT MaDatBan FROM datban 
+                  WHERE MaBan = ? 
+                  AND MaDatBan != ?
+                  AND DATE(NgayGio) = ? 
+                  AND TrangThai NOT IN ('da_huy', 'hoan_thanh')";
+    $stmt = $ketnoi->prepare($sql_check);
+    $stmt->bind_param("iis", $maban, $madatban, $ngayden);
+    $stmt->execute();
+    $result = $stmt->get_result();
+    
+    if ($result->num_rows > 0) {
+        $_SESSION['error'] = 'Bàn này đã được đặt trong ngày đã chọn';
+        header("Location: ../edit_booking.php?id=$madatban");
+        exit;
+    }
+    $stmt->close();
+}
+
+if ($loaidatban == 'tiec' && $maphong) {
+    $sql_check = "SELECT MaDatBan FROM datban 
+                  WHERE MaPhong = ? 
+                  AND MaDatBan != ?
+                  AND DATE(NgayGio) = ? 
+                  AND TrangThai NOT IN ('da_huy', 'hoan_thanh')";
+    $stmt = $ketnoi->prepare($sql_check);
+    $stmt->bind_param("iis", $maphong, $madatban, $ngayden);
+    $stmt->execute();
+    $result = $stmt->get_result();
+    
+    if ($result->num_rows > 0) {
+        $_SESSION['error'] = 'Phòng này đã được đặt trong ngày đã chọn';
+        header("Location: ../edit_booking.php?id=$madatban");
+        exit;
+    }
+    $stmt->close();
+}
+
+// Bắt đầu transaction
 $ketnoi->begin_transaction();
 
 try {
-    // Kiểm tra đơn đặt bàn tồn tại
-    $sql_check = "SELECT * FROM datban WHERE MaDatBan = ? FOR UPDATE";
-    $stmt_check = $ketnoi->prepare($sql_check);
-    $stmt_check->bind_param("i", $madatban);
-    $stmt_check->execute();
-    $existing = $stmt_check->get_result()->fetch_assoc();
-    $stmt_check->close();
+    // Cập nhật bảng datban
+    $sql_update = "UPDATE datban SET 
+                   HoTen = ?,
+                   SDT = ?,
+                   NgayGio = ?,
+                   LoaiDatBan = ?,
+                   MaBan = ?,
+                   MaPhong = ?,
+                   MaCombo = ?,
+                   TienCoc = ?,
+                   GhiChu = ?
+                   WHERE MaDatBan = ?";
     
-    if (!$existing) {
-        throw new Exception("Đơn đặt bàn không tồn tại");
+    $stmt = $ketnoi->prepare($sql_update);
+    $combo_id_val = $combo_id > 0 ? $combo_id : null;
+    
+    $stmt->bind_param(
+        "ssssiiidsi",
+        $hoten,
+        $sdt,
+        $ngaygio,
+        $loaidatban,
+        $maban,
+        $maphong,
+        $combo_id_val,
+        $tiencoc,
+        $ghichu,
+        $madatban
+    );
+    
+    if (!$stmt->execute()) {
+        throw new Exception('Lỗi cập nhật thông tin đặt bàn: ' . $stmt->error);
     }
+    $stmt->close();
     
-    // Kiểm tra bàn/phòng có trống không (trừ đơn hiện tại)
-    if ($loaidatban == 'thuong') {
-        $sql_available = "SELECT COUNT(*) as count FROM datban 
-                          WHERE MaBan = ? 
-                          AND DATE(NgayGio) = DATE(?)
-                          AND TrangThaiDatBan IN ('da_dat', 'da_xac_nhan', 'dang_su_dung')
-                          AND MaDatBan != ?";
-        $stmt_available = $ketnoi->prepare($sql_available);
-        $stmt_available->bind_param("isi", $maban, $ngaygio, $madatban);
-        $stmt_available->execute();
-        $result = $stmt_available->get_result()->fetch_assoc();
-        $stmt_available->close();
+    // Xử lý sản phẩm cho bàn tiệc
+    if ($loaidatban == 'tiec' && $maphong) {
+        // Xóa tất cả chi tiết cũ
+        $sql_delete = "DELETE FROM chitietdatban WHERE MaDatBan = ?";
+        $stmt = $ketnoi->prepare($sql_delete);
+        $stmt->bind_param("i", $madatban);
+        $stmt->execute();
+        $stmt->close();
         
-        if ($result['count'] > 0) {
-            throw new Exception("Bàn này đã được đặt vào ngày " . date('d/m/Y', strtotime($ngaygio)));
+        // Thêm chi tiết mới
+        if (!empty($products)) {
+            $sql_insert = "INSERT INTO chitietdatban (MaDatBan, MaSP, MaSize, SoLuong, ThanhTien) 
+                          VALUES (?, ?, ?, ?, ?)";
+            $stmt = $ketnoi->prepare($sql_insert);
+            
+            foreach ($products as $product) {
+                if (isset($product['masp']) && isset($product['masize']) && isset($product['quantity']) && isset($product['price'])) {
+                    $masp = intval($product['masp']);
+                    $masize = intval($product['masize']);
+                    $soluong = intval($product['quantity']);
+                    $dongia = floatval($product['price']);
+                    $thanhtien = $soluong * $dongia;
+                    
+                    if ($masp > 0 && $masize > 0 && $soluong > 0) {
+                        $stmt->bind_param("iiiid", $madatban, $masp, $masize, $soluong, $thanhtien);
+                        
+                        if (!$stmt->execute()) {
+                            throw new Exception('Lỗi thêm chi tiết sản phẩm: ' . $stmt->error);
+                        }
+                    }
+                }
+            }
+            $stmt->close();
         }
         
-        // Update
-        $sql_update = "UPDATE datban SET 
-                       HoTen = ?, 
-                       SDT = ?, 
-                       NgayGio = ?,
-                       LoaiDatBan = 'thuong',
-                       MaBan = ?,
-                       MaPhong = NULL,
-                       MaCombo = NULL,
-                       TienCoc = 0,
-                       GhiChu = ?
-                       WHERE MaDatBan = ?";
+        // Tính tổng tiền
+        $sql_total = "SELECT SUM(ThanhTien) as TongTien 
+                     FROM chitietdatban 
+                     WHERE MaDatBan = ?";
+        $stmt = $ketnoi->prepare($sql_total);
+        $stmt->bind_param("i", $madatban);
+        $stmt->execute();
+        $result = $stmt->get_result();
+        $row = $result->fetch_assoc();
+        $tongtien = $row['TongTien'] ?? 0;
+        $stmt->close();
         
-        $stmt_update = $ketnoi->prepare($sql_update);
-        $stmt_update->bind_param("sssisi", $hoten, $sdt, $ngaygio, $maban, $ghichu, $madatban);
-        
-    } else {
-        // Bàn tiệc
-        $sql_available = "SELECT COUNT(*) as count FROM datban 
-                          WHERE MaPhong = ? 
-                          AND DATE(NgayGio) = DATE(?)
-                          AND TrangThaiDatBan IN ('da_dat', 'da_xac_nhan', 'dang_su_dung')
-                          AND MaDatBan != ?";
-        $stmt_available = $ketnoi->prepare($sql_available);
-        $stmt_available->bind_param("isi", $maphong, $ngaygio, $madatban);
-        $stmt_available->execute();
-        $result = $stmt_available->get_result()->fetch_assoc();
-        $stmt_available->close();
-        
-        if ($result['count'] > 0) {
-            throw new Exception("Phòng này đã được đặt vào ngày " . date('d/m/Y', strtotime($ngaygio)));
-        }
-        
-        // Update
+        // Áp dụng giảm giá combo nếu có
+        $tongtien_sau_giam = $tongtien;
         if ($combo_id > 0) {
-            $sql_update = "UPDATE datban SET 
-                           HoTen = ?, 
-                           SDT = ?, 
-                           NgayGio = ?,
-                           LoaiDatBan = 'tiec',
-                           MaBan = NULL,
-                           MaPhong = ?,
-                           MaCombo = ?,
-                           TienCoc = ?,
-                           GhiChu = ?
-                           WHERE MaDatBan = ?";
+            $sql_combo = "SELECT giamgia FROM combo WHERE MaCombo = ?";
+            $stmt = $ketnoi->prepare($sql_combo);
+            $stmt->bind_param("i", $combo_id);
+            $stmt->execute();
+            $result = $stmt->get_result();
             
-            $stmt_update = $ketnoi->prepare($sql_update);
-            $stmt_update->bind_param("sssiidsi", $hoten, $sdt, $ngaygio, $maphong, $combo_id, $tiencoc, $ghichu, $madatban);
-        } else {
-            $sql_update = "UPDATE datban SET 
-                           HoTen = ?, 
-                           SDT = ?, 
-                           NgayGio = ?,
-                           LoaiDatBan = 'tiec',
-                           MaBan = NULL,
-                           MaPhong = ?,
-                           MaCombo = NULL,
-                           TienCoc = ?,
-                           GhiChu = ?
-                           WHERE MaDatBan = ?";
-            
-            $stmt_update = $ketnoi->prepare($sql_update);
-            $stmt_update->bind_param("sssidsi", $hoten, $sdt, $ngaygio, $maphong, $tiencoc, $ghichu, $madatban);
+            if ($combo_row = $result->fetch_assoc()) {
+                $giamgia = floatval($combo_row['giamgia']);
+                $tongtien_sau_giam = $tongtien - ($tongtien * $giamgia / 100);
+            }
+            $stmt->close();
         }
+        
+        // Cập nhật tổng tiền vào datban
+        $sql_update_total = "UPDATE datban SET TongTien = ? WHERE MaDatBan = ?";
+        $stmt = $ketnoi->prepare($sql_update_total);
+        $stmt->bind_param("di", $tongtien_sau_giam, $madatban);
+        $stmt->execute();
+        $stmt->close();
+    } else {
+        // Nếu là bàn thường, xóa hết chi tiết (nếu có)
+        $sql_delete = "DELETE FROM chitietdatban WHERE MaDatBan = ?";
+        $stmt = $ketnoi->prepare($sql_delete);
+        $stmt->bind_param("i", $madatban);
+        $stmt->execute();
+        $stmt->close();
+        
+        // Set TongTien = 0 cho bàn thường
+        $sql_update_total = "UPDATE datban SET TongTien = 0 WHERE MaDatBan = ?";
+        $stmt = $ketnoi->prepare($sql_update_total);
+        $stmt->bind_param("i", $madatban);
+        $stmt->execute();
+        $stmt->close();
     }
     
-    if (!$stmt_update->execute()) {
-        throw new Exception("Lỗi khi cập nhật: " . $stmt_update->error);
-    }
-    
-    $stmt_update->close();
-    
-    // Commit
+    // Commit transaction
     $ketnoi->commit();
     
-    $_SESSION['success'] = "Cập nhật đặt bàn thành công!";
-    header('Location: ../view/datban.php?date=' . $ngayden);
+    $_SESSION['success'] = 'Cập nhật đặt bàn thành công!';
+    header('Location: ../quan_ly_datban.php');
     exit;
     
 } catch (Exception $e) {
+    // Rollback nếu có lỗi
     $ketnoi->rollback();
-    $_SESSION['error'] = $e->getMessage();
-    header('Location: ../view/edit_booking.php?id=' . $madatban);
+    
+    $_SESSION['error'] = 'Lỗi: ' . $e->getMessage();
+    header("Location: ../edit_booking.php?id=$madatban");
     exit;
 }
-
-$ketnoi->close();
 ?>

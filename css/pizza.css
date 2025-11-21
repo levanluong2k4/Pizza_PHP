@@ -280,6 +280,11 @@ ease-in-out !important;
   cursor: pointer;
   transition: color 0.3s ease-in-out, border-color 0.3s ease-in-out;
 }
+.navbar-nav .nav-item{
+  text-align: left;
+  flex: 0 0 auto;
+  width: 23%;
+}
 
 .inner-nav-tab .nav-item .nav-link:hover {
   color: var(--bs-yellow);

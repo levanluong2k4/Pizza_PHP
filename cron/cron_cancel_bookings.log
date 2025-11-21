@@ -1,0 +1,23 @@
+[2025-11-21 06:53:35] Starting auto-cancel job
+[2025-11-21 06:53:35] Cancelled booking #1 - Customer: Luongle12 (0124545400) - Status changed to 'da_huy'
+[2025-11-21 06:53:35] Cancelled booking #21 - Customer: Luongle12 (0124545400) - Status changed to 'da_huy'
+[2025-11-21 06:53:35] Cancelled booking #22 - Customer: Luongle12 (0124545400) - Status changed to 'da_huy'
+[2025-11-21 06:53:35] Successfully cancelled 3 bookings
+[2025-11-21 06:53:35] Cron job completed
+
+[2025-11-21 16:24:12] Starting auto-cancel job
+[2025-11-21 16:24:12] Current server time: 2025-11-21 16:24:12
+[2025-11-21 16:24:12] SQL Query: SELECT MaDatBan, HoTen, SDT, NgayTao,
+                   TIMESTAMPDIFF(MINUTE, NgayTao, NOW()) as minutes_passed
+            FROM datban 
+            WHERE TrangThaiThanhToan = 'chuathanhtoan' 
+            AND TrangThaiDatBan = 'da_dat'
+            AND TIMESTAMPDIFF(MINUTE, NgayTao, NOW()) >= 5
+[2025-11-21 16:24:12] Found 2 bookings to check
+[2025-11-21 16:24:12] Processing booking #23 - Created: 2025-11-21 15:11:52 - Minutes passed: 72
+[2025-11-21 16:24:12] ✓ Cancelled booking #23 - Customer: Luongle12 (0124545400)
+[2025-11-21 16:24:12] Processing booking #26 - Created: 2025-11-21 15:54:51 - Minutes passed: 29
+[2025-11-21 16:24:12] ✓ Cancelled booking #26 - Customer: Luongle12 (0124545400)
+[2025-11-21 16:24:12] Successfully cancelled 2 bookings
+[2025-11-21 16:24:12] Cron job completed
+

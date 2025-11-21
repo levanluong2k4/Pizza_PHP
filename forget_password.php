@@ -1,218 +1,146 @@
-<?php 
-require 'includes/db_connect.php';
-header('Content-Type: application/json');
-
-$new_password = $_POST['new_password'];
-    $confirm_password = $_POST['confirm_password'];
-    
-
-    
-    // Kiểm tra mật khẩu cũ bằng password_verify
-   
-        if($new_password == $confirm_password){
-            if(strlen($new_password) >= 6){
-                // Mã hóa mật khẩu mới bằng password_hash
-                $hashed_password = password_hash($new_password, PASSWORD_DEFAULT);
-                $sql_update_pass = "UPDATE khachhang SET MatKhau = '$hashed_password' WHERE MaKH = '$user_id'";
-                
-                if(mysqli_query($ketnoi, $sql_update_pass)){
-                        echo json_encode([
-                        'success' => true,
-                       
-                        'message' => 'Thay đổi mật khẩu thành công!'
-                    ]);
-                } else {
-                     echo json_encode([
-                            'success' => false,
-                            'error_type' => 'missing_data',
-                            'message' => 'Có lỗi xảy ra. Vui lòng thử lại!'
-                        ]);
-                }
-            } else {
-                     echo json_encode([
-                    'success' => false,
-                    'error_type' => 'short_password',
-                    'message' => 'mật khẩu phải ít nhất 6 kí tự'
-                ]);
-            }
-        } else {
-                    echo json_encode([
-                'success' => false,
-                'error_type' => 'not match',
-                'message' => 'mật khẩu không khớp!'
-            ]);
-        }
-    
-
-
+<?php
+// ==========================================
+// FILE 1: forget_password.php (Form nhập email)
+// ==========================================
 ?>
-
-
-
-
-
-
-
-
-
-
-
 <!DOCTYPE html>
-<html lang="en">
-
+<html lang="vi">
 <head>
-    <title>Pizza</title>
-    <!-- Required meta tags -->
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
-    <!-- animate -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css" />
-    <link rel="stylesheet" href="./css/animate.css">
-    <!-- Bootstrap CSS v5.2.1 -->
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quên Mật Khẩu - Pizza Store</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" type="text/css" href="//cdn.jsdelivr.net/npm/slick-carousel@1.8.1/slick/slick.css" />
-
-    <!-- slick -->
-    <link rel="stylesheet" type="text/css" href="//cdn.jsdelivr.net/npm/slick-carousel@1.8.1/slick/slick.css" />
-    <link rel="stylesheet" type="text/css" href="//cdn.jsdelivr.net/npm/slick-carousel@1.8.1/slick/slick-theme.css" />
-    <link rel="stylesheet" type="text/css" href="slick/slick-theme.css" />
-
-    <!-- CSS -->
-    <link rel="stylesheet" href="css/pizza.css">
-    <link rel="stylesheet" href="css/basic.css">
-    <link rel="stylesheet" href="css/sign_up.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css"
-        integrity="sha512-SnH5WK+bZxgPHs44uWIX+LLJAJ9/2PkPKZ5QiAj6Ta86w+fsb2TkcmfRyVX3pBnMFcV7oQPJkl9QevSCWr3W6A=="
-        crossorigin="anonymous" referrerpolicy="no-referrer" />
-</head>
-
-<body>
-    <header class="bg-icon">
-        <?php include 'components/navbar.php'; ?>
-        
-
-
-    </header>
-             <!-- Tab đổi mật khẩu -->
-                        <div class="tab-pane fade" id="password" role="tabpanel">
-                            <form method="POST" action="">
-                                <div class="row justify-content-center">
-                                    <div class="col-md-8">
-                                      
-                                        <div class="mb-3">
-                                            <label class="form-label">Mật khẩu mới * (tối thiểu 6 ký tự)</label>
-                                            <input type="password" id="password" class="form-control" name="new_password"
-                                                minlength="6" required>
-                                              <small id="error-new-password" class="text-danger"
-                                                style="font-size: 0.8em;"></small>
-                                        </div>
-                                        <div class="mb-3">
-                                            <label class="form-label">Xác nhận mật khẩu mới *</label>
-                                            <input type="password" id="password_confirm" class="form-control" name="confirm_password"
-                                                minlength="6" required>
-                                        </div>
-                                        <div class="text-center mt-4">
-                                            <button type="submit" name="change_password" class="btn btn-save">
-                                                <i class="fas fa-key"></i> Đổi mật khẩu
-                                            </button>
-                                           
-                                        </div>
-                                    </div>
-                                </div>
-                            </form>
-                        </div>
-
-
-
-
-    <?php include 'components/footer.php'; ?>
-
-    <!-- jQuery (phải load trước slick) -->
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-
-    <!-- Bootstrap JS -->
-    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.8/dist/umd/popper.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.min.js"></script>
-
-    <!-- Slick Carousel JS -->
-    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/slick-carousel@1.8.1/slick/slick.min.js"></script>
-
-    <script src="./js/wow.min.js"></script>
-   
-
- <script>
-    $(document).ready(function() {
-
-
-    
-
-
-
-
-
-    // ✅ Đổi selector thành #new_password
-    $('.btn-save').on('click', function(e) {
-        e.preventDefault();
-
-        const password = $('#password').val().trim();
-        const password_confirm = $('#password_confirm').val().trim();
-
-        const btn = $(this);
-        
-        // Clear error
-        $('#error-new-password').text('');
-        
-        // Validation phía client
-        if (!password) {
-            $('#error-new-password').text('Vui lòng nhập password');
-            return;
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+    <style>
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
-        
-      
+        .forgot-card {
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+            padding: 40px;
+            max-width: 500px;
+            width: 100%;
+        }
+        .forgot-icon {
+            font-size: 60px;
+            color: #667eea;
+            margin-bottom: 20px;
+        }
+        .btn-submit {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border: none;
+            padding: 12px;
+            font-weight: 600;
+        }
+        .btn-submit:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+    </style>
+</head>
+<body>
+    <div class="forgot-card">
+        <div class="text-center">
+            <i class="fas fa-lock forgot-icon"></i>
+            <h3 class="mb-3">Quên Mật Khẩu?</h3>
+            <p class="text-muted mb-4">Nhập email của bạn để nhận mã xác thực</p>
+        </div>
 
-        // Disable button khi đang gửi
-        btn.prop('disabled', true).html('<i class="fas fa-spinner fa-spin"></i> Đang gửi...');
+        <div id="message-container"></div>
 
-         $.ajax({
-            url: 'forget_password.php',
-            method: 'POST',
-            data: { confirm_password:password_confirm
-                ,new_password:password  },
-            dataType: 'json',
-            success: function(response) {
-                if (response.success) {
-                    window.location.href = 'sign_in.php';
-                } else {
-                    if (response.error_type === 'short_password' || response.error_type === 'not match') {
-                        $('#error-new-password').text(response.message);
-                    } else {
-                        alert(response.message);
-                    }
-                    btn.prop('disabled', false).html('<i class="fas fa-envelope"></i> Đổi password');
-                }
-            },
-            error: function(xhr, status, error) {
-                console.error('AJAX Error:', xhr.responseText);
-                alert('Lỗi hệ thống hoặc mạng. Vui lòng thử lại!');
-                btn.prop('disabled', false).html('<i class="fas fa-envelope"></i> Đổi password');
+        <form id="forgotForm">
+            <div class="mb-3">
+                <label class="form-label">Email *</label>
+                <div class="input-group">
+                    <span class="input-group-text"><i class="fas fa-envelope"></i></span>
+                    <input type="email" class="form-control" id="email" name="email" 
+                           placeholder="example@gmail.com" required>
+                </div>
+                <small id="error-email" class="text-danger"></small>
+            </div>
+
+            <button type="submit" class="btn btn-primary btn-submit w-100">
+                <i class="fas fa-paper-plane"></i> Gửi Mã Xác Thực
+            </button>
+
+            <div class="text-center mt-3">
+                <a href="dangnhap.php" class="text-decoration-none">
+                    <i class="fas fa-arrow-left"></i> Quay lại đăng nhập
+                </a>
+            </div>
+        </form>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        $('#forgotForm').on('submit', function(e) {
+            e.preventDefault();
+            
+            const email = $('#email').val().trim();
+            const btn = $(this).find('button[type="submit"]');
+            
+            $('#error-email').text('');
+            $('#message-container').html('');
+            
+            if (!email) {
+                $('#error-email').text('Vui lòng nhập email!');
+                return;
             }
+            
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            if (!emailRegex.test(email)) {
+                $('#error-email').text('Email không đúng định dạng!');
+                return;
+            }
+            
+            btn.prop('disabled', true).html('<i class="fas fa-spinner fa-spin"></i> Đang xử lý...');
+            
+            $.ajax({
+                url: 'handlers/send_reset_code.php',
+                method: 'POST',
+                data: { email: email },
+                dataType: 'json',
+                success: function(response) {
+                    if (response.success) {
+                        $('#message-container').html(`
+                            <div class="alert alert-success alert-dismissible fade show">
+                                <i class="fas fa-check-circle"></i> ${response.message}
+                            </div>
+                        `);
+                        
+                        setTimeout(function() {
+                            window.location.href = 'handlers/verify_reset_code.php';
+                        }, 2000);
+                    } else {
+                        $('#message-container').html(`
+                            <div class="alert alert-danger alert-dismissible fade show">
+                                <i class="fas fa-exclamation-triangle"></i> ${response.message}
+                            </div>
+                        `);
+                        btn.prop('disabled', false).html('<i class="fas fa-paper-plane"></i> Gửi Mã Xác Thực');
+                    }
+                },
+                error: function(xhr) {
+                    $('#message-container').html(`
+                        <div class="alert alert-danger">
+                            <i class="fas fa-times-circle"></i> Lỗi hệ thống! Vui lòng thử lại sau.
+                        </div>
+                    `);
+                    btn.prop('disabled', false).html('<i class="fas fa-paper-plane"></i> Gửi Mã Xác Thực');
+                }
+            });
         });
-    });
-
-    // Validation khi người dùng nhập
-    $('#new_password').on('input', function() {
-        $('#error-new-password').text('');
-    });
-
-
-// 3. LOAD ĐỊA CHỈ CŨ (nếu có)
-
-   
-
-
-});
- </script>
-
+        
+        $('#email').on('input', function() {
+            $('#error-email').text('');
+        });
+    </script>
+</body>
 </html>
-
-
