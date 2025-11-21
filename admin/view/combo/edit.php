@@ -1,34 +1,80 @@
 <?php
-require __DIR__ . '/../../includes/db_connect.php';
+require __DIR__ . '/../../../includes/db_connect.php';
 
-$sql = "
-    SELECT 
-    lsp.MaLoai,
-    lsp.TenLoai,
-    IFNULL(SUM(ctdh.SoLuong), 0) AS TongSoLuongBan
-    FROM loaisanpham lsp
-    LEFT JOIN sanpham sp ON lsp.MaLoai = sp.MaLoai
-    LEFT JOIN chitietdonhang ctdh ON sp.MaSP = ctdh.MaSP
-    LEFT JOIN donhang dh ON ctdh.MaDH = dh.MaDH 
-    AND dh.trangthai = 'Giao thành công'
-    GROUP BY lsp.MaLoai, lsp.TenLoai
-    ORDER BY TongSoLuongBan DESC;
+$errors = [];
+$success = "";
 
-";
-$kq = mysqli_query($ketnoi, $sql);
+// Lấy id combo
+$id = intval($_GET["MaCombo"] ?? 0);
 
+// Lấy dữ liệu combo
+$sql = "SELECT * FROM combo WHERE MaCombo = ?";
+$stmt = $ketnoi->prepare($sql);
+$stmt->bind_param("i", $id);
+$stmt->execute();
+$result = $stmt->get_result();
+$combo = $result->fetch_assoc();
+
+if (!$combo) {
+    die("Không tìm thấy combo.");
+}
+
+$Tencombo_old = $combo["Tencombo"];
+$Anh_old      = $combo["Anh"];
+$giamgia_old  = $combo["giamgia"];
+
+// Xử lý submit update
+if ($_SERVER["REQUEST_METHOD"] === "POST") {
+
+    $Tencombo = trim($_POST["Tencombo"] ?? "");
+    $giamgia  = intval($_POST["giamgia"] ?? 0);
+
+    $Anh = $Anh_old; // Mặc định giữ ảnh cũ
+
+    // Xử lý upload ảnh mới
+    if (isset($_FILES["Anh"]) && $_FILES["Anh"]["error"] === 0) {
+        $targetDir = "../../../img/";
+        $ext = pathinfo($_FILES["Anh"]["name"], PATHINFO_EXTENSION);
+        $fileName = "combo_" . time() . "." . $ext;
+        $targetPath = $targetDir . $fileName;
+
+        if (move_uploaded_file($_FILES["Anh"]["tmp_name"], $targetPath)) {
+            $Anh = $fileName;
+        }
+    }
+
+    // Validate
+    if ($Tencombo === "") $errors[] = "Tên combo không được để trống";
+    if ($giamgia < 0 || $giamgia > 100) $errors[] = "Giảm giá phải từ 0–100%";
+
+    if (empty($errors)) {
+
+        $sql = "UPDATE combo 
+                SET Tencombo = ?, Anh = ?, giamgia = ?
+                WHERE MaCombo = ?";
+        $stmt = $ketnoi->prepare($sql);
+        $stmt->bind_param("ssii", $Tencombo, $Anh, $giamgia, $id);
+
+        if ($stmt->execute()) {
+            header("Location: index.php");
+            exit;
+        } else {
+            $errors[] = "Lỗi SQL: " . $ketnoi->error;
+        }
+    }
+}
 ?>
+
+
 <!DOCTYPE html>
 <html lang="vi">
 
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Thống kê sản phẩm bán chạy - Admin Panel</title>
+    <title>Sửa Combo</title>
 
-    <!-- Bootstrap CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet">
-    <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" />
 
     <style>
@@ -116,41 +162,32 @@ $kq = mysqli_query($ketnoi, $sql);
         .main-title {
             color: #28a745;
             font-weight: 700;
-            margin-top: 40px;
-            text-align: center;
+            margin-top: 50px;
         }
 
-        table {
+        .text-muted {
+            color: #6c757d !important;
+        }
+
+        .form-container {
             background: white;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            margin-top: 20px;
+        }
+
+        .preview-img {
+            width: 120px;
             border-radius: 8px;
-            overflow: hidden;
-            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
-        }
-
-        th {
-            background-color: #28a745;
-            color: white;
-        }
-
-        td,
-        th {
-            vertical-align: middle;
-            text-align: center;
-        }
-
-        tr:nth-child(even) {
-            background-color: #f2f2f2;
-        }
-
-        img {
-            border-radius: 6px;
+            margin-top: 10px;
+            border: 1px solid #ddd;
         }
     </style>
 </head>
 
 <body>
 
-    <!-- ===== NAVBAR GIỮ NGUYÊN ===== -->
     <nav class="navbar navbar-expand-lg">
         <div class="container-fluid">
             <a class="navbar-brand" href="#"><i class="fa-solid fa-leaf"></i> Admin Panel</a>
@@ -163,10 +200,13 @@ $kq = mysqli_query($ketnoi, $sql);
 
             <div class="collapse navbar-collapse" id="navbarNavDropdown">
                 <ul class="navbar-nav text-center">
-                    <!-- Giữ nguyên tất cả các option -->
+
+                    <!-- QUẢN LÝ SẢN PHẨM -->
                     <li class="nav-item dropdown">
                         <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown"
-                            aria-expanded="false"><i class="fa-solid fa-box-open"></i> Quản lý sản phẩm</a>
+                            aria-expanded="false">
+                            <i class="fa-solid fa-box-open"></i> Quản lý sản phẩm
+                        </a>
                         <ul class="dropdown-menu">
                             <li class="dropdown-submenu">
                                 <a class="dropdown-item" href="#" data-bs-toggle="dropdown">
@@ -178,6 +218,7 @@ $kq = mysqli_query($ketnoi, $sql);
                                     <li><a class="dropdown-item" href="#"><i class="fa-solid fa-layer-group"></i> Danh mục loại sản phẩm</a></li>
                                 </ul>
                             </li>
+
                             <li class="dropdown-submenu">
                                 <a class="dropdown-item" href="#" data-bs-toggle="dropdown">
                                     <i class="fa-solid fa-ruler-combined"></i> Quản lý size sản phẩm
@@ -187,6 +228,7 @@ $kq = mysqli_query($ketnoi, $sql);
                                     <li><a class="dropdown-item" href="#"><i class="fa-solid fa-plus-circle"></i> Thêm size sản phẩm</a></li>
                                 </ul>
                             </li>
+
                             <li class="dropdown-submenu">
                                 <a class="dropdown-item" href="#" data-bs-toggle="dropdown">
                                     <i class="fa-solid fa-tags"></i> Quản lý giá theo size
@@ -199,28 +241,36 @@ $kq = mysqli_query($ketnoi, $sql);
                         </ul>
                     </li>
 
-                    <!-- Các mục khác giữ nguyên -->
+                    <!-- TÀI KHOẢN -->
                     <li class="nav-item dropdown">
                         <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown"
-                            aria-expanded="false"><i class="fa-solid fa-user-tie"></i> Quản lý tài khoản</a>
+                            aria-expanded="false">
+                            <i class="fa-solid fa-user-tie"></i> Quản lý tài khoản
+                        </a>
                         <ul class="dropdown-menu">
                             <li><a class="dropdown-item" href="create_account.php"><i class="fa-solid fa-id-card"></i> Tạo tài khoản nhân viên</a></li>
                         </ul>
                     </li>
 
+                    <!-- KHÁCH HÀNG -->
                     <li class="nav-item dropdown">
                         <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown"
-                            aria-expanded="false"><i class="fa-solid fa-users"></i> Quản lý khách hàng</a>
+                            aria-expanded="false">
+                            <i class="fa-solid fa-users"></i> Quản lý khách hàng
+                        </a>
                         <ul class="dropdown-menu">
                             <li><a class="dropdown-item" href="list_customer.php"><i class="fa-solid fa-list"></i> Danh sách khách hàng</a></li>
-                            <li><a class="dropdown-item" href="#"><i class="fa-solid fa-crown"></i> Khách hàng mua nhiều nhất</a></li>
-                            <li><a class="dropdown-item" href="#"><i class="fa-solid fa-map-marked-alt"></i> Khu vực KH mua nhiều nhất</a></li>
+                            <li><a class="dropdown-item" href="add_customer.php"><i class="fa-solid fa-crown"></i> Khách hàng mua nhiều nhất</a></li>
+                            <li><a class="dropdown-item" href="add_customer.php"><i class="fa-solid fa-map-marked-alt"></i> Khu vực KH mua nhiều nhất</a></li>
                         </ul>
                     </li>
 
+                    <!-- ĐƠN HÀNG -->
                     <li class="nav-item dropdown">
                         <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown"
-                            aria-expanded="false"><i class="fa-solid fa-receipt"></i> Quản lý đơn hàng</a>
+                            aria-expanded="false">
+                            <i class="fa-solid fa-receipt"></i> Quản lý đơn hàng
+                        </a>
                         <ul class="dropdown-menu">
                             <li><a class="dropdown-item" href="list_orders.php"><i class="fa-solid fa-clipboard-list"></i> Danh sách đơn hàng</a></li>
                             <li><a class="dropdown-item" href="#"><i class="fa-solid fa-hourglass-half"></i> Đơn hàng chờ xử lý</a></li>
@@ -229,28 +279,36 @@ $kq = mysqli_query($ketnoi, $sql);
                         </ul>
                     </li>
 
-                    <!-- Thống kê -->
+                    <!-- THỐNG KÊ -->
                     <li class="nav-item dropdown">
                         <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown"
-                            aria-expanded="false"><i class="fa-solid fa-chart-line"></i> Thống kê</a>
+                            aria-expanded="false">
+                            <i class="fa-solid fa-chart-line"></i> Thống kê
+                        </a>
                         <ul class="dropdown-menu">
+
                             <li class="dropdown-submenu">
-                                <a class="dropdown-item" href="#" data-bs-toggle="dropdown"><i class="fa-solid fa-box"></i> Thống kê sản phẩm</a>
+                                <a class="dropdown-item" href="#" data-bs-toggle="dropdown">
+                                    <i class="fa-solid fa-box"></i> Thống kê sản phẩm
+                                </a>
                                 <ul class="dropdown-menu">
-                                    <li><a class="dropdown-item" href="./best_selling_product.php"><i class="fa-solid fa-fire"></i> Sản phẩm bán chạy</a></li>
-                                    <li><a class="dropdown-item" href="./best_selling_category.php"><i class="fa-solid fa-layer-group"></i> Loại sản phẩm bán chạy</a></li>
+                                    <li><a class="dropdown-item" href="../best_selling/best_selling_product.php"><i class="fa-solid fa-fire"></i> Sản phẩm bán chạy</a></li>
+                                    <li><a class="dropdown-item" href="../best_selling/best_selling_category.php"><i class="fa-solid fa-layer-group"></i> Loại sản phẩm bán chạy</a></li>
                                     <li><a class="dropdown-item" href="#"><i class="fa-solid fa-box-open"></i> Tồn kho sản phẩm</a></li>
                                     <li><a class="dropdown-item" href="#"><i class="fa-solid fa-exclamation-triangle"></i> Sản phẩm sắp hết hàng</a></li>
                                 </ul>
                             </li>
+
                             <li class="dropdown-submenu">
-                                <a class="dropdown-item" href="#" data-bs-toggle="dropdown"><i class="fa-solid fa-money-bill-wave"></i> Thống kê doanh thu</a>
+                                <a class="dropdown-item" href="#" data-bs-toggle="dropdown">
+                                    <i class="fa-solid fa-money-bill-wave"></i> Thống kê doanh thu
+                                </a>
                                 <ul class="dropdown-menu">
-                                    <li><a class="dropdown-item" href="./revenue_statistic_table.php"><i class="fa-solid fa-table"></i> Doanh thu theo số liệu</a></li>
-                                    <li><a class="dropdown-item" href="./revenue_statistic_chart.php"><i class="fa-solid fa-chart-bar"></i> Doanh thu theo biểu đồ</a></li>
+                                    <li><a class="dropdown-item" href="../revenue_statistic/revenue_statistic_table.php"><i class="fa-solid fa-table"></i> Doanh thu theo số liệu</a></li>
+                                    <li><a class="dropdown-item" href="../revenue_statistic/revenue_statistic_chart.php"><i class="fa-solid fa-chart-bar"></i> Doanh thu theo biểu đồ</a></li>
                                 </ul>
                             </li>
-                            <!-- Thống kê đơn hàng -->
+
                             <li class="dropdown-submenu">
                                 <a class="dropdown-item" href="#" data-bs-toggle="dropdown">
                                     <i class="fa-solid fa-shopping-cart"></i> Thống kê đơn hàng
@@ -261,68 +319,110 @@ $kq = mysqli_query($ketnoi, $sql);
                                     <li><a class="dropdown-item" href="#"><i class="fa-solid fa-clock"></i> Đơn hàng theo thời gian</a></li>
                                 </ul>
                             </li>
+
+                            <li>
+                                <hr class="dropdown-divider">
+                            </li>
+                            <li><a class="dropdown-item" href="#"><i class="fa-solid fa-chart-area"></i> Báo cáo tổng hợp</a></li>
+                            <li><a class="dropdown-item" href="#"><i class="fa-solid fa-file-export"></i> Xuất báo cáo Excel</a></li>
+                            <li><a class="dropdown-item" href="#"><i class="fa-solid fa-file-pdf"></i> Xuất báo cáo PDF</a></li>
                         </ul>
                     </li>
 
-                    
                 </ul>
 
+                <!-- Logout -->
                 <div class="ms-auto">
                     <a href="logout.php" class="logout-btn"><i class="fa-solid fa-right-from-bracket"></i> Đăng xuất</a>
                 </div>
+
             </div>
         </div>
     </nav>
 
-    <!-- ===== NỘI DUNG CHÍNH: BẢNG THỐNG KÊ ===== -->
-    <div class="container mt-5">
-        <h2 class="main-title"><i class="fa-solid"></i> Thống kê loại sản phẩm bán chạy</h2>
-        <div class="table-responsive mt-4">
-            <table class="table table-bordered table-hover align-middle">
-                <thead>
-                    <tr>
-                        <th>Mã loại sản phẩm</th>
-                        <th>Tên loại sản phẩm</th>
-                        <th>Đã bán</th>
-                    </tr>
-                </thead>
+    <div class="container mt-4">
+        <h2 class="main-title"><i class="fa-solid fa-pen-to-square"></i> Sửa Combo</h2>
 
-                <tbody>
-                    <?php foreach ($kq as $value) { ?>
-                        <tr>
-                            <td><?php echo $value["MaLoai"]; ?></td>
-                            <td><?php echo $value["TenLoai"]; ?></td>
-                            <td><b><?php echo $value["TongSoLuongBan"]; ?></b></td>
-                        </tr>
-                    <?php } ?>
-                </tbody>
+        <a href="./index.php" class="btn btn-secondary mt-2">
+            <i class="fa-solid fa-arrow-left"></i> Quay lại danh sách
+        </a>
 
-            </table>
+        <div class="form-container mt-4">
+
+            <?php if (!empty($errors)) { ?>
+                <div class="alert alert-danger">
+                    <?php foreach ($errors as $err) echo "<div>- $err</div>"; ?>
+                </div>
+            <?php } ?>
+
+            <form method="POST" enctype="multipart/form-data">
+
+                <div class="mb-3">
+                    <label class="form-label">Tên Combo:</label>
+                    <input type="text" name="Tencombo" value="<?= htmlspecialchars($Tencombo_old) ?>" class="form-control" required>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Giảm giá (%):</label>
+                    <input type="number" name="giamgia" class="form-control"
+                        min="0" max="100"
+                        value="<?= htmlspecialchars($giamgia_old) ?>" required>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">Ảnh Combo:</label>
+                    <input type="file" name="Anh" class="form-control">
+                    <small class="text-muted d-block mt-1">Nếu không chọn ảnh → giữ ảnh cũ.</small>
+
+                    <?php if ($Anh_old): ?>
+                        <img src="../../../img/<?= $Anh_old ?>" class="preview-img">
+                    <?php endif; ?>
+                </div>
+
+                <button type="submit" class="btn btn-success px-4">
+                    <i class="fa-solid fa-check"></i> Cập nhật
+                </button>
+
+            </form>
         </div>
+
     </div>
 
+    <!-- Bootstrap JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"></script>
+
     <script>
         document.addEventListener('DOMContentLoaded', function() {
             const dropdownSubmenus = document.querySelectorAll('.dropdown-submenu');
+
             dropdownSubmenus.forEach(function(submenu) {
                 const submenuLink = submenu.querySelector('a[data-bs-toggle="dropdown"]');
                 const submenuDropdown = submenu.querySelector('.dropdown-menu');
-                submenu.addEventListener('mouseenter', () => submenuDropdown.classList.add('show'));
-                submenu.addEventListener('mouseleave', () => submenuDropdown.classList.remove('show'));
+
+                submenu.addEventListener('mouseenter', function() {
+                    submenuDropdown.classList.add('show');
+                });
+
+                submenu.addEventListener('mouseleave', function() {
+                    submenuDropdown.classList.remove('show');
+                });
+
                 submenuLink.addEventListener('click', function(e) {
                     e.preventDefault();
                     e.stopPropagation();
                     submenuDropdown.classList.toggle('show');
                 });
             });
+
             document.addEventListener('click', function(e) {
                 if (!e.target.closest('.dropdown-submenu')) {
-                    document.querySelectorAll('.dropdown-submenu .dropdown-menu').forEach(menu => menu.classList.remove('show'));
+                    document.querySelectorAll('.dropdown-submenu .dropdown-menu').forEach(function(menu) {
+                        menu.classList.remove('show');
+                    });
                 }
             });
         });
     </script>
+
 </body>
 
 </html>

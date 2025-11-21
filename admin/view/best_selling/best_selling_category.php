@@ -1,90 +1,40 @@
 <?php
-require __DIR__ . '/../../includes/db_connect.php';
-
-date_default_timezone_set('Asia/Ho_Chi_Minh');
-$now = new DateTime();
-$currentYear = (int)$now->format('Y');
-$currentMonth = (int)$now->format('m');
-
-$filter = $_GET['filter'] ?? 'year';
-$selectedYear = $_GET['year'] ?? $currentYear;
-$selectedMonth = $_GET['month'] ?? null;
-$from = $_GET['from_date'] ?? null;
-$to = $_GET['to_date'] ?? null;
-
-// Xác định điều kiện lọc
-if ($from && $to) {
-    $condition = "AND DATE(dh.NgayDat) BETWEEN '$from' AND '$to'";
-    $title = "Doanh thu từ $from đến $to";
-} else {
-    switch ($filter) {
-        case 'today':
-            $condition = "AND DATE(dh.NgayDat) = CURDATE()";
-            $title = "Doanh thu hôm nay (" . $now->format('d/m/Y') . ")";
-            break;
-        case '12months':
-            $condition = "AND dh.NgayDat >= DATE_SUB(CURDATE(), INTERVAL 12 MONTH)";
-            $title = "Doanh thu 12 tháng gần nhất";
-            break;
-        case 'year':
-            $condition = "AND YEAR(dh.NgayDat) = $selectedYear";
-            $title = "Doanh thu năm $selectedYear";
-            break;
-        case 'month':
-            $start = sprintf("%04d-%02d-01", $selectedYear, $selectedMonth);
-            $end = date("Y-m-t", strtotime($start));
-            $condition = "AND dh.NgayDat BETWEEN '$start' AND '$end'";
-            $title = "Doanh thu tháng $selectedMonth/$selectedYear";
-            break;
-        default:
-            $condition = "AND YEAR(dh.NgayDat) = $currentYear";
-            $title = "Doanh thu năm $currentYear";
-            break;
-    }
-}
+require __DIR__ . '/../../../includes/db_connect.php';
 
 $sql = "
-SELECT 
-    DATE(dh.NgayDat) AS Ngay,
-    SUM(ctdh.SoLuong) AS TongSoLuongBan,
-    SUM(ctdh.ThanhTien) AS DoanhThuNgay
-FROM donhang dh
-JOIN chitietdonhang ctdh ON dh.MaDH = ctdh.MaDH
-WHERE dh.trangthai = 'Giao thành công'
-$condition
-GROUP BY DATE(dh.NgayDat)
-ORDER BY Ngay ASC;
+    SELECT 
+    lsp.MaLoai,
+    lsp.TenLoai,
+    IFNULL(SUM(ctdh.SoLuong), 0) AS TongSoLuongBan
+    FROM loaisanpham lsp
+    LEFT JOIN sanpham sp ON lsp.MaLoai = sp.MaLoai
+    LEFT JOIN chitietdonhang ctdh ON sp.MaSP = ctdh.MaSP
+    LEFT JOIN donhang dh ON ctdh.MaDH = dh.MaDH 
+    AND dh.trangthai = 'Giao thành công'
+    GROUP BY lsp.MaLoai, lsp.TenLoai
+    ORDER BY TongSoLuongBan DESC;
+
 ";
-
 $kq = mysqli_query($ketnoi, $sql);
-$chartData = [];
-while ($row = mysqli_fetch_assoc($kq)) $chartData[] = $row;
-mysqli_data_seek($kq, 0);
-?>
 
+?>
 <!DOCTYPE html>
 <html lang="vi">
 
 <head>
     <meta charset="utf-8" />
-    <title>Thống kê doanh thu theo biểu đồ</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet">
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Thống kê sản phẩm bán chạy - Admin Panel</title>
+
     <!-- Bootstrap CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet">
     <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" />
+
     <style>
         body {
             background-color: #f9fafb;
             font-family: "Segoe UI", sans-serif;
-        }
-
-        .main-title {
-            color: #28a745;
-            font-weight: 700;
-            text-align: center;
-            margin-top: 40px;
         }
 
         .navbar {
@@ -162,10 +112,43 @@ mysqli_data_seek($kq, 0);
             background: white;
             color: #28a745;
         }
+
+        .main-title {
+            color: #28a745;
+            font-weight: 700;
+            margin-top: 40px;
+            text-align: center;
+        }
+
+        table {
+            background: white;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        th {
+            background-color: #28a745;
+            color: white;
+        }
+
+        td,
+        th {
+            vertical-align: middle;
+            text-align: center;
+        }
+
+        tr:nth-child(even) {
+            background-color: #f2f2f2;
+        }
+
+        img {
+            border-radius: 6px;
+        }
     </style>
 </head>
 
-<body class="p-3">
+<body>
 
     <!-- ===== NAVBAR GIỮ NGUYÊN ===== -->
     <nav class="navbar navbar-expand-lg">
@@ -263,8 +246,8 @@ mysqli_data_seek($kq, 0);
                             <li class="dropdown-submenu">
                                 <a class="dropdown-item" href="#" data-bs-toggle="dropdown"><i class="fa-solid fa-money-bill-wave"></i> Thống kê doanh thu</a>
                                 <ul class="dropdown-menu">
-                                    <li><a class="dropdown-item" href="./revenue_statistic_table.php"><i class="fa-solid fa-table"></i> Doanh thu theo số liệu</a></li>
-                                    <li><a class="dropdown-item" href="./revenue_statistic_chart.php"><i class="fa-solid fa-chart-bar"></i> Doanh thu theo biểu đồ</a></li>
+                                    <li><a class="dropdown-item" href="../revenue_statistic/revenue_statistic_table.php"><i class="fa-solid fa-table"></i> Doanh thu theo số liệu</a></li>
+                                    <li><a class="dropdown-item" href="../revenue_statistic/revenue_statistic_chart.php"><i class="fa-solid fa-chart-bar"></i> Doanh thu theo biểu đồ</a></li>
                                 </ul>
                             </li>
                             <!-- Thống kê đơn hàng -->
@@ -281,7 +264,7 @@ mysqli_data_seek($kq, 0);
                         </ul>
                     </li>
 
-
+                    
                 </ul>
 
                 <div class="ms-auto">
@@ -291,131 +274,32 @@ mysqli_data_seek($kq, 0);
         </div>
     </nav>
 
-    <div class="container">
-        <h2 class="main-title">Thống kê doanh thu theo biểu đồ</h2>
+    <!-- ===== NỘI DUNG CHÍNH: BẢNG THỐNG KÊ ===== -->
+    <div class="container mt-5">
+        <h2 class="main-title"><i class="fa-solid"></i> Thống kê loại sản phẩm bán chạy</h2>
+        <div class="table-responsive mt-4">
+            <table class="table table-bordered table-hover align-middle">
+                <thead>
+                    <tr>
+                        <th>Mã loại sản phẩm</th>
+                        <th>Tên loại sản phẩm</th>
+                        <th>Đã bán</th>
+                    </tr>
+                </thead>
 
-        <form method="GET" class="row g-3 align-items-end mb-4">
-            <div class="col-auto">
-                <label for="from_date" class="form-label">Từ ngày:</label>
-                <input type="date" id="from_date" name="from_date" class="form-control"
-                    value="<?php echo htmlspecialchars($_GET['from_date'] ?? ''); ?>">
-            </div>
-            <div class="col-auto">
-                <label for="to_date" class="form-label">Đến ngày:</label>
-                <input type="date" id="to_date" name="to_date" class="form-control"
-                    value="<?php echo htmlspecialchars($_GET['to_date'] ?? ''); ?>">
-            </div>
-            <div class="col-auto">
-                <button class="btn btn-success" type="submit"><i class="fa-solid fa-filter"></i> Lọc</button>
-            </div>
+                <tbody>
+                    <?php foreach ($kq as $value) { ?>
+                        <tr>
+                            <td><?php echo $value["MaLoai"]; ?></td>
+                            <td><?php echo $value["TenLoai"]; ?></td>
+                            <td><b><?php echo $value["TongSoLuongBan"]; ?></b></td>
+                        </tr>
+                    <?php } ?>
+                </tbody>
 
-            <!-- Các nút lọc nhanh -->
-            <div class="col-auto ms-auto d-flex flex-wrap gap-2">
-                <a href="?filter=today" class="btn btn-outline-success <?php if($filter=='today') echo 'active'; ?>">Hôm nay</a>
-                <a href="?filter=12months" class="btn btn-outline-success <?php if($filter=='12months') echo 'active'; ?>">12 tháng gần nhất</a>
-
-                <!-- Năm -->
-                <div class="dropdown">
-                    <button class="btn btn-outline-success dropdown-toggle" type="button" data-bs-toggle="dropdown">
-                        Năm <?php echo $selectedYear; ?>
-                    </button>
-                    <ul class="dropdown-menu">
-                        <?php for ($y = $currentYear; $y >= $currentYear - 5; $y--): ?>
-                            <li><a class="dropdown-item" href="?filter=year&year=<?php echo $y; ?>">Năm <?php echo $y; ?></a></li>
-                        <?php endfor; ?>
-                    </ul>
-                </div>
-
-                <!-- Tháng -->
-                <div class="dropdown">
-                    <button class="btn btn-outline-success dropdown-toggle" type="button" data-bs-toggle="dropdown">
-                        Tháng <?php echo $selectedMonth ?: $currentMonth; ?>
-                    </button>
-                    <ul class="dropdown-menu">
-                        <?php for ($m = 1; $m <= 12; $m++): ?>
-                            <li>
-                                <a class="dropdown-item" href="?filter=month&year=<?php echo $selectedYear; ?>&month=<?php echo $m; ?>">
-                                    Tháng <?php echo $m; ?>/<?php echo $selectedYear; ?>
-                                </a>
-                            </li>
-                        <?php endfor; ?>
-                    </ul>
-                </div>
-            </div>
-        </form>
-
-        <h5 class="text-center text-success fw-bold mb-3"><?php echo $title; ?></h5>
-
-        <!-- Biểu đồ -->
-        <div class="mt-5">
-            <canvas id="revenueChart" height="120"></canvas>
+            </table>
         </div>
     </div>
-
-    <script>
-        const data = <?php echo json_encode($chartData); ?>;
-        const labels = data.map(d => d.Ngay);
-        const doanhThu = data.map(d => d.DoanhThuNgay);
-        const soLuong = data.map(d => d.TongSoLuongBan);
-
-        const ctx = document.getElementById('revenueChart').getContext('2d');
-        new Chart(ctx, {
-            type: 'bar',
-            data: {
-                labels,
-                datasets: [
-                    {
-                        label: 'Doanh thu (VNĐ)',
-                        data: doanhThu,
-                        backgroundColor: 'rgba(40,167,69,0.6)',
-                        borderColor: 'rgba(40,167,69,1)',
-                        borderWidth: 2
-                    },
-                    {
-                        label: 'Số lượng bán',
-                        data: soLuong,
-                        backgroundColor: 'rgba(75,192,192,0.4)',
-                        borderColor: 'rgba(75,192,192,1)',
-                        borderWidth: 2,
-                        yAxisID: 'y1'
-                    }
-                ]
-            },
-            options: {
-                responsive: true,
-                interaction: { mode: 'index', intersect: false },
-                stacked: false,
-                plugins: {
-                    title: {
-                        display: true,
-                        text: 'Biểu đồ doanh thu & số lượng bán theo ngày',
-                        font: { size: 18 }
-                    },
-                    tooltip: {
-                        callbacks: {
-                            label: ctx => ctx.dataset.label.includes('Doanh thu')
-                                ? ctx.parsed.y.toLocaleString('vi-VN') + '₫'
-                                : ctx.parsed.y
-                        }
-                    }
-                },
-                scales: {
-                    y: {
-                        type: 'linear',
-                        position: 'left',
-                        title: { display: true, text: 'Doanh thu (VNĐ)' },
-                        ticks: { callback: val => val.toLocaleString('vi-VN') }
-                    },
-                    y1: {
-                        type: 'linear',
-                        position: 'right',
-                        title: { display: true, text: 'Số lượng bán' },
-                        grid: { drawOnChartArea: false }
-                    }
-                }
-            }
-        });
-    </script>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"></script>
     <script>
