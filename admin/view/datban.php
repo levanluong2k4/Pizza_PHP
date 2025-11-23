@@ -44,7 +44,7 @@ $sql_phong = "SELECT
     db.SDT,
     db.NgayGio,
     db.MaCombo,
-    db.TienCoc,
+ 
     db.GhiChu,
     db.TrangThaiDatBan,
     c.Tencombo,

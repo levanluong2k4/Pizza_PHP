@@ -12,22 +12,18 @@ if(!isset($_GET['id'])){
     exit;
 }
 
-
 if($phuongthuc=='momo' ){
     if($resultCode!=0){
         $sql_update="UPDATE `datban` SET `TrangThaiThanhToan`='chuathanhtoan' WHERE MaDatBan=$madatban";
         mysqli_query($ketnoi,$sql_update);
     }
 }
- if($phuongthuc=='vnpay'){
+if($phuongthuc=='vnpay'){
     if($vnp_TransactionStatus!=0){
         $sql_update="UPDATE `datban` SET `TrangThaiThanhToan`='chuathanhtoan' WHERE MaDatBan=$madatban";
         mysqli_query($ketnoi,$sql_update);
     }
 }
-
-
-
 
 // Lấy thông tin đặt bàn
 $sql = "SELECT db.*, 
@@ -46,12 +42,6 @@ $stmt->execute();
 $result = $stmt->get_result();
 $booking = $result->fetch_assoc();
 $stmt->close();
-
-// if (!$booking) {
-//     $_SESSION['error'] = "Không tìm thấy thông tin đặt bàn";
-//     header('Location: index.php');
-//     exit;
-// }
 
 // Nếu là đặt tiệc, lấy chi tiết combo
 $combo_details = [];
@@ -77,30 +67,17 @@ if ($booking['LoaiDatBan'] == 'tiec' && $booking['MaCombo']) {
 <html lang="en">
 
 <head>
-    <title>Pizza</title>
-    <!-- Required meta tags -->
+    <title>Pizza - Đặt bàn thành công</title>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
-    <!-- animate -->
+    
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css" />
-    <link rel="stylesheet" href="./css/animate.css">
-    <!-- Bootstrap CSS v5.2.1 -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" type="text/css" href="//cdn.jsdelivr.net/npm/slick-carousel@1.8.1/slick/slick.css" />
-
-    <!-- slick -->
-    <link rel="stylesheet" type="text/css" href="//cdn.jsdelivr.net/npm/slick-carousel@1.8.1/slick/slick.css" />
-    <link rel="stylesheet" type="text/css" href="//cdn.jsdelivr.net/npm/slick-carousel@1.8.1/slick/slick-theme.css" />
-    <link rel="stylesheet" type="text/css" href="slick/slick-theme.css" />
-
-    <!-- CSS -->
     <link rel="stylesheet" href="../css/pizza.css">
     <link rel="stylesheet" href="../css/basic.css">
     <link rel="stylesheet" href="../css/sign_up.css">
     <link rel="stylesheet" href="../css/datban.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css"
-        integrity="sha512-SnH5WK+bZxgPHs44uWIX+LLJAJ9/2PkPKZ5QiAj6Ta86w+fsb2TkcmfRyVX3pBnMFcV7oQPJkl9QevSCWr3W6A=="
-        crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" />
 </head>
 
 <body>
@@ -108,9 +85,6 @@ if ($booking['LoaiDatBan'] == 'tiec' && $booking['MaCombo']) {
     <header class="bg-icon pt-2">
         <?php include '../components/navbar.php'; ?>
     </header>
-
-   
-
 
 <div class="success-container">
     <div class="success-header">
@@ -120,79 +94,111 @@ if ($booking['LoaiDatBan'] == 'tiec' && $booking['MaCombo']) {
         <h2>Đặt bàn thành công!</h2>
         <div class="booking-code">#<?php echo $madatban; ?></div>
         <p class="mb-0">Vui lòng lưu lại mã đặt bàn để tra cứu</p>
-         <?php if ($booking['TrangThaiThanhToan'] == 'chuathanhtoan'): ?>
-    
-<!-- Thêm thông báo đếm ngược -->
-<div class="alert alert-warning mt-3" id="countdown-alert">
-    <i class="fas fa-clock me-2"></i>
-    <strong>Lưu ý:</strong> Vui lòng thanh toán trong vòng 
-    <span id="countdown-timer" class="fw-bold text-danger"></span>
-    <br>
-    <small>Sau thời gian này, đơn đặt bàn sẽ tự động bị hủy.</small>
-</div>
-
-<style>
-#countdown-alert {
-    border-left: 4px solid #ff6b6b;
-    animation: pulse 2s infinite;
-}
-
-@keyframes pulse {
-    0%, 100% { opacity: 1; }
-    50% { opacity: 0.8; }
-}
-</style>
-
-<script>
-// Tính thời gian còn lại từ NgayTao
-const createdTime = new Date('<?php echo $booking['NgayTao']; ?>').getTime();
-const expiryTime = createdTime + (5 * 60 * 1000); // Thêm 5 phút
-
-function updateCountdown() {
-    const now = new Date().getTime();
-    const timeLeft = expiryTime - now;
-    
-    if (timeLeft <= 0) {
-        document.getElementById('countdown-timer').innerHTML = 'HẾT THỜI GIAN';
-        document.getElementById('countdown-alert').classList.remove('alert-warning');
-        document.getElementById('countdown-alert').classList.add('alert-danger');
         
-        // Gọi AJAX để xóa đơn
-        $.ajax({
-            url: 'auto_cancel_booking.php',
-            method: 'POST',
-            data: {
-                booking_id: <?php echo $madatban; ?>,
-                action: 'cancel_unpaid'
-            },
-            success: function() {
-                alert('Đơn đặt bàn đã bị hủy do không thanh toán đúng hạn.');
-                window.location.href = '../index.php';
+        <?php if ($booking['TrangThaiThanhToan'] == 'chuathanhtoan' && $booking['LoaiDatBan'] == 'tiec'): ?>
+        <!-- Thông báo đếm ngược -->
+        <div class="alert alert-warning mt-3" id="countdown-alert">
+            <i class="fas fa-exclamation-triangle me-2"></i>
+            <strong>Cảnh báo:</strong> Vui lòng thanh toán trong vòng 
+            <span id="countdown-timer" class="fw-bold text-danger"></span>
+            <br>
+            <small>Hệ thống sẽ tự động hủy đơn nếu không thanh toán đúng hạn.</small>
+            <br>
+            <small class="text-muted">
+                <i class="fas fa-clock me-1"></i>
+                Thời gian tạo: <?php echo date('d/m/Y H:i:s', strtotime($booking['NgayTao'])); ?>
+            </small>
+        </div>
+
+        <style>
+        #countdown-alert {
+            border-left: 4px solid #ff6b6b;
+            animation: pulse 2s infinite;
+            background: linear-gradient(135deg, #fff3cd 0%, #ffe4a8 100%);
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.85; }
+        }
+
+        #countdown-timer {
+            font-size: 1.3em;
+            padding: 2px 8px;
+            background: rgba(255, 0, 0, 0.1);
+            border-radius: 4px;
+        }
+
+        .expired-alert {
+            background: linear-gradient(135deg, #f8d7da 0%, #f5c2c7 100%) !important;
+            border-left: 4px solid #dc3545 !important;
+        }
+        </style>
+
+        <script>
+        // Tính thời gian còn lại từ NgayTao
+        const createdTime = new Date('<?php echo $booking['NgayTao']; ?>').getTime();
+        const expiryTime = createdTime + (5 * 60 * 1000); // 5 phút
+
+        function updateCountdown() {
+            const now = new Date().getTime();
+            const timeLeft = expiryTime - now;
+            
+            if (timeLeft <= 0) {
+                // HẾT THỜI GIAN - Chỉ thông báo, MySQL Event sẽ tự động hủy
+                document.getElementById('countdown-timer').innerHTML = 'ĐÃ HẾT HẠN';
+                document.getElementById('countdown-alert').classList.remove('alert-warning');
+                document.getElementById('countdown-alert').classList.add('alert-danger', 'expired-alert');
+                
+                // Hiển thị thông báo
+                alert('⚠️ Đơn đặt bàn đã hết hạn thanh toán!\n\nHệ thống sẽ tự động hủy đơn này.\nVui lòng đặt bàn lại nếu cần.');
+                
+                // Chuyển về trang chủ
+                window.location.href = '../trangchu.php';
+                return;
             }
+            
+            // Tính phút và giây
+            const minutes = Math.floor(timeLeft / 60000);
+            const seconds = Math.floor((timeLeft % 60000) / 1000);
+            
+            // Hiển thị countdown
+            document.getElementById('countdown-timer').innerHTML = 
+                minutes + ' phút ' + (seconds < 10 ? '0' : '') + seconds + ' giây';
+            
+            // Đổi màu khi còn dưới 1 phút
+            if (minutes < 1) {
+                document.getElementById('countdown-timer').style.color = '#dc3545';
+                document.getElementById('countdown-timer').style.fontSize = '1.4em';
+                document.getElementById('countdown-timer').style.fontWeight = 'bold';
+                
+                // Thêm hiệu ứng nhấp nháy
+                if (seconds % 2 === 0) {
+                    document.getElementById('countdown-alert').style.borderColor = '#dc3545';
+                } else {
+                    document.getElementById('countdown-alert').style.borderColor = '#ff6b6b';
+                }
+            }
+            
+            // Cảnh báo khi còn 1 phút
+            if (minutes === 0 && seconds === 59) {
+                if (confirm('⏰ Chỉ còn 1 phút để thanh toán!\n\nBạn có muốn tiếp tục thanh toán không?')) {
+                    // Có thể thêm logic chuyển đến trang thanh toán
+                    console.log('User muốn thanh toán');
+                }
+            }
+        }
+
+        // Cập nhật mỗi giây
+        const countdownInterval = setInterval(updateCountdown, 1000);
+        updateCountdown(); // Chạy ngay lập tức
+
+        // Dọn dẹp khi rời trang
+        window.addEventListener('beforeunload', function() {
+            clearInterval(countdownInterval);
         });
-        
-        return;
-    }
-    
-    const minutes = Math.floor(timeLeft / 60000);
-    const seconds = Math.floor((timeLeft % 60000) / 1000);
-    
-    document.getElementById('countdown-timer').innerHTML = 
-        minutes + ' phút ' + (seconds < 10 ? '0' : '') + seconds + ' giây';
-    
-    // Đổi màu khi còn dưới 1 phút
-    if (minutes < 1) {
-        document.getElementById('countdown-timer').style.color = '#ff0000';
-        document.getElementById('countdown-timer').style.fontSize = '1.2em';
-    }
-}
-
-// Cập nhật mỗi giây
-setInterval(updateCountdown, 1000);
-updateCountdown();
-</script>
-
-<?php endif; ?>
+        </script>
+        <?php endif; ?>
     </div>
     
     <div class="info-section">
@@ -201,12 +207,11 @@ updateCountdown();
             Thông tin đặt bàn
         </h5>
 
-
-         <div class="info-row">
+        <div class="info-row">
             <span class="info-label">
                 <i class="fas fa-calendar-alt me-2"></i>Ngày tạo:
             </span>
-            <span class="info-value"><?php echo date('d/m/Y H:i', strtotime($booking['NgayTao'])); ?></span>
+            <span class="info-value"><?php echo date('d/m/Y H:i:s', strtotime($booking['NgayTao'])); ?></span>
         </div>
         
         <div class="info-row">
@@ -223,11 +228,9 @@ updateCountdown();
             <span class="info-value"><?php echo htmlspecialchars($booking['SDT']); ?></span>
         </div>
         
-   
-        
         <div class="info-row">
             <span class="info-label">
-                <i class="fas fa-calendar-alt me-2"></i>Ngày giờ đến:
+                <i class="fas fa-calendar-check me-2"></i>Ngày giờ đến:
             </span>
             <span class="info-value"><?php echo date('d/m/Y H:i', strtotime($booking['NgayGio'])); ?></span>
         </div>
@@ -258,35 +261,27 @@ updateCountdown();
         
         <div class="info-row">
             <span class="info-label">
-                <i class="fas fa-tags me-2"></i>Giá combo:
+                <i class="fas fa-money-bill-wave me-2"></i>Tổng tiền:
             </span>
             <span class="info-value text-success fw-bold">
-                <?php echo number_format($booking['GiaCombo'], 0, ',', '.'); ?> VNĐ
-            </span>
-        </div>
-           <div class="info-row">
-            <span class="info-label">
-                <i class="fas fa-tags me-2"></i>Trạng thái thanh toán
-            </span>
-            <span class="info-value text-success fw-bold">
-                <?php echo $booking['TrangThaiThanhToan'] ?>
+                <?php echo number_format($booking['Tongtien'], 0, ',', '.'); ?> VNĐ
             </span>
         </div>
         
-        <?php if ($booking['TienCoc'] > 0): ?>
         <div class="info-row">
             <span class="info-label">
-                <i class="fas fa-money-bill-wave me-2"></i>Tiền cọc:
+                <i class="fas fa-credit-card me-2"></i>Trạng thái thanh toán:
             </span>
-            <span class="info-value text-warning fw-bold">
-                <?php echo number_format($booking['TienCoc'], 0, ',', '.'); ?> VNĐ
+            <span class="info-value">
+                <span class="badge <?php echo $booking['TrangThaiThanhToan'] == 'chuathanhtoan' ? 'bg-warning text-dark' : 'bg-success'; ?>">
+                    <?php echo $booking['TrangThaiThanhToan'] == 'chuathanhtoan' ? 'Chưa thanh toán' : 'Đã thanh toán'; ?>
+                </span>
             </span>
         </div>
-        <?php endif; ?>
         
         <!-- Hiển thị chi tiết combo -->
         <?php if (!empty($combo_details)): ?>
-        <div class="combo-items">
+        <div class="combo-items mt-3">
             <h6 class="mb-3">
                 <i class="fas fa-list me-2"></i>
                 Sản phẩm trong combo:
@@ -309,7 +304,7 @@ updateCountdown();
         
         <div class="info-row">
             <span class="info-label">
-                <i class="fas fa-hourglass-half me-2"></i>Trạng thái:
+                <i class="fas fa-hourglass-half me-2"></i>Trạng thái đơn:
             </span>
             <span class="info-value">
                 <span class="status-badge status-pending">Chờ xác nhận</span>
@@ -319,7 +314,7 @@ updateCountdown();
         <?php if (!empty($booking['GhiChu'])): ?>
         <div class="info-row">
             <span class="info-label">
-                <i class="fas fa-comment me-2"></i>Ghi chú:
+                <i class="fas fa-comment-alt me-2"></i>Ghi chú: 
             </span>
             <span class="info-value"><?php echo htmlspecialchars($booking['GhiChu']); ?></span>
         </div>
@@ -335,14 +330,19 @@ updateCountdown();
             <li>Quý khách vui lòng đến đúng giờ đã đặt</li>
             <li>Nhân viên sẽ liên hệ để xác nhận đơn đặt bàn trong thời gian sớm nhất</li>
             <li>Nếu cần thay đổi hoặc hủy đặt bàn, vui lòng liên hệ hotline: <strong>1900 xxxx</strong></li>
-            <?php if ($booking['LoaiDatBan'] == 'tiec'): ?>
-            <li>Đối với bàn tiệc, quý khách vui lòng thanh toán tiền cọc để giữ phòng</li>
+            <?php if ($booking['LoaiDatBan'] == 'tiec' && $booking['TrangThaiThanhToan'] == 'chuathanhtoan'): ?>
+            <li class="text-danger fw-bold">
+                <i class="fas fa-exclamation-circle me-1"></i>
+                Đơn đặt tiệc cần thanh toán trong vòng 5 phút để giữ chỗ
+            </li>
+            <?php elseif ($booking['LoaiDatBan'] == 'tiec'): ?>
+            <li>Cảm ơn quý khách đã thanh toán. Chúng tôi sẽ chuẩn bị tốt nhất cho tiệc của bạn!</li>
             <?php endif; ?>
         </ul>
     </div>
     
     <div class="action-buttons">
-        <a href="index.php" class="btn btn-success btn-action">
+        <a href="../trangchu.php" class="btn btn-success btn-action">
             <i class="fas fa-home me-2"></i>
             Về trang chủ
         </a>
@@ -356,8 +356,6 @@ updateCountdown();
         </a>
     </div>
 </div>
-
-
 
 <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>

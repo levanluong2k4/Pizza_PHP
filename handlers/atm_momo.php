@@ -83,7 +83,7 @@ function processmomoPayment_ordertable($order_id, $total_price, $orderInfo,$than
     
     // Thông tin giao dịch
     $orderId = "DB" . $order_id . "_" . time();; // Mã đơn hàng unique
-    $amount = (string)$total_price;
+    $amount = (int)$total_price;
     $requestId = time() . "";
     $requestType = "payWithATM";
     

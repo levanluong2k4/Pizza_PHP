@@ -6,10 +6,18 @@
                             <div class="card-body">
                                 <p class="card-text text-success mb-3" style="font-weight: 600;">
                                     <?php echo $sp["TenSP"] ?></p>
-                                <button  class="inner-btn mt-2 btn-buy"
+                                
+                                 <div class="d-flex align-items-center justify-content-center flex-column">
+
+                                    <span class="combo-total-price fs-4 text-danger" style="font-weight: 600;">
+
+                                        <?php echo number_format($sp['GiaThapNhat'] , 0, ',', '.'); ?> VNĐ
+                                    </span>
+                                   <button  class="inner-btn mt-2 btn-buy"
                                     data-masp="<?php echo $sp["MaSP"]; ?>">
                                     Mua ngay
                                 </button>
+                                </div>
                             </div>
                         </div>
                     </div>

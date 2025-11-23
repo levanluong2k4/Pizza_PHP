@@ -52,19 +52,22 @@ else if($is_loaidatban_search){
 
 }
 else {
-    // Code tìm kiếm sản phẩm bình thường
-    $sql = "SELECT * FROM sanpham WHERE 1=1";
+    // Code tìm kiếm sản phẩm bình thường - ✅ THÊM JOIN với sanpham_size
+    $sql = "SELECT sanpham.*, MIN(sps.Gia) as GiaThapNhat
+            FROM sanpham
+            INNER JOIN sanpham_size as sps ON sps.MaSP = sanpham.MaSP
+            WHERE 1=1";
     $params = [];
     $types = "";
 
     if ($search != '') {
-        $sql .= " AND TenSP LIKE ?";
+        $sql .= " AND sanpham.TenSP LIKE ?";
         $params[] = "%$search%";
         $types .= "s";
     }
 
     if ($category_id != '') {
-        $sql .= " AND MaLoai = ?";
+        $sql .= " AND sanpham.MaLoai = ?";
         $params[] = $category_id;
         $types .= "s";
         
@@ -76,6 +79,9 @@ else {
         $stmt_cat->close();
     }
 
+    // ✅ THÊM GROUP BY
+    $sql .= " GROUP BY sanpham.MaSP";
+
     $stmt = $ketnoi->prepare($sql);
     if (!empty($params)) {
         $stmt->bind_param($types, ...$params);
@@ -85,7 +91,7 @@ else {
     $stmt->close();
 }
 
-require 'includes/query_products.php';
+
 
 
 ?>
@@ -105,7 +111,7 @@ require 'includes/query_products.php';
     <link rel="stylesheet" href="css/pizza.css">
     <link rel="stylesheet" href="css/basic.css">
     <link rel="stylesheet" href="css/search.css">
-    
+
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css"
         integrity="sha512-SnH5WK+bZxgPHs44uWIX+LLJAJ9/2PkPKZ5QiAj6Ta86w+fsb2TkcmfRyVX3pBnMFcV7oQPJkl9QevSCWr3W6A=="
         crossorigin="anonymous" referrerpolicy="no-referrer" />
@@ -139,7 +145,7 @@ require 'includes/query_products.php';
                 </h3>
                 <div class="combo-price">
                     <i class="fas fa-tags me-2"></i>
-                    <?php echo number_format($combos_id['giamgia'], 0, ',', '.'); ?> VNĐ
+                    <?php echo number_format($combos_id['Tongtien'], 0, ',', '.'); ?> VNĐ
                 </div>
             </div>
 
@@ -209,20 +215,30 @@ require 'includes/query_products.php';
                                 <i class="fas fa-receipt me-2"></i>
                                 Tổng giá trị sản phẩm:
                             </span>
-                         <span class="text-decoration-line-through text-muted fs-4">
-                        <?php echo number_format($total_combo, 0, ',', '.'); ?> VNĐ
-                    </span>
+                            <span class="text-decoration-line-through text-muted fs-4">
+                                <?php echo number_format($total_combo, 0, ',', '.'); ?> VNĐ
+                            </span>
 
                         </div>
-                          <div class="d-flex justify-content-between align-items-center">
+                        <div class="d-flex justify-content-between align-items-center">
                             <span class="combo-total-label">
                                 <i class="fas fa-receipt me-2"></i>
                                 Chỉ còn:
                             </span>
                             <span class="combo-total-price">
-                                <?php echo number_format($total_combo - ($total_combo * ($combos_id['giamgia']/100)), 0, ',', '.'); ?> VNĐ
+                                <?php
+                                    // ✅ Giá gốc (số nguyên) - dùng để gửi qua URL
+                                    $giacuoi_raw = $total_combo - ($total_combo * ($combos_id['giamgia']/100));
+                                    
+                                    // ✅ Giá format (hiển thị)
+                                    $giacuoi_format = number_format($giacuoi_raw, 0, ',', '.');
+                                    
+                                    echo $giacuoi_format;
+                                    ?>
+                                VNĐ
                             </span>
                         </div>
+
 
                         <?php if ($total_combo > $combos_id['giamgia']): ?>
                         <div class="combo-savings">
@@ -232,7 +248,8 @@ require 'includes/query_products.php';
                                     Tiết kiệm được:
                                 </span>
                                 <span class="combo-savings-text" style="font-size: 22px;">
-                                    <?php echo number_format( ($total_combo * ($combos_id['giamgia']/100)), 0, ',', '.'); ?> VNĐ
+                                    <?php echo number_format( ($total_combo * ($combos_id['giamgia']/100)), 0, ',', '.'); ?>
+                                    VNĐ
                                 </span>
                             </div>
                         </div>
@@ -240,11 +257,11 @@ require 'includes/query_products.php';
                     </div>
                 </div>
 
-                <a href="./datban/info_datban.php?combo_id=<?php echo $combo_id ?>&loaidatban=tiec"
-                    class="btn btn-order-combo mt-3">
-                    <i class="fas fa-calendar-check me-2"></i>
-                    Đặt bàn ngay - Combo này
-                </a>
+                  <!-- Thay đổi nút đặt bàn -->
+                    <button type="button" class="btn btn-order-combo mt-3" id="btnOrderCombo">
+                        <i class="fas fa-calendar-check me-2"></i>
+                        Đặt bàn ngay - Combo này
+                    </button>
             </div>
         </div>
 
@@ -272,9 +289,14 @@ require 'includes/query_products.php';
                                 <p class="card-text text-success mb-3" style="font-weight: 600;">
                                     <?php echo $sp["TenSP"] ?>
                                 </p>
-                                <button class="inner-btn mt-2 btn-buy" data-masp="<?php echo $sp["MaSP"]; ?>">
-                                    Mua ngay
-                                </button>
+                                <div class="d-flex align-items-center justify-content-center flex-column">
+                                    <span class="combo-total-price fs-4 text-danger" style="font-weight: 600;">
+                                        <?php echo number_format($sp['GiaThapNhat'], 0, ',', '.'); ?> VNĐ
+                                    </span>
+                                    <button class="inner-btn mt-2 btn-buy" data-masp="<?php echo $sp["MaSP"]; ?>">
+                                        Mua ngay
+                                    </button>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -310,56 +332,60 @@ require 'includes/query_products.php';
 
                 <div class="col-lg-4 col-6 wow animate__bounceInLeft">
                     <div class="inner-items card-combo text-center">
-                        <a href="/unitop/backend/lesson/school/project_pizza/research.php?combo_id=<?php echo $sp["MaCombo"]; ?>&loaidatban=tiec">
-                        <div class="card border-0 bg-transparent">
-                            <img src="./<?php echo $sp["Anh"] ?>" class="card-img-top mx-auto"
-                                alt="<?php echo $sp["Tencombo"] ?>">
-                            <div class="card-body align-items-center" style="height:300px">
-                                <h3 class="card-text text-success mb-3" style="font-weight: 600;">
-                                    <?php echo $sp["Tencombo"] ?>
-                                </h3>
-                                <div class="combo-description" style=" height: 150px;     
-                                                                                overflow-y: auto;">
-                                            <?php 
-                                    $macombo=$sp['MaCombo'];
-                                        $sql_detail_combo="SELECT ct.*, 
-                                            sps.Gia as ThanhTien, 
-                                            sp.TenSP, 
-                                            sp.Anh, 
-                                            sp.MaLoai,
-                                            sps.MaSize,
-                                            s.TenSize
-                                    FROM chitietcombo ct 
-                                    INNER JOIN sanpham sp ON ct.MaSP = sp.MaSP
-                                    INNER JOIN size s on ct.MaSize = s.MaSize
-                                    INNER JOIN sanpham_size sps ON ct.MaSP = sps.MaSP AND ct.MaSize = sps.MaSize 
-                                    WHERE ct.MaCombo=$macombo";
-                                        $result_detail=mysqli_query($ketnoi,$sql_detail_combo);
-                                   
-                                    foreach ($result_detail as $value) :
-                                 
-                                    echo '<p class="m-0 text-start card-text" style="font-weight: 600; color:#0000004a">'
-                                                . '+' . $value['SoLuong'] . ' ' . $value["TenSP"] .
-                                            '</p>';
-
-                                    endforeach
-                                                    ?>
-
-                            </div>
-                                <div class="d-flex align-items-center justify-content-between">
-
-                                    <span class="combo-total-price">
-
-                                        <?php echo number_format($sp['Tongtien'] , 0, ',', '.'); ?> VNĐ
+                        <a
+                            href="/unitop/backend/lesson/school/project_pizza/research.php?combo_id=<?php echo $sp["MaCombo"]; ?>&loaidatban=tiec">
+                            <div class="card border-0 bg-transparent position-relative">
+                                <!-- ✅ BADGE GIẢM GIÁ Ở GÓC TRÁI TRÊN -->
+                                <?php if (isset($sp['giamgia']) && $sp['giamgia'] > 0): ?>
+                                <div class="position-absolute top-0 start-0 m-2" style="z-index: 10;">
+                                    <span class="badge bg-danger fs-6 px-3 py-2 shadow-sm">
+                                        <i class="fas fa-tag me-1"></i>
+                                        -<?php echo $sp['giamgia']; ?>%
                                     </span>
-                                    <a class="inner-btn mt-2  py-2 px-5"
-                                        href="./datban/info_datban.php?combo_id=<?php echo $sp['MaCombo'] ?>&loaidatban=tiec">
-                                        Đặt ngay
-                                    </a>
                                 </div>
+                                <?php endif; ?>
 
+                                <img src="./<?php echo $sp["Anh"] ?>" class="card-img-top mx-auto"
+                                    alt="<?php echo $sp["Tencombo"] ?>">
+                                <div class="card-body align-items-center" style="height:300px">
+                                    <h3 class="card-text text-success mb-3" style="font-weight: 600;">
+                                        <?php echo $sp["Tencombo"] ?>
+                                    </h3>
+                                    <div class="combo-description" style="height: 150px; overflow-y: auto;">
+                                        <?php 
+                $macombo = $sp['MaCombo'];
+                $sql_detail_combo = "SELECT ct.*, 
+                    sps.Gia as ThanhTien, 
+                    sp.TenSP, 
+                    sp.Anh, 
+                    sp.MaLoai,
+                    sps.MaSize,
+                    s.TenSize
+                FROM chitietcombo ct 
+                INNER JOIN sanpham sp ON ct.MaSP = sp.MaSP
+                INNER JOIN size s on ct.MaSize = s.MaSize
+                INNER JOIN sanpham_size sps ON ct.MaSP = sps.MaSP AND ct.MaSize = sps.MaSize 
+                WHERE ct.MaCombo = $macombo";
+                $result_detail = mysqli_query($ketnoi, $sql_detail_combo);
+               
+                foreach ($result_detail as $value):
+                    echo '<p class="m-0 text-start card-text" style="font-weight: 600; color:#0000004a">'
+                        . '+' . $value['SoLuong'] . ' ' . $value["TenSP"] .
+                    '</p>';
+                endforeach;
+                ?>
+                                    </div>
+                                    <div class="d-flex align-items-center justify-content-between">
+                                        <span class="combo-total-price">
+                                            <?php echo number_format($sp['Tongtien'], 0, ',', '.'); ?> VNĐ
+                                        </span>
+                                        <a class="inner-btn mt-2 py-2 px-5"
+                                            href="./datban/info_datban.php?combo_id=<?php echo $sp['MaCombo'] ?>&loaidatban=tiec">
+                                            Đặt ngay
+                                        </a>
+                                    </div>
+                                </div>
                             </div>
-                        </div>
                         </a>
                     </div>
                 </div>
@@ -458,6 +484,7 @@ require 'includes/query_products.php';
 
 
 
+
     <script>
     // Toggle combo details
     function toggleComboDetails() {
@@ -476,7 +503,41 @@ require 'includes/query_products.php';
         }
     }
 
+    // ✅ HÀM TÍNH LẠI TỔNG TIỀN COMBO
+    function recalculateComboTotal() {
+        let newTotal = 0;
 
+        // Duyệt qua tất cả combo items
+        $('.combo-item').each(function() {
+            const priceText = $(this).find('.combo-item-price').text().replace(/[^0-9]/g, '');
+            const itemTotal = parseInt(priceText) || 0;
+            newTotal += itemTotal;
+        });
+
+        // Lấy phần trăm giảm giá
+        const discountPercent = <?php echo isset($combos_id['giamgia']) ? $combos_id['giamgia'] : 0; ?>;
+
+        // Tính giá sau giảm
+        const discountAmount = newTotal * (discountPercent / 100);
+        const finalPrice = newTotal - discountAmount;
+
+        // CẬP NHẬT TỔNG GIÁ TRỊ SẢN PHẨM (gạch ngang)
+        $('.combo-total .text-decoration-line-through').text(
+            newTotal.toLocaleString('vi-VN') + ' VNĐ'
+        );
+
+        // CẬP NHẬT GIÁ SAU GIẢM (Chỉ còn)
+        $('.combo-total .combo-total-price').text(
+            finalPrice.toLocaleString('vi-VN') + ' VNĐ'
+        );
+
+        // CẬP NHẬT SỐ TIỀN TIẾT KIỆM
+        if (discountPercent > 0) {
+            $('.combo-savings .combo-savings-text').last().text(
+                discountAmount.toLocaleString('vi-VN') + ' VNĐ'
+            );
+        }
+    }
 
     // Load more products
     $('#loadMoreBtn').on('click', function() {
@@ -550,28 +611,26 @@ require 'includes/query_products.php';
 
                     if (res.success && res.products.length > 0) {
                         res.products.forEach(p => {
-                            // Hiển thị tất cả sizes của sản phẩm
                             p.sizes.forEach(size => {
                                 $('#productList').append(`
-                                <div class="col-md-4 col-6 mb-3">
-                                    <div class="product-option-card" 
-                                         data-masp="${p.MaSP}" 
-                                         data-masize="${size.MaSize}"
-                                         data-tensp="${p.TenSP}"
-                                         data-tensize="${size.TenSize}"
-                                         data-gia="${size.Gia}"
-                                         data-anh="${p.Anh}">
-                                        <img src="${p.Anh}" class="product-option-image" alt="${p.TenSP}">
-                                        <div class="product-option-name">${p.TenSP}</div>
-                                        <div class="badge bg-info mb-2">${size.TenSize}</div>
-                                        <div class="product-option-price">${parseInt(size.Gia).toLocaleString()} VNĐ</div>
-                                    </div>
+                            <div class="col-md-4 col-6 mb-3">
+                                <div class="product-option-card" 
+                                     data-masp="${p.MaSP}" 
+                                     data-masize="${size.MaSize}"
+                                     data-tensp="${p.TenSP}"
+                                     data-tensize="${size.TenSize}"
+                                     data-gia="${size.Gia}"
+                                     data-anh="${p.Anh}">
+                                    <img src="${p.Anh}" class="product-option-image" alt="${p.TenSP}">
+                                    <div class="product-option-name">${p.TenSP}</div>
+                                    <div class="badge bg-info mb-2">${size.TenSize}</div>
+                                    <div class="product-option-price">${parseInt(size.Gia).toLocaleString()} VNĐ</div>
                                 </div>
-                            `);
+                            </div>
+                        `);
                             });
                         });
 
-                        // Xử lý click chọn sản phẩm
                         $('.product-option-card').on('click', function() {
                             $('.product-option-card').removeClass('selected');
                             $(this).addClass('selected');
@@ -604,22 +663,36 @@ require 'includes/query_products.php';
             });
         });
 
-        // Xử lý xác nhận thay đổi
+        // ✅ XỬ LÝ XÁC NHẬN THAY ĐỔI - CẬP NHẬT TỔNG TIỀN
         $('#btnConfirmChange').on('click', function() {
             if (selectedProduct && originalComboItem) {
+                const quantity = parseInt(originalComboItem.data('soluong')) || 1;
+                const newPrice = parseFloat(selectedProduct.gia);
+                const newTotal = newPrice * quantity;
+
                 // Cập nhật giao diện combo item
                 originalComboItem.find('img').attr('src', selectedProduct.anh);
                 originalComboItem.find('.combo-item-name').html(
                     selectedProduct.tensp +
                     ' <span class="badge bg-info ms-2">' + selectedProduct.tensize + '</span>'
                 );
+
+                // Cập nhật giá đơn vị
+                originalComboItem.find('.combo-item-qty .text-muted').text(
+                    newPrice.toLocaleString('vi-VN') + ' VNĐ/món'
+                );
+
+                // Cập nhật tổng tiền item
                 originalComboItem.find('.combo-item-price').text(
-                    parseInt(selectedProduct.gia).toLocaleString() + ' VNĐ'
+                    newTotal.toLocaleString('vi-VN') + ' VNĐ'
                 );
 
                 // Cập nhật data attributes
                 originalComboItem.data('masp', selectedProduct.masp);
                 originalComboItem.data('masize', selectedProduct.masize);
+
+                // TÍNH LẠI TỔNG TIỀN COMBO
+                recalculateComboTotal();
 
                 // Đóng modal
                 $('#modalChangeProduct').modal('hide');
@@ -628,8 +701,41 @@ require 'includes/query_products.php';
                 alert('Đã thay đổi sản phẩm thành công!');
             }
         });
+
+        $('#btnOrderCombo').on('click', function() {
+    const comboId = <?php echo $combo_id; ?>;
+    const comboItems = [];
+    
+    // ✅ Thu thập thông tin các sản phẩm trong combo (kể cả đã thay đổi)
+    $('.combo-item').each(function() {
+        comboItems.push({
+            masp: $(this).data('masp'),
+            masize: $(this).data('masize'),
+            soluong: $(this).data('soluong')
+        });
+    });
+    
+    // ✅ Gửi AJAX để lưu vào session
+    $.ajax({
+        url: 'handlers/save_combo_order.php',
+        method: 'POST',
+        data: {
+            combo_id: comboId,
+            combo_items: JSON.stringify(comboItems),
+            loaidatban: 'tiec'
+        },
+        success: function(response) {
+            // Chuyển trang KHÔNG GỬI GIÁ
+            window.location.href = `./datban/info_datban.php?combo_id=${comboId}&loaidatban=tiec`;
+        },
+        error: function() {
+            alert('Có lỗi xảy ra. Vui lòng thử lại!');
+        }
+    });
+});
     });
     </script>
+
 
 </body>
 

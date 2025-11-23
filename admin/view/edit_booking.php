@@ -504,12 +504,7 @@ if ($current_type == 'tiec' && $booking['MaPhong']) {
                     </select>
                 </div>
                 
-                <!-- Tiền cọc -->
-                <div class="mt-3">
-                    <label class="form-label">Tiền cọc (VNĐ)</label>
-                    <input type="number" class="form-control" name="tiencoc" id="tiencoc" min="0" 
-                           value="<?php echo $booking['TienCoc'] ?? 0; ?>">
-                </div>
+             
                 
                 <!-- Quản lý sản phẩm combo -->
                 <div class="combo-products-section" id="comboProductsSection">

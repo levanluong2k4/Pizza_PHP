@@ -2,14 +2,18 @@
 session_start();
 require '../includes/db_connect.php';
 
-$combo_id = $_GET['combo_id'] ?? '';
+$combo_id = $_GET['combo_id'] ?? $_SESSION['combo_order']['combo_id'] ?? null;
 $loaidatban = $_GET['loaidatban'] ?? 'thuong'; // Mặc định là đặt bàn thường
 
 $combo_info = null;
 $combo_details = [];
+$total_price = 0;
+$final_price = 0;
+$discount_amount = 0;
 
 // Nếu là đặt bàn tiệc, lấy thông tin combo
 if ($loaidatban == 'tiec' && $combo_id != '') {
+    // ✅ Lấy thông tin combo
     $sql_combo = "SELECT * FROM combo WHERE MaCombo = ?";
     $stmt_combo = $ketnoi->prepare($sql_combo);
     $stmt_combo->bind_param("i", $combo_id);
@@ -17,21 +21,81 @@ if ($loaidatban == 'tiec' && $combo_id != '') {
     $combo_info = $stmt_combo->get_result()->fetch_assoc();
     $stmt_combo->close();
     
-    // Lấy chi tiết combo
-    $sql_detail = "SELECT ct.*, sp.TenSP, sp.Anh, s.TenSize, sps.Gia
-                   FROM chitietcombo ct
-                   INNER JOIN sanpham sp ON ct.MaSP = sp.MaSP
-                   INNER JOIN size s ON ct.MaSize = s.MaSize
-                   INNER JOIN sanpham_size sps ON ct.MaSP = sps.MaSP AND ct.MaSize = sps.MaSize
-                   WHERE ct.MaCombo = ?";
-    $stmt_detail = $ketnoi->prepare($sql_detail);
-    $stmt_detail->bind_param("i", $combo_id);
-    $stmt_detail->execute();
-    $result_detail = $stmt_detail->get_result();
-    while ($row = $result_detail->fetch_assoc()) {
-        $combo_details[] = $row;
+    if (!$combo_info) {
+        die("Combo không tồn tại!");
     }
-    $stmt_detail->close();
+    
+    // ✅ TÍNH GIÁ TỪ DATABASE (KHÔNG DÙNG GIÁ TỪ URL)
+    
+    // Nếu người dùng đã thay đổi sản phẩm (có trong session)
+    if (isset($_SESSION['combo_order']['items'])) {
+        foreach ($_SESSION['combo_order']['items'] as $item) {
+            // Lấy giá thực từ database
+            $sql_price = "SELECT sp.TenSP, sp.Anh, s.TenSize, sps.Gia 
+                         FROM sanpham_size sps
+                         INNER JOIN sanpham sp ON sps.MaSP = sp.MaSP
+                         INNER JOIN size s ON sps.MaSize = s.MaSize
+                         WHERE sps.MaSP = ? AND sps.MaSize = ?";
+            $stmt_price = $ketnoi->prepare($sql_price);
+            $stmt_price->bind_param("ii", $item['masp'], $item['masize']);
+            $stmt_price->execute();
+            $result = $stmt_price->get_result()->fetch_assoc();
+            
+            if ($result) {
+                $item_total = $result['Gia'] * $item['soluong'];
+                $total_price += $item_total;
+                
+                // Lưu vào combo_details để hiển thị
+                $combo_details[] = [
+                    'MaSP' => $item['masp'],
+                    'MaSize' => $item['masize'],
+                    'TenSP' => $result['TenSP'],
+                    'TenSize' => $result['TenSize'],
+                    'Anh' => $result['Anh'],
+                    'Gia' => $result['Gia'],
+                    'SoLuong' => $item['soluong'],
+                    'ThanhTien' => $item_total
+                ];
+            }
+            $stmt_price->close();
+        }
+    } else {
+        // Nếu KHÔNG thay đổi, lấy từ chi tiết combo gốc
+        $sql_detail = "SELECT ct.*, sp.TenSP, sp.Anh, s.TenSize, sps.Gia
+                       FROM chitietcombo ct
+                       INNER JOIN sanpham sp ON ct.MaSP = sp.MaSP
+                       INNER JOIN size s ON ct.MaSize = s.MaSize
+                       INNER JOIN sanpham_size sps ON ct.MaSP = sps.MaSP AND ct.MaSize = sps.MaSize
+                       WHERE ct.MaCombo = ?";
+        $stmt_detail = $ketnoi->prepare($sql_detail);
+        $stmt_detail->bind_param("i", $combo_id);
+        $stmt_detail->execute();
+        $result_detail = $stmt_detail->get_result();
+        
+        while ($row = $result_detail->fetch_assoc()) {
+            $item_total = $row['Gia'] * $row['SoLuong'];
+            $total_price += $item_total;
+            
+            $row['ThanhTien'] = $item_total;
+            $combo_details[] = $row;
+        }
+        $stmt_detail->close();
+    }
+    
+    // ✅ ÁP DỤNG GIẢM GIÁ
+    $discount_percent = $combo_info['giamgia'] ?? 0;
+    $discount_amount = $total_price * ($discount_percent / 100);
+    $final_price = $total_price - $discount_amount;
+    
+    // ✅ LƯU VÀO SESSION ĐỂ DÙNG CHO CÁC BƯỚC TIẾP THEO
+    $_SESSION['order_summary'] = [
+        'combo_id' => $combo_id,
+        'total_price' => $total_price,
+        'discount_percent' => $discount_percent,
+        'discount_amount' => $discount_amount,
+        'final_price' => $final_price,
+        'combo_details' => $combo_details
+    ];
 }
 
 // Lấy danh sách bàn/phòng - Ban đầu hiển thị tất cả
@@ -125,41 +189,53 @@ if ($loaidatban == 'thuong') {
             <?php endif; ?>
 
             <form id="formDatBan" method="POST" action="../handlers/process_datban.php">
-                <input type="hidden" name="loaidatban" value="<?php echo $loaidatban; ?>">
-                <input type="hidden" name="combo_id" value="<?php echo $combo_id; ?>">
-                <input type="hidden" id="selectedTable" name="table_id" value="">
+                 <input type="hidden" name="loaidatban" value="<?php echo $loaidatban; ?>">
+    <input type="hidden" name="combo_id" value="<?php echo $combo_id; ?>">
+    <input type="hidden" id="selectedTable" name="table_id" value="">
+    
+    <!-- ✅ THÊM HIDDEN INPUT ĐỂ GỬI GIÁ AN TOÀN -->
+    <?php if ($loaidatban == 'tiec' && isset($final_price)): ?>
+    <input type="hidden" name="final_price" value="<?php echo $final_price; ?>">
+    <input type="hidden" name="total_price" value="<?php echo $total_price; ?>">
+    <input type="hidden" name="discount_amount" value="<?php echo $discount_amount; ?>">
+    <?php endif; ?>
 
-                <?php if ($loaidatban == 'tiec' && $combo_info): ?>
-                <!-- Hiển thị thông tin combo -->
-                <div class="combo-summary">
-                    <h5 class="mb-3">
-                        <i class="fas fa-box-open me-2"></i>
-                        Combo đã chọn
-                    </h5>
-                    <?php if (!empty($combo_info['Anh'])): ?>
-                    <img src="../<?php echo $combo_info['Anh']; ?>" alt="<?php echo $combo_info['Tencombo']; ?>">
-                    <?php endif; ?>
-                    <h4><?php echo htmlspecialchars($combo_info['Tencombo']); ?></h4>
-                    <?php 
-                $total1 = 0;
-                foreach ($combo_details as $item): 
-                    $subtotal = $item['Gia'] * $item['SoLuong'];
-                    $total1 += $subtotal;
-                endforeach;
-                ?>
-                    <h5>Giá : <span
-                            style="text-decoration: line-through;"><?php echo number_format($total1, 0, ',', '.')?>VNĐ</span>
-                    </h5>
-                    <div class="combo-price">
-                        <i class="fas fa-tags me-2"></i>
-                        <?php echo "Chỉ còn : ". number_format($total1-($total1 *($combo_info['giamgia']/100)), 0, ',', '.'); ?>VNĐ
-                    </div>
-                    <button type="button" class="btn btn-sm btn-outline-primary mt-2" data-bs-toggle="modal"
-                        data-bs-target="#comboDetailsModal">
-                        <i class="fas fa-list me-2"></i>Xem chi tiết combo
-                    </button>
-                </div>
-                <?php endif; ?>
+    <?php if ($loaidatban == 'tiec' && $combo_info): ?>
+    <!-- Hiển thị thông tin combo -->
+    <div class="combo-summary">
+        <h5 class="mb-3">
+            <i class="fas fa-box-open me-2"></i>
+            Combo đã chọn
+        </h5>
+        <?php if (!empty($combo_info['Anh'])): ?>
+        <img src="../<?php echo $combo_info['Anh']; ?>" alt="<?php echo $combo_info['Tencombo']; ?>">
+        <?php endif; ?>
+        <h4><?php echo htmlspecialchars($combo_info['Tencombo']); ?></h4>
+    
+        <h5>Giá gốc: 
+            <span class="text-decoration-line-through text-muted">
+                <?php echo number_format($total_price, 0, ',', '.'); ?> VNĐ
+            </span>
+        </h5>
+        <div class="combo-price">
+            <i class="fas fa-tags me-2"></i>
+            Chỉ còn: <strong class="text-danger">
+                <?php echo number_format($final_price, 0, ',', '.'); ?> VNĐ
+            </strong>
+        </div>
+        <?php if ($discount_amount > 0): ?>
+        <div class="text-success mt-2">
+            <i class="fas fa-gift me-2"></i>
+            Tiết kiệm: <?php echo number_format($discount_amount, 0, ',', '.'); ?> VNĐ 
+            (<?php echo $combo_info['giamgia']; ?>%)
+        </div>
+        <?php endif; ?>
+        <button type="button" class="btn btn-sm btn-outline-primary mt-2" data-bs-toggle="modal"
+            data-bs-target="#comboDetailsModal">
+            <i class="fas fa-list me-2"></i>Xem chi tiết combo
+        </button>
+    </div>
+    <?php endif; ?>
 
                 <!-- Thông tin khách hàng -->
                 <div class="form-section">
@@ -232,35 +308,23 @@ if ($loaidatban == 'thuong') {
                     </div>
                 </div>
 
-                <!-- Tiền cọc (chỉ cho bàn tiệc) -->
-                <?php if ($loaidatban == 'tiec'):
-                   $coc= ($total1-($total1 *($combo_info['giamgia']/100)))/2
-                    
-                    ?>
-                <div class="form-section">
-
-
-
-
-                    <input type="hidden" class="form-control" name="tiencoc" min="0" value="<?php echo $coc ?>">
-
-
-
-                </div>
-                <?php endif; ?>
+             
 
                 <!-- Ghi chú -->
                 <div class="form-section">
                     <div class="form-section-title">
                         <i class="fas fa-comment me-2"></i>
-                        Ghi chú
+                        Ghi chú:(miễn phí decor nếu đặt phòng tiệc vui lòng ghi rõ trong phần ghi chú) 
                     </div>
 
                     <textarea class="form-control" name="ghichu" rows="3"
                         placeholder="Yêu cầu đặc biệt (nếu có)..."></textarea>
                 </div>
                 <!-- Ghi chú -->
-                <div class="form-section">
+                        <?php if($loaidatban=="tiec"):
+                            
+                    ?>  
+                       <div class="form-section">
                     <div class="form-section-title">
                         <i class="fas fa-comment me-2"></i>
                         Thanh toán trực tuyến
@@ -285,77 +349,98 @@ if ($loaidatban == 'thuong') {
                     </div>
                    
                 </div>
+                    <?php endif; ?>     
 
                 <!-- Nút submit -->
                 <button type="submit" class="btn-submit">
-                    <i class="fas fa-money-bill-wave me-2"></i>
-                    Cọc trước <?php echo  number_format($coc, 0, ',', '.'); ?> VNĐ
+                   
+                   <?php if($loaidatban=="tiec"):
+                       
+                    ?>
+
+                    Yêu cầu thanh toán trước <?php echo number_format($final_price, 0, ',', '.'); ?>VNĐ
+                     <?php else:
+                       
+                        ?>
+                         Đặt bàn ngay
+                            <?php endif; ?>
                 </button>
             </form>
         </div>
     </div>
 
     <!-- Modal chi tiết combo -->
-    <?php if ($loaidatban == 'tiec' && $combo_info): ?>
-    <div class="modal fade" id="comboDetailsModal" tabindex="-1">
-        <div class="modal-dialog modal-lg">
-            <div class="modal-content" style="top: 50px;">
-                <div class="modal-header">
-                    <h5 class="modal-title">
-                        <i class="fas fa-list me-2"></i>
-                        Chi tiết combo
-                    </h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                </div>
-                <div class="modal-body">
-                    <?php 
-                $total = 0;
-                foreach ($combo_details as $item): 
-                    $subtotal = $item['Gia'] * $item['SoLuong'];
-                    $total += $subtotal;
-                ?>
-                    <div class="d-flex align-items-center mb-3 pb-3 border-bottom">
-                        <img src="../<?php echo $item['Anh']; ?>"
-                            style="width: 80px; height: 80px; object-fit: contain; border-radius: 8px;" class="me-3">
-                        <div class="flex-grow-1">
-                            <h6 class="mb-1"><?php echo $item['TenSP']; ?></h6>
-                            <small class="text-muted">Size: <?php echo $item['TenSize']; ?></small>
-                            <div class="mt-1">
-                                Số lượng: <strong><?php echo $item['SoLuong']; ?></strong>
-                            </div>
-                        </div>
-                        <div class="text-end">
-                            <div><?php echo number_format($item['Gia'], 0, ',', '.'); ?> VNĐ/món</div>
-                            <strong class="text-success"><?php echo number_format($subtotal, 0, ',', '.'); ?>
-                                VNĐ</strong>
+   <!-- Modal chi tiết combo -->
+<?php if ($loaidatban == 'tiec' && $combo_info): ?>
+<div class="modal fade" id="comboDetailsModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content" style="top: 50px;">
+            <div class="modal-header">
+                <h5 class="modal-title">
+                    <i class="fas fa-list me-2"></i>
+                    Chi tiết combo
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <?php foreach ($combo_details as $item): ?>
+                <div class="d-flex align-items-center mb-3 pb-3 border-bottom">
+                    <img src="../<?php echo $item['Anh']; ?>"
+                        style="width: 80px; height: 80px; object-fit: contain; border-radius: 8px;" class="me-3">
+                    <div class="flex-grow-1">
+                        <h6 class="mb-1"><?php echo $item['TenSP']; ?></h6>
+                        <small class="text-muted">Size: <?php echo $item['TenSize']; ?></small>
+                        <div class="mt-1">
+                            Số lượng: <strong><?php echo $item['SoLuong']; ?></strong>
                         </div>
                     </div>
-                    <?php endforeach; ?>
+                    <div class="text-end">
+                        <div class="text-muted"><?php echo number_format($item['Gia'], 0, ',', '.'); ?> VNĐ/món</div>
+                        <strong class="text-success">
+                            <?php echo number_format($item['ThanhTien'], 0, ',', '.'); ?> VNĐ
+                        </strong>
+                    </div>
+                </div>
+                <?php endforeach; ?>
 
-                    <div class="text-end mt-3">
-                        <h5>
-                            Tổng tiền:
-                            <span class="text-success" style="text-decoration: line-through;">
-                                <?php echo number_format($total, 0, ',', '.'); ?> VNĐ
+                <div class="text-end mt-3">
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <h5 class="mb-0">Tổng giá trị sản phẩm:</h5>
+                        <h5 class="mb-0">
+                            <span class="text-decoration-line-through text-muted">
+                                <?php echo number_format($total_price, 0, ',', '.'); ?> VNĐ
                             </span>
                         </h5>
-
-                        <h4>Còn lại: <span
-                                class="text-danger"><?php echo number_format($total- ($total*($combo_info['giamgia']/100)), 0, ',', '.'); ?>
-                                VNĐ</span></h4>
-                        <?php if ($total > 0): ?>
-                        <div class="alert alert-success mt-2">
-                            <i class="fas fa-gift me-2"></i>
-                            Tiết kiệm: <?php echo number_format(($total*($combo_info['giamgia']/100)), 0, ',', '.'); ?>
-                            VNĐ
-                        </div>
-                        <?php endif; ?>
                     </div>
+                    
+                    <?php if ($discount_amount > 0): ?>
+                    <div class="d-flex justify-content-between align-items-center text-success mb-2">
+                        <span>Giảm giá (<?php echo $combo_info['giamgia']; ?>%):</span>
+                        <span>-<?php echo number_format($discount_amount, 0, ',', '.'); ?> VNĐ</span>
+                    </div>
+                    <?php endif; ?>
+                    
+                    <hr>
+                    
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h4 class="mb-0">Tổng thanh toán:</h4>
+                        <h4 class="mb-0 text-danger">
+                            <?php echo number_format($final_price, 0, ',', '.'); ?> VNĐ
+                        </h4>
+                    </div>
+                    
+                    <?php if ($discount_amount > 0): ?>
+                    <div class="alert alert-success mt-3 mb-0">
+                        <i class="fas fa-gift me-2"></i>
+                        Bạn tiết kiệm được: <strong><?php echo number_format($discount_amount, 0, ',', '.'); ?> VNĐ</strong>
+                    </div>
+                    <?php endif; ?>
                 </div>
             </div>
         </div>
     </div>
-    <?php endif; ?>
+</div>
+<?php endif; ?>
 
     <?php include '../components/footer.php'; ?>
 

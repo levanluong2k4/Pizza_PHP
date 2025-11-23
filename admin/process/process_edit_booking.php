@@ -18,7 +18,7 @@ $ngayden = $_POST['ngayden'] ?? '';
 $gioden = $_POST['gioden'] ?? '';
 $table_id = $_POST['table_id'] ?? '';
 $combo_id = intval($_POST['combo_id'] ?? 0);
-$tiencoc = floatval($_POST['tiencoc'] ?? 0);
+
 $ghichu = trim($_POST['ghichu'] ?? '');
 $products = $_POST['products'] ?? [];
 
@@ -133,7 +133,7 @@ try {
                    MaBan = ?,
                    MaPhong = ?,
                    MaCombo = ?,
-                   TienCoc = ?,
+                  
                    GhiChu = ?
                    WHERE MaDatBan = ?";
     
@@ -141,7 +141,7 @@ try {
     $combo_id_val = $combo_id > 0 ? $combo_id : null;
     
     $stmt->bind_param(
-        "ssssiiidsi",
+        "ssssiiisi",
         $hoten,
         $sdt,
         $ngaygio,
@@ -149,7 +149,7 @@ try {
         $maban,
         $maphong,
         $combo_id_val,
-        $tiencoc,
+      
         $ghichu,
         $madatban
     );

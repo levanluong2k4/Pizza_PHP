@@ -1,6 +1,6 @@
 <?php 
 
-require "includes/query_products.php";
+require "includes/load_products.php";
 
 ?>
 

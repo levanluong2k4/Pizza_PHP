@@ -289,24 +289,14 @@ $status = $trangThai[$booking['TrangThaiDatBan']] ?? ['text' => 'Không xác đ�
         </div>
         <?php endif; ?>
         
-        <?php if ($booking['TienCoc'] > 0): ?>
-        <div class="total-row">
-            <span>Tiền cọc đã thanh toán:</span>
-            <strong><?php echo number_format($booking['TienCoc']); ?> đ</strong>
-        </div>
-        <?php endif; ?>
+     
         
         <div class="total-row main">
             <span>Tổng thanh toán:</span>
             <strong><?php echo number_format($tongtien_cuoi); ?> đ</strong>
         </div>
         
-        <?php if ($booking['TienCoc'] > 0): ?>
-        <div class="total-row" style="border-top: 1px solid rgba(255,255,255,0.3); margin-top: 8px; padding-top: 8px;">
-            <span>Còn lại:</span>
-            <strong><?php echo number_format($tongtien_cuoi - $booking['TienCoc']); ?> đ</strong>
-        </div>
-        <?php endif; ?>
+      
     </div>
     <?php endif; ?>
 </div>
