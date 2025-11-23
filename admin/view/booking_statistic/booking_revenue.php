@@ -1,173 +1,139 @@
 <?php
 require __DIR__ . '/../../../includes/db_connect.php';
 
-// === LẤY GIÁ TRỊ TỪ FORM ===
-$from = $_GET['from_date'] ?? null;
-$to = $_GET['to_date'] ?? null;
-$filter = $_GET['filter'] ?? '5nam'; // mặc định: 5 năm đổ lại
+// =============== BỘ LỌC ================
+$filter = $_GET['filter'] ?? 'homnay';
 
-// === XỬ LÝ LOGIC ĐIỀU KIỆN THỜI GIAN ===
-if ($from && $to) {
-    // Nếu người dùng chọn khoảng ngày cụ thể
-    $condition = "AND DATE(dh.NgayDat) BETWEEN '$from' AND '$to'";
-    $title = "Doanh thu từ $from đến $to";
-} else {
-    // Nếu chọn theo bộ lọc
-    switch ($filter) {
-        case 'homnay':
-            $title = "Doanh thu hôm nay (" . date('d/m/Y') . ")";
-            $condition = "AND DATE(dh.NgayDat) = CURDATE()";
-            break;
+switch ($filter) {
+    case 'thang':
+        $title = "Doanh thu tháng " . date('m/Y');
+        $condition = "AND MONTH(db.NgayGio) = MONTH(CURDATE()) 
+                      AND YEAR(db.NgayGio) = YEAR(CURDATE())";
+        break;
 
-        case '12thang':
-            $title = "Doanh thu 12 tháng gần nhất";
-            $condition = "AND dh.NgayDat >= DATE_SUB(CURDATE(), INTERVAL 12 MONTH)";
-            break;
+    case 'nam':
+        $title = "Doanh thu năm " . date('Y');
+        $condition = "AND YEAR(db.NgayGio) = YEAR(CURDATE())";
+        break;
 
-        case 'nam':
-            $year = $_GET['year'] ?? date('Y');
-            $title = "Doanh thu năm $year";
-            $condition = "AND YEAR(dh.NgayDat) = $year";
-            break;
-
-        case 'thang':
-            $month = $_GET['month'] ?? date('m');
-            $year = $_GET['year'] ?? date('Y');
-            $title = "Doanh thu tháng $month/$year";
-            $condition = "AND YEAR(dh.NgayDat) = $year AND MONTH(dh.NgayDat) = $month";
-            break;
-
-        default:
-            $condition = "AND YEAR(dh.NgayDat) = YEAR(CURDATE())";
-            $title = "Doanh thu năm " . date('Y');
-            break;
-    }
+    default:
+        $title = "Doanh thu hôm nay (" . date('d/m/Y') . ")";
+        $condition = "AND DATE(db.NgayGio) = CURDATE()";
+        break;
 }
 
+// =============== TRUY VẤN CHÍNH ================
 $sql = "
 SELECT 
-    DATE(dh.NgayDat) AS Ngay,
-    SUM(ctdh.SoLuong) AS TongSoLuongBan,
-    SUM(ctdh.ThanhTien) AS DoanhThuNgay
-FROM donhang dh
-JOIN chitietdonhang ctdh ON dh.MaDH = ctdh.MaDH
-WHERE dh.trangthai = 'Giao thành công'
+    DATE(db.NgayGio) AS Ngay,
+    SUM(ctdb.SoLuong) AS TongSoLuong,
+    SUM(ctdb.ThanhTien) AS DoanhThuNgay
+FROM datban db
+JOIN chitietdatban ctdb ON db.MaDatBan = ctdb.MaDatBan
+WHERE db.TrangThaiThanhToan = 'dathanhtoan'
 $condition
-GROUP BY DATE(dh.NgayDat)
-ORDER BY Ngay DESC;
+GROUP BY DATE(db.NgayGio)
+ORDER BY Ngay DESC
 ";
 
 $kq = mysqli_query($ketnoi, $sql);
 
-// =================Truy vấn tính tổng=================
-
+// =============== TÍNH TỔNG DOANH THU ================
 $sql_tong = "
-SELECT SUM(ctdh.ThanhTien) AS TongDoanhThu
-FROM donhang dh
-JOIN chitietdonhang ctdh ON dh.MaDH = ctdh.MaDH
-WHERE dh.trangthai = 'Giao thành công'
-$condition;
+SELECT SUM(ctdb.ThanhTien) AS TongDoanhThu
+FROM datban db
+JOIN chitietdatban ctdb ON db.MaDatBan = ctdb.MaDatBan
+WHERE db.TrangThaiThanhToan = 'dathanhtoan'
+$condition
 ";
 
 $tong = mysqli_fetch_assoc(mysqli_query($ketnoi, $sql_tong))["TongDoanhThu"] ?? 0;
 
-// ========== XỬ LÝ XUẤT FILE EXCEL & PDF ==========
+
+// =============== EXPORT ================
 require_once __DIR__ . '/../../../vendor/autoload.php';
 
-// ⚠️ PHẢI ĐƯA use RA NGOÀI, KHÔNG ĐƯỢC ĐẶT TRONG IF
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
 
-
 if (isset($_GET['export'])) {
-    $exportType = $_GET['export'];
 
-    // Lấy dữ liệu ra mảng để dùng cho export
+    // Lấy dữ liệu để export
     $data = [];
     while ($row = mysqli_fetch_assoc($kq)) {
         $data[] = $row;
     }
-
-    // Reset lại kết quả cho hiển thị HTML phía dưới
     mysqli_data_seek($kq, 0);
 
-    if ($exportType === 'excel') {
-        // --- XUẤT EXCEL ---
+    if ($_GET['export'] === 'excel') {
+        // ===== Export Excel =====
         $spreadsheet = new Spreadsheet();
         $sheet = $spreadsheet->getActiveSheet();
 
-        // Tiêu đề
         $sheet->setCellValue('A1', 'Ngày');
-        $sheet->setCellValue('B1', 'Tổng số lượng bán');
-        $sheet->setCellValue('C1', 'Doanh thu trong ngày (VNĐ)');
+        $sheet->setCellValue('B1', 'Tổng số lượng');
+        $sheet->setCellValue('C1', 'Doanh thu (VNĐ)');
 
-        // Dữ liệu
         $rowIndex = 2;
         foreach ($data as $row) {
             $sheet->setCellValue("A{$rowIndex}", $row['Ngay']);
-            $sheet->setCellValue("B{$rowIndex}", $row['TongSoLuongBan']);
+            $sheet->setCellValue("B{$rowIndex}", $row['TongSoLuong']);
             $sheet->setCellValue("C{$rowIndex}", $row['DoanhThuNgay']);
             $rowIndex++;
         }
 
-        // Tổng doanh thu
         $sheet->setCellValue("A{$rowIndex}", "TỔNG DOANH THU");
         $sheet->mergeCells("A{$rowIndex}:B{$rowIndex}");
         $sheet->setCellValue("C{$rowIndex}", $tong);
 
-        // Xuất file
         header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
-        header('Content-Disposition: attachment;filename="thongke_doanhthu.xlsx"');
+        header('Content-Disposition: attachment;filename="thongke_datban.xlsx"');
         header('Cache-Control: max-age=0');
 
         $writer = new Xlsx($spreadsheet);
         $writer->save('php://output');
         exit;
-    } elseif ($exportType === 'pdf') {
-        // --- XUẤT PDF ---
-        $pdf = new TCPDF();
+    } elseif ($_GET['export'] === 'pdf') {
+        // ===== Export PDF =====
+        $pdf = new TCPDF('P', 'mm', 'A4', true, 'UTF-8', false);
+
         $pdf->SetCreator('Admin Panel');
         $pdf->SetAuthor('Hệ thống');
-        $pdf->SetTitle('Thống kê doanh thu');
+        $pdf->SetTitle('Thống kê doanh thu đặt bàn');
+
+        // Quan trọng: font unicode hỗ trợ tiếng Việt
+        $pdf->SetFont('dejavusans', '', 12);
+
         $pdf->AddPage();
 
-        $html = '<h3 style="text-align:center; font-family: DejaVu Sans;">THỐNG KÊ DOANH THU</h3>';
-        $html .= '<table border="1" cellspacing="0" cellpadding="5" style="font-family: DejaVu Sans;">
-                    <tr style="background-color:#28a745;color:white; ">
-                        <th>Ngày</th>
-                        <th>Tổng số lượng bán</th>
-                        <th>Doanh thu trong ngày (VNĐ)</th>
-                    </tr>';
-        foreach ($data as $row) {
+
+        $html = "<h3 style='text-align:center;'>THỐNG KÊ DOANH THU ĐẶT BÀN</h3>";
+        $html .= '<table border="1" cellspacing="0" cellpadding="5">
+                <tr style="background-color:#28a745;color:#ffffff;">
+                    <th>Ngày</th>
+                    <th>Tổng số lượng</th>
+                    <th>Doanh thu (VNĐ)</th>
+                </tr>';
+
+        foreach ($data as $r) {
             $html .= "<tr>
-                        <td>{$row['Ngay']}</td>
-                        <td>{$row['TongSoLuongBan']}</td>
-                        <td>" . number_format($row['DoanhThuNgay']) . "₫</td>
+                        <td>{$r['Ngay']}</td>
+                        <td>{$r['TongSoLuong']}</td>
+                        <td>" . number_format($r['DoanhThuNgay']) . "</td>
                     </tr>";
         }
 
-        $html .= '<tr style="background-color:#e7ffe7;font-weight:bold;">
-                    <td colspan="2">TỔNG DOANH THU</td>
-                    <td>' . number_format($tong) . '₫</td>
-                  </tr>';
-        $html .= '</table>';
+        $html .= "<tr style='background:#e7ffe7;font-weight:bold;'>
+                    <td colspan='2'>TỔNG DOANH THU</td>
+                    <td>" . number_format($tong) . "</td>
+                  </tr>
+                </table>";
 
-        $pdf->writeHTML($html, true, false, true, false, '');
-        $pdf->Output('thongke_doanhthu.pdf', 'I');
+        $pdf->writeHTML($html);
+        $pdf->Output('thongke_datban.pdf', 'I');
         exit;
     }
 }
-// =================Truy vấn tính tổng=================
-
-$sql_tong = "
-SELECT SUM(ctdh.ThanhTien) AS TongDoanhThu
-FROM donhang dh
-JOIN chitietdonhang ctdh ON dh.MaDH = ctdh.MaDH
-WHERE dh.trangthai = 'Giao thành công'
-$condition;
-";
-
-$tong = mysqli_fetch_assoc(mysqli_query($ketnoi, $sql_tong))["TongDoanhThu"] ?? 0;
 ?>
 
 <!DOCTYPE html>
@@ -176,7 +142,7 @@ $tong = mysqli_fetch_assoc(mysqli_query($ketnoi, $sql_tong))["TongDoanhThu"] ?? 
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Thống kê sản phẩm bán chạy - Admin Panel</title>
+    <title>Thống kê doanh thu đặt bàn</title>
 
     <!-- Bootstrap CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet">
@@ -428,123 +394,63 @@ $tong = mysqli_fetch_assoc(mysqli_query($ketnoi, $sql_tong))["TongDoanhThu"] ?? 
 
     <!-- ===== NỘI DUNG CHÍNH: BẢNG THỐNG KÊ ===== -->
     <div class="container mt-4">
-        <form method="GET" class="row g-3 align-items-end">
-            <!-- Bộ lọc khoảng thời gian -->
-            <div class="col-auto">
-                <label for="from_date" class="form-label">Từ ngày:</label>
-                <input type="date" id="from_date" name="from_date" class="form-control"
-                    value="<?php echo $_GET['from_date'] ?? ''; ?>">
-            </div>
 
-            <div class="col-auto">
-                <label for="to_date" class="form-label">Đến ngày:</label>
-                <input type="date" id="to_date" name="to_date" class="form-control"
-                    value="<?php echo $_GET['to_date'] ?? ''; ?>">
-            </div>
+        <form method="GET" class="d-flex gap-2 mb-3">
 
-            <div class="col-auto">
-                <button class="btn btn-success" type="submit">
-                    <i class="fa-solid fa-filter"></i> Lọc
-                </button>
-            </div>
+            <button type="submit" name="filter" value="homnay"
+                class="btn btn-outline-success <?php echo ($filter == 'homnay') ? 'active' : ''; ?>">
+                Hôm nay
+            </button>
 
-            <!-- Các nút nhanh -->
-            <div class="col-auto d-flex gap-2 flex-wrap">
-                <!-- Hôm nay -->
-                <button type="button" class="btn btn-outline-success"
-                    onclick="window.location.href='?filter=homnay'">
-                    Hôm nay
-                </button>
+            <button type="submit" name="filter" value="thang"
+                class="btn btn-outline-success <?php echo ($filter == 'thang') ? 'active' : ''; ?>">
+                Tháng này
+            </button>
 
-                <!-- 12 tháng gần nhất -->
-                <button type="button" class="btn btn-outline-success"
-                    onclick="window.location.href='?filter=12thang'">
-                    12 tháng gần nhất
-                </button>
+            <button type="submit" name="filter" value="nam"
+                class="btn btn-outline-success <?php echo ($filter == 'nam') ? 'active' : ''; ?>">
+                Năm này
+            </button>
 
-                <!-- Chọn năm -->
-                <div class="dropdown">
-                    <button class="btn btn-outline-success dropdown-toggle" type="button" data-bs-toggle="dropdown">
-                        Chọn năm
-                    </button>
-                    <ul class="dropdown-menu">
-                        <?php
-                        $yearNow = date('Y');
-                        for ($i = 0; $i < 5; $i++) {
-                            $y = $yearNow - $i;
-                            echo "<li><a class='dropdown-item' href='?filter=nam&year=$y'>$y</a></li>";
-                        }
-                        ?>
-                    </ul>
-                </div>
+            <a href="?<?php echo http_build_query(array_merge($_GET, ['export' => 'excel'])); ?>"
+                class="btn btn-primary ms-auto">
+                Xuất Excel
+            </a>
 
-                <!-- Chọn tháng -->
-                <div class="dropdown">
-                    <button class="btn btn-outline-success dropdown-toggle" type="button" data-bs-toggle="dropdown">
-                        Chọn tháng
-                    </button>
-                    <ul class="dropdown-menu">
-                        <?php
-                        $now = new DateTime();
-                        for ($i = 0; $i < 12; $i++) {
-                            $month = $now->format('m');
-                            $year = $now->format('Y');
-                            echo "<li><a class='dropdown-item' href='?filter=thang&month=$month&year=$year'>Tháng $month/$year</a></li>";
-                            $now->modify('-1 month');
-                        }
-                        ?>
-                    </ul>
-                </div>
-            </div>
+            <a href="?<?php echo http_build_query(array_merge($_GET, ['export' => 'pdf'])); ?>"
+                class="btn btn-danger">
+                Xuất PDF
+            </a>
 
-            <!-- Nút xuất file -->
-            <div class="col-auto">
-                <a href="?<?php echo http_build_query(array_merge($_GET, ['export' => 'excel'])); ?>"
-                    class="btn btn-primary">
-                    <i class="fa-solid fa-file-excel"></i> Xuất Excel
-                </a>
-            </div>
-            <div class="col-auto">
-                <a href="?<?php echo http_build_query(array_merge($_GET, ['export' => 'pdf'])); ?>"
-                    class="btn btn-danger">
-                    <i class="fa-solid fa-file-pdf"></i> Xuất PDF
-                </a>
-            </div>
         </form>
-        
-    </div>
-        
 
-    <div class="container mt-5">
-        <h2 class="main-title"><i class="fa-solid "></i> Thống kê doanh thu theo số liệu</h2>
-        <h5 class="text-center mb-4"><?php echo $title; ?></h5>
-        <div class="table-responsive mt-4">
-            <table class="table table-bordered table-hover align-middle">
+        <h4 class="text-center mb-3" style="color:#28a745"><?php echo $title; ?></h4>
+
+        <div class="table-responsive">
+            <table class="table table-bordered table-hover">
                 <thead>
                     <tr>
                         <th>Ngày</th>
-                        <th>Tổng số lượng bán</th>
-                        <th>Doanh thu trong ngày (VNĐ)</th>
+                        <th>Tổng số lượng</th>
+                        <th>Doanh thu (VNĐ)</th>
                     </tr>
                 </thead>
 
                 <tbody>
                     <?php foreach ($kq as $row) { ?>
                         <tr>
-                            <td><?php echo $row["Ngay"]; ?></td>
-                            <td><?php echo $row["TongSoLuongBan"]; ?></td>
-                            <td><b><?php echo number_format($row["DoanhThuNgay"]); ?>VNĐ</b></td>
+                            <td><?php echo $row['Ngay']; ?></td>
+                            <td><?php echo $row['TongSoLuong']; ?></td>
+                            <td><b><?php echo number_format($row['DoanhThuNgay']); ?> VNĐ</b></td>
                         </tr>
                     <?php } ?>
 
-                    <!-- Tổng doanh thu -->
-                    <tr style="background-color:#e7ffe7; font-weight: bold;">
+                    <tr style="background:#e7ffe7;font-weight:bold;">
                         <td colspan="2">TỔNG DOANH THU</td>
-                        <td><?php echo number_format($tong); ?>VNĐ</td>
+                        <td><?php echo number_format($tong); ?> VNĐ</td>
                     </tr>
                 </tbody>
             </table>
-
         </div>
     </div>
 
