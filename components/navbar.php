@@ -6,7 +6,7 @@ if (session_status() == PHP_SESSION_NONE) {
 }
 $user_id =$_SESSION['user_id']?? null;
 
-$ketnoi = mysqli_connect("localhost", "root", "", "php_pizza");
+$ketnoi = mysqli_connect("localhost:8889", "root", "root", "php_pizza");
 mysqli_set_charset($ketnoi, "utf8");
 
 if (isset($_COOKIE['remember']) && !empty($_COOKIE['remember'])) {
@@ -100,8 +100,8 @@ if (!empty($_SESSION['cart'])) {
 
 $sqlloaisp="SELECT * FROM loaisanpham";
 $loaisp=mysqli_query($ketnoi,$sqlloaisp);
-$sqlcombo="SELECT * FROM combo";
-$combo=mysqli_query($ketnoi,$sqlcombo);
+//$sqlcombo="SELECT * FROM combo";
+//$combo=mysqli_query($ketnoi,$sqlcombo);
 
 
 
