@@ -19,6 +19,3 @@
        class="btn btn-danger">
        Đã huỷ
     </a>
-
-</div>
-

@@ -18,9 +18,8 @@ $items = $conn->query("
     WHERE MaDH = $MaDH
 ");
 ?>
-
+    <?php include "tabs.php"; ?>
 <h2>Chi tiết đơn hàng #<?= $MaDH ?></h2>
-<?php include "tabs.php"; ?>
 
 <p><b>Khách hàng:</b> <?= $order['HoTen'] ?></p>
 <p><b>Ngày đặt:</b> <?= $order['ngaydat'] ?></p>
@@ -30,18 +29,16 @@ $items = $conn->query("
 <h3>Cập nhật trạng thái</h3>
 
 <form action="update_status.php" method="POST">
-    <input type="hidden" name="MaDH" value="<?= $MaDH ?>">
-
+    <input type="hidden" name="MaDH" value="<?php echo $MaDH; ?>">
+    
     <select name="trangthai">
-        <option <?= $order['trangthai']=='Chờ xử lý'?'selected':'' ?>>Chờ xử lý</option>
-        <option <?= $order['trangthai']=='Đang giao'?'selected':'' ?>>Đang giao</option>
-        <option <?= $order['trangthai']=='Giao thành công'?'selected':'' ?>>Giao thành công</option>
-        <option <?= $order['trangthai']=='Đã huỷ'?'selected':'' ?>>Đã huỷ</option>
+        <option value="Chờ duyệt">Chờ duyệt</option>
+        <option value="Đang giao">Đang giao</option>
+        <option value="Hoàn thành">Hoàn thành</option>
     </select>
 
     <button type="submit">Cập nhật</button>
 </form>
-
 <h3>Danh sách sản phẩm</h3>
 
 <table border="1" cellspacing="0" cellpadding="10">

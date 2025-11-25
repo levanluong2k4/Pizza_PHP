@@ -4,16 +4,16 @@ $conn = new mysqli("localhost", "root", "", "php_pizza");
 $sql = "SELECT donhang.*, khachhang.HoTen 
         FROM donhang 
         LEFT JOIN khachhang ON donhang.MaKH = khachhang.MaKH
+        WHERE trangthai = 'Đã huỷ'
         ORDER BY MaDH DESC";
 $result = $conn->query($sql);
 ?>
-
 <!DOCTYPE html>
 <html lang="vi">
 
 <head>
     <meta charset="UTF-8">
-    <title>Danh sách đơn hàng</title>
+    <title>Đơn hàng đã huỷ</title>
 
     <!-- Bootstrap -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet">
@@ -64,7 +64,7 @@ $result = $conn->query($sql);
 
     <div class="container mt-4">
 
-        <h2 class="page-title mb-3"><i class="fa-solid fa-receipt"></i> Danh sách đơn hàng</h2>
+        <h2 class="page-title mb-3"><i class="fa-solid fa-receipt"></i> Đơn hàng đã huỷ</h2>
         <div class="card shadow order-card mt-3">
             <div class="card-body">
 
@@ -81,36 +81,15 @@ $result = $conn->query($sql);
                     </thead>
 
                     <tbody>
-                        <?php while ($row = $result->fetch_assoc()): ?>
-
-                            <?php
-                            $st = $row['trangthai'];
-
-                            $class = match ($st) {
-                                "Đang xử lý" => "dang-xu-ly",
-                                "Hoàn thành" => "hoan-thanh",
-                                default => "da-huy"
-                            };
-                            ?>
-
+                        <?php while($row = $result->fetch_assoc()): ?>
                             <tr>
-                                <td><strong>#<?= $row['MaDH'] ?></strong></td>
+                                <td><?= $row['MaDH'] ?></td>
                                 <td><?= $row['HoTen'] ?></td>
                                 <td><?= $row['ngaydat'] ?></td>
                                 <td><?= number_format($row['TongTien']) ?>₫</td>
-
-                                <td>
-                                    <span class="status-badge <?= $class ?>"><?= $st ?></span>
-                                </td>
-
-                                <td>
-                                    <a href="detail.php?MaDH=<?= $row['MaDH'] ?>" class="btn btn-outline-success btn-sm">
-                                        <i class="fa-solid fa-eye"></i> Xem
-                                    </a>
-                                </td>
+                                <td><a href="detail.php?MaDH=<?= $row['MaDH'] ?>">Xem</a></td>
                             </tr>
-
-                        <?php endwhile; ?>
+                            <?php endwhile; ?>
                     </tbody>
 
                 </table>
@@ -122,3 +101,4 @@ $result = $conn->query($sql);
 </body>
 
 </html>
+

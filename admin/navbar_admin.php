@@ -203,9 +203,9 @@
                         </a>
                         <ul class="dropdown-menu">
                             <li><a class="dropdown-item" href="list_orders.php"><i class="fa-solid fa-clipboard-list"></i> Danh sách đơn hàng</a></li>
-                            <li><a class="dropdown-item" href="#"><i class="fa-solid fa-hourglass-half"></i> Đơn hàng chờ xử lý</a></li>
-                            <li><a class="dropdown-item" href="#"><i class="fa-solid fa-check-circle"></i> Đơn hàng đã hoàn thành</a></li>
-                            <li><a class="dropdown-item" href="#"><i class="fa-solid fa-times-circle"></i> Đơn hàng đã hủy</a></li>
+                            <li><a class="dropdown-item" href="pending.php"><i class="fa-solid fa-hourglass-half"></i> Đơn hàng chờ xử lý</a></li>
+                            <li><a class="dropdown-item" href="completed.php"><i class="fa-solid fa-check-circle"></i> Đơn hàng đã hoàn thành</a></li>
+                            <li><a class="dropdown-item" href="canceled.php"><i class="fa-solid fa-times-circle"></i> Đơn hàng đã hủy</a></li>
                         </ul>
                     </li>
 

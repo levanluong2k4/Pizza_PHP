@@ -1,5 +1,6 @@
+
 <?php
-$conn = new mysqli("localhost","root","","php_piza");
+$conn = new mysqli("localhost","root","","php_pizza");
 
 $MaDH = $_POST['MaDH'];
 $trangthai = $_POST['trangthai'];

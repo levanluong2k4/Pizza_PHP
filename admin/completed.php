@@ -9,9 +9,39 @@ $sql = "SELECT donhang.*, khachhang.HoTen
 $result = $conn->query($sql);
 ?>
 
-<h2>Đơn hàng đã hoàn thành</h2>
-<?php include "tabs.php"; ?>
+<!DOCTYPE html>
+<html lang="vi">
 
+<head>
+    <meta charset="UTF-8">
+    <title>Danh sách đơn hàng</title>
+
+    <!-- Bootstrap -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" />
+
+    <style>
+        body {
+            background-color: #f3f4f6;
+            font-family: "Segoe UI", sans-serif;
+        }
+
+        .page-title {
+            font-size: 26px;
+            font-weight: bold;
+            color: #28a745;
+        }
+
+        .order-card {
+            border-radius: 12px;
+        }
+
+
+    </style>
+</head>
+<?php include "navbar_admin.php"; ?>    
+<h2>Đơn hàng đã hoàn thành</h2>
 <table border="1" cellspacing="0" cellpadding="10">
 <tr>
     <th>Mã ĐH</th>
