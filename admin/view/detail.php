@@ -1,5 +1,5 @@
 <?php
-$conn = new mysqli("localhost", "root", "", "pizza_company");
+$conn = new mysqli("localhost", "root", "", "php_pizza");
 
 $MaDH = $_GET['MaDH'];
 
