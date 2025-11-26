@@ -246,11 +246,23 @@
                                     <i class="fa-solid fa-shopping-cart"></i> Thống kê đơn hàng
                                 </a>
                                 <ul class="dropdown-menu">
-                                    <li><a class="dropdown-item" href="#"><i class="fa-solid fa-list-alt"></i> Tổng quan đơn hàng</a></li>
-                                    <li><a class="dropdown-item" href="#"><i class="fa-solid fa-chart-pie"></i> Tỷ lệ đơn hàng theo trạng thái</a></li>
+
+                                    <li>
+                                    <a class="dropdown-item" href="/pizza/Pizza_PHP/admin/view/orders_statistic/orders_statis.php">
+                                        <i class="fa-solid fa-list-alt"></i> Tổng quan đơn hàng
+                                    </a>
+                                    </li>
+
+                                    <li>
+                                    <a class="dropdown-item" href="/pizza/Pizza_PHP/admin/view/orders_statistic/orders_statis_chart.php">
+                                        <i class="fa-solid fa-chart-pie"></i> Tỷ lệ đơn hàng theo trạng thái
+                                    </a>
+                                    </li>
                                     <li><a class="dropdown-item" href="#"><i class="fa-solid fa-clock"></i> Đơn hàng theo thời gian</a></li>
+
                                 </ul>
                             </li>
+
 
                             <!-- Thống kê tổng hợp -->
                             <li><hr class="dropdown-divider"></li>

@@ -263,11 +263,6 @@ $classStatus = match ($st) {
                                     Chờ xử lý
                                 </option>
 
-                                <option value="Chờ giao" 
-                                    <?php if ($st == "Chờ giao") echo "selected"; ?>>
-                                    Chờ giao
-                                </option>
-
                                 <option value="Đang giao" 
                                     <?php if ($st == "Đang giao") echo "selected"; ?>>
                                     Đang giao
