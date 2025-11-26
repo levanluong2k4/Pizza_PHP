@@ -77,12 +77,6 @@ include __DIR__ . '/../../navbar_admin.php';
         Thống kê tổng quan theo ngày
     </h2>
 
-    <div class="card shadow card-stat mb-4">
-        <div class="card-body">
-            <h5 class="fw-bold mb-3">Biểu đồ đơn hàng theo ngày</h5>
-            <canvas id="ordersByDayChart"></canvas>
-        </div>
-    </div>
 
     <div class="card shadow card-stat">
         <div class="card-body">

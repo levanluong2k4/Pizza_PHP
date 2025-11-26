@@ -258,7 +258,7 @@
                                         <i class="fa-solid fa-chart-pie"></i> Tỷ lệ đơn hàng theo trạng thái
                                     </a>
                                     </li>
-                                    <li><a class="dropdown-item" href="#"><i class="fa-solid fa-clock"></i> Đơn hàng theo thời gian</a></li>
+                                    <li><a class="dropdown-item" href="/pizza/Pizza_PHP/admin/view/orders_statistic/orders_time_chart.php"><i class="fa-solid fa-clock"></i> Đơn hàng theo thời gian</a></li>
 
                                 </ul>
                             </li>
