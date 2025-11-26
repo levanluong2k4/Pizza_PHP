@@ -172,18 +172,18 @@ require "includes/load_products.php";
    <!-- jQuery -->
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 
-<!-- Bootstrap JS -->
+<!-- ✅ 2. Bootstrap -->
 <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.8/dist/umd/popper.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.min.js"></script>
 
-<!-- Slick Carousel JS -->
+<!-- ✅ 3. Slick Carousel (PHẢI SAU jQuery) -->
 <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/slick-carousel@1.8.1/slick/slick.min.js"></script>
 
-<!-- WOW.js -->
+<!-- ✅ 4. WOW.js -->
 <script src="./js/wow.min.js"></script>
 <script>new WOW().init();</script>
 
-<!-- Search JS -->
+<!-- ✅ 5. Search JS -->
 <script src="js/search.js"></script>
 
 <script>
@@ -226,35 +226,43 @@ $(document).ready(function() {
   
   // Init Slick lần đầu
   initProductSlick();
+// ==================== FILTER CATEGORY ====================
+$(".btn-category").click(function(e) {
+  e.preventDefault();
+  let categoryId = $(this).data("id");
+  console.log("🔍 Category clicked:", categoryId);
   
-  // ==================== FILTER CATEGORY ====================
-  $(".btn-category").click(function(e) {
-    e.preventDefault();
-    let categoryId = $(this).data("id");
-    console.log(" Category clicked:", categoryId);
-    
-    $(".btn-category").removeClass("active");
-    $(this).addClass("active");
+  $(".btn-category").removeClass("active");
+  $(this).addClass("active");
 
-    $.ajax({
-      url: "includes/query_products.php",
-      method: "GET",
-      data: { maloai: categoryId }
-    })
-    .done(function(data) {
-      console.log(" Category data loaded");
-      
-      // Destroy slick trước
-      if ($('#product-list').hasClass('slick-initialized')) {
-        $('#product-list').slick('unslick');
-      }
-      
-      // Update HTML
-      $("#product-list").html(data);
-      
-      // Re-init chỉ cho #product-list
-      setTimeout(function() {
-        $('#product-list').slick({
+  $.ajax({
+    url: "includes/query_products.php",
+    method: "GET",
+    data: { maloai: categoryId }
+  })
+  .done(function(data) {
+    console.log("✅ Category data loaded");
+    
+    const $productList = $('#product-list');
+    
+    // ✅ 1. Destroy slick nếu đã init
+    if ($productList.hasClass('slick-initialized')) {
+      $productList.slick('unslick');
+    }
+    
+    // ✅ 2. Update HTML
+    $productList.html(data);
+    
+    // ✅ 3. Kiểm tra Slick có tồn tại không
+    if (typeof $.fn.slick === 'undefined') {
+      console.error("❌ Slick Carousel chưa được load!");
+      return;
+    }
+    
+    // ✅ 4. Re-init với delay để đảm bảo DOM đã render
+    setTimeout(function() {
+      try {
+        $productList.slick({
           infinite: true,
           dots: true,
           customPaging: function(slider, i) {
@@ -272,12 +280,16 @@ $(document).ready(function() {
             settings: { slidesToShow: 1 }
           }]
         });
-      }, 100);
-    })
-    .fail(function(xhr, status, error) {
-      console.error(" Category request failed:", status, error);
-    });
+        console.log("✅ Slick re-initialized");
+      } catch (error) {
+        console.error("❌ Lỗi init Slick:", error);
+      }
+    }, 200); // Tăng delay lên 200ms
+  })
+  .fail(function(xhr, status, error) {
+    console.error("❌ Category request failed:", status, error);
   });
+});
   
 
 });

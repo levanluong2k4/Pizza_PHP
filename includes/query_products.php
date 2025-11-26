@@ -95,7 +95,7 @@ if (isset($_GET['maloai'])) {
 
     if (mysqli_num_rows($sanpham_rs) > 0) {
         foreach ($sanpham_rs as $sp): 
-            include "../components/product_card.php"; 
+            include __DIR__ . "/../components/product_card.php"; 
         endforeach; 
     } else {
         echo '<p>Không có sản phẩm nào trong danh mục này.</p>';

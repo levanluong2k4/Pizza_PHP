@@ -70,7 +70,7 @@
             </button>
 
             <div class="text-center mt-3">
-                <a href="dangnhap.php" class="text-decoration-none">
+                <a href="sign_in.php" class="text-decoration-none">
                     <i class="fas fa-arrow-left"></i> Quay lại đăng nhập
                 </a>
             </div>

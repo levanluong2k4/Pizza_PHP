@@ -227,10 +227,10 @@ else {
                             </span>
                             <span class="combo-total-price">
                                 <?php
-                                    // ✅ Giá gốc (số nguyên) - dùng để gửi qua URL
+                                  
                                     $giacuoi_raw = $total_combo - ($total_combo * ($combos_id['giamgia']/100));
                                     
-                                    // ✅ Giá format (hiển thị)
+                             
                                     $giacuoi_format = number_format($giacuoi_raw, 0, ',', '.');
                                     
                                     echo $giacuoi_format;
@@ -257,11 +257,11 @@ else {
                     </div>
                 </div>
 
-                  <!-- Thay đổi nút đặt bàn -->
-                    <button type="button" class="btn btn-order-combo mt-3" id="btnOrderCombo">
-                        <i class="fas fa-calendar-check me-2"></i>
-                        Đặt bàn ngay - Combo này
-                    </button>
+                <!-- Thay đổi nút đặt bàn -->
+                <button type="button" class="btn btn-order-combo mt-3" id="btnOrderCombo">
+                    <i class="fas fa-calendar-check me-2"></i>
+                    Đặt bàn ngay - Combo này
+                </button>
             </div>
         </div>
 
@@ -269,15 +269,15 @@ else {
         <!-- Hiển thị danh sách sản phẩm bình thường -->
         <div id="productContainer">
             <?php 
-            $products = mysqli_fetch_all($products_result, MYSQLI_ASSOC);
-            $total_products = count($products);
-            $products_per_row = 3;
-            $rows = array_chunk($products, $products_per_row);
-            $initial_rows = 1;
-            
-            foreach ($rows as $index => $row_products): 
-                $show_class = $index < $initial_rows ? 'show' : '';
-            ?>
+    $products = mysqli_fetch_all($products_result, MYSQLI_ASSOC);
+    $total_products = count($products);
+    $products_per_row = 3;
+    $rows = array_chunk($products, $products_per_row);
+    $initial_rows = 1; // ✅ THAY ĐỔI: Hiển thị 2 hàng ban đầu (6 sản phẩm)
+    
+    foreach ($rows as $index => $row_products): 
+        $show_class = $index < $initial_rows ? 'show' : '';
+    ?>
             <div class="row row-cols-1 row-cols-md-2 row-cols-lg-4 g-4 mb-4 product-row <?= $show_class ?>">
                 <?php foreach ($row_products as $sp): ?>
                 <div class="col-lg-4 col-6 wow animate__bounceInLeft">
@@ -306,7 +306,10 @@ else {
             <?php endforeach; ?>
         </div>
 
-        <?php if (count($rows) > $initial_rows): ?>
+        <?php 
+// ✅ CHỈ HIỂN THỊ NÚT NẾU CÓ NHIỀU HỠN INITIAL_ROWS
+if (count($rows) > $initial_rows): 
+?>
         <div class="text-center">
             <button id="loadMoreBtn" class="btn btn-outline-success btn-load-more">
                 <i class="fas fa-chevron-down me-2"></i>Xem thêm
@@ -315,21 +318,20 @@ else {
         <?php endif; ?>
 
         <?php elseif ($loaidatban_result): ?>
-        <!-- Hiển thị danh sách sản phẩm bình thường -->
+        <!-- Hiển thị danh sách combo -->
         <div id="productContainer">
             <?php 
-            $product_combo = mysqli_fetch_all($loaidatban_result, MYSQLI_ASSOC);
-            $total_products = count($product_combo);
-            $combo_per_row = 3;
-            $rows = array_chunk($product_combo, $combo_per_row);
-            $initial_rows = 1;
-            
-            foreach ($rows as $index => $row_products): 
-                $show_class = $index < $initial_rows ? 'show' : '';
-            ?>
+    $product_combo = mysqli_fetch_all($loaidatban_result, MYSQLI_ASSOC);
+    $total_products = count($product_combo);
+    $combo_per_row = 3;
+    $rows = array_chunk($product_combo, $combo_per_row);
+    $initial_rows = 2; // ✅ THAY ĐỔI: Hiển thị 2 hàng ban đầu
+    
+    foreach ($rows as $index => $row_products): 
+        $show_class = $index < $initial_rows ? 'show' : '';
+    ?>
             <div class="row row-cols-1 row-cols-md-2 row-cols-lg-4 g-4 mb-4 product-row <?= $show_class ?>">
                 <?php foreach ($row_products as $sp): ?>
-
                 <div class="col-lg-4 col-6 wow animate__bounceInLeft">
                     <div class="inner-items card-combo text-center">
                         <a
@@ -394,7 +396,10 @@ else {
             <?php endforeach; ?>
         </div>
 
-        <?php if (count($rows) > $initial_rows): ?>
+        <?php 
+// ✅ CHỈ HIỂN THỊ NÚT NẾU CÓ NHIỀU HỠN INITIAL_ROWS
+if (count($rows) > $initial_rows): 
+?>
         <div class="text-center">
             <button id="loadMoreBtn" class="btn btn-outline-success btn-load-more">
                 <i class="fas fa-chevron-down me-2"></i>Xem thêm
@@ -472,269 +477,280 @@ else {
         </div>
     </div>
 
-    <?php require "includes/toast_cart.php"?>
-
-    <?php include './components/footer.php'; ?>
-
-    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.8/dist/umd/popper.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.min.js"></script>
-    <script src="js/search.js"></script>
-    <script src="js/add_to_cart.js"></script>
+   <?php require "includes/toast_cart.php"?>
+<?php include './components/footer.php'; ?>
 
 
+<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
 
 
-    <script>
-    // Toggle combo details
-    function toggleComboDetails() {
-        const details = document.getElementById('comboDetails');
-        const btnText = document.getElementById('detailsBtnText');
-        const icon = document.getElementById('detailsIcon');
+<script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.8/dist/umd/popper.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 
-        details.classList.toggle('show');
 
-        if (details.classList.contains('show')) {
-            btnText.textContent = 'Ẩn chi tiết sản phẩm';
-            icon.className = 'fas fa-chevron-up ms-2';
-        } else {
-            btnText.textContent = 'Xem chi tiết sản phẩm trong combo';
-            icon.className = 'fas fa-chevron-down ms-2';
-        }
+<script src="js/add_to_cart.js"></script>
+<script src="js/search.js"></script>
+
+<script>
+// Toggle combo details
+function toggleComboDetails() {
+    const details = document.getElementById('comboDetails');
+    const btnText = document.getElementById('detailsBtnText');
+    const icon = document.getElementById('detailsIcon');
+
+    details.classList.toggle('show');
+
+    if (details.classList.contains('show')) {
+        btnText.textContent = 'Ẩn chi tiết sản phẩm';
+        icon.className = 'fas fa-chevron-up ms-2';
+    } else {
+        btnText.textContent = 'Xem chi tiết sản phẩm trong combo';
+        icon.className = 'fas fa-chevron-down ms-2';
     }
+}
 
-    // ✅ HÀM TÍNH LẠI TỔNG TIỀN COMBO
-    function recalculateComboTotal() {
-        let newTotal = 0;
+// ✅ HÀM TÍNH LẠI TỔNG TIỀN COMBO
+function recalculateComboTotal() {
+    let newTotal = 0;
 
-        // Duyệt qua tất cả combo items
-        $('.combo-item').each(function() {
-            const priceText = $(this).find('.combo-item-price').text().replace(/[^0-9]/g, '');
-            const itemTotal = parseInt(priceText) || 0;
-            newTotal += itemTotal;
-        });
-
-        // Lấy phần trăm giảm giá
-        const discountPercent = <?php echo isset($combos_id['giamgia']) ? $combos_id['giamgia'] : 0; ?>;
-
-        // Tính giá sau giảm
-        const discountAmount = newTotal * (discountPercent / 100);
-        const finalPrice = newTotal - discountAmount;
-
-        // CẬP NHẬT TỔNG GIÁ TRỊ SẢN PHẨM (gạch ngang)
-        $('.combo-total .text-decoration-line-through').text(
-            newTotal.toLocaleString('vi-VN') + ' VNĐ'
-        );
-
-        // CẬP NHẬT GIÁ SAU GIẢM (Chỉ còn)
-        $('.combo-total .combo-total-price').text(
-            finalPrice.toLocaleString('vi-VN') + ' VNĐ'
-        );
-
-        // CẬP NHẬT SỐ TIỀN TIẾT KIỆM
-        if (discountPercent > 0) {
-            $('.combo-savings .combo-savings-text').last().text(
-                discountAmount.toLocaleString('vi-VN') + ' VNĐ'
-            );
-        }
-    }
-
-    // Load more products
-    $('#loadMoreBtn').on('click', function() {
-        const productRows = $('.product-row');
-        let currentShowingRows = $('.product-row.show').length;
-        const rowsToLoadPerClick = 2;
-
-        let rowsShown = 0;
-        for (let i = currentShowingRows; i < productRows.length && rowsShown < rowsToLoadPerClick; i++) {
-            $(productRows[i]).addClass('show');
-            rowsShown++;
-            currentShowingRows++;
-        }
-
-        if (currentShowingRows >= productRows.length) {
-            $(this).hide();
-        }
-
-        setTimeout(() => {
-            const newlyShownRow = productRows[currentShowingRows - rowsShown];
-            if (newlyShownRow) {
-                newlyShownRow.scrollIntoView({
-                    behavior: 'smooth',
-                    block: 'nearest'
-                });
-            }
-        }, 100);
+    // Duyệt qua tất cả combo items
+    $('.combo-item').each(function() {
+        const priceText = $(this).find('.combo-item-price').text().replace(/[^0-9]/g, '');
+        const itemTotal = parseInt(priceText) || 0;
+        newTotal += itemTotal;
     });
 
-    $(document).ready(function() {
-        let selectedProduct = null;
-        let originalComboItem = null;
+    // Lấy phần trăm giảm giá
+    const discountPercent = <?php echo isset($combos_id['giamgia']) ? $combos_id['giamgia'] : 0; ?>;
 
-        $('.combo-item').on('click', function() {
-            const masp = $(this).data('masp');
-            const maloai = $(this).data('maloai');
-            const masize = $(this).data('masize');
+    // Tính giá sau giảm
+    const discountAmount = newTotal * (discountPercent / 100);
+    const finalPrice = newTotal - discountAmount;
 
-            // Lưu lại combo item gốc
-            originalComboItem = $(this);
+    // CẬP NHẬT TỔNG GIÁ TRỊ SẢN PHẨM (gạch ngang)
+    $('.combo-total .text-decoration-line-through').text(
+        newTotal.toLocaleString('vi-VN') + ' VNĐ'
+    );
 
-            // Mở modal
-            $('#modalChangeProduct').modal('show');
+    // CẬP NHẬT GIÁ SAU GIẢM (Chỉ còn)
+    $('.combo-total .combo-total-price').text(
+        finalPrice.toLocaleString('vi-VN') + ' VNĐ'
+    );
 
-            // Hiển thị thông tin sản phẩm hiện tại
-            const imgSrc = $(this).find('img').attr('src');
-            const productName = $(this).find('.combo-item-name').clone().children().remove().end()
-                .text().trim();
-            const productSize = $(this).find('.badge').text() || '';
+    // CẬP NHẬT SỐ TIỀN TIẾT KIỆM
+    if (discountPercent > 0) {
+        $('.combo-savings .combo-savings-text').last().text(
+            discountAmount.toLocaleString('vi-VN') + ' VNĐ'
+        );
+    }
+}
 
-            $('#currentProductImage').attr('src', imgSrc);
-            $('#currentProductName').text(productName);
-            $('#currentProductSize').text(productSize);
+// Load more products
+$('#loadMoreBtn').on('click', function() {
+    const productRows = $('.product-row');
+    let currentShowingRows = $('.product-row.show').length;
+    const rowsToLoadPerClick = 1; // Mỗi lần load 1 hàng
 
-            // Load sản phẩm thay thế
-            $('#productList').empty();
-            $('#loadingProducts').removeClass('d-none');
-            $('#btnConfirmChange').prop('disabled', true);
-            selectedProduct = null;
+    let rowsShown = 0;
+    for (let i = currentShowingRows; i < productRows.length && rowsShown < rowsToLoadPerClick; i++) {
+        $(productRows[i]).addClass('show');
+        rowsShown++;
+        currentShowingRows++;
+    }
 
-            $.ajax({
-                url: 'get_products_by_category.php',
-                type: 'GET',
-                data: {
-                    category_id: maloai,
-                    exclude_id: masp
-                },
-                dataType: 'json',
-                success: function(res) {
-                    $('#loadingProducts').addClass('d-none');
+    // ẨN NÚT NẾU ĐÃ HIỂN THỊ HẾT
+    if (currentShowingRows >= productRows.length) {
+        $(this).fadeOut();
+    }
 
-                    if (res.success && res.products.length > 0) {
-                        res.products.forEach(p => {
-                            p.sizes.forEach(size => {
-                                $('#productList').append(`
-                            <div class="col-md-4 col-6 mb-3">
-                                <div class="product-option-card" 
-                                     data-masp="${p.MaSP}" 
-                                     data-masize="${size.MaSize}"
-                                     data-tensp="${p.TenSP}"
-                                     data-tensize="${size.TenSize}"
-                                     data-gia="${size.Gia}"
-                                     data-anh="${p.Anh}">
-                                    <img src="${p.Anh}" class="product-option-image" alt="${p.TenSP}">
-                                    <div class="product-option-name">${p.TenSP}</div>
-                                    <div class="badge bg-info mb-2">${size.TenSize}</div>
-                                    <div class="product-option-price">${parseInt(size.Gia).toLocaleString()} VNĐ</div>
+    // SCROLL ĐẾN HÀNG MỚI
+    setTimeout(() => {
+        const newlyShownRow = productRows[currentShowingRows - 1];
+        if (newlyShownRow) {
+            newlyShownRow.scrollIntoView({
+                behavior: 'smooth',
+                block: 'center'
+            });
+        }
+    }, 100);
+});
+
+// ✅ XỬ LÝ THAY ĐỔI SẢN PHẨM TRONG COMBO
+$(document).ready(function() {
+    let selectedProduct = null;
+    let originalComboItem = null;
+
+    // ✅ Sử dụng event delegation để tránh lỗi
+    $(document).on('click', '.combo-item', function() {
+        const masp = $(this).data('masp');
+        const maloai = $(this).data('maloai');
+        const masize = $(this).data('masize');
+
+        // Lưu lại combo item gốc
+        originalComboItem = $(this);
+
+        // ✅ Khởi tạo và mở modal bằng Bootstrap API
+        const modalElement = document.getElementById('modalChangeProduct');
+        const modal = new bootstrap.Modal(modalElement);
+        modal.show();
+
+        // Hiển thị thông tin sản phẩm hiện tại
+        const imgSrc = $(this).find('img').attr('src');
+        const productName = $(this).find('.combo-item-name').clone().children().remove().end().text().trim();
+        const productSize = $(this).find('.badge').text() || '';
+
+        $('#currentProductImage').attr('src', imgSrc);
+        $('#currentProductName').text(productName);
+        $('#currentProductSize').text(productSize);
+
+        // Load sản phẩm thay thế
+        $('#productList').empty();
+        $('#loadingProducts').removeClass('d-none');
+        $('#btnConfirmChange').prop('disabled', true);
+        selectedProduct = null;
+
+        $.ajax({
+            url: 'get_products_by_category.php',
+            type: 'GET',
+            data: {
+                category_id: maloai,
+                exclude_id: masp
+            },
+            dataType: 'json',
+            success: function(res) {
+                $('#loadingProducts').addClass('d-none');
+
+                if (res.success && res.products.length > 0) {
+                    res.products.forEach(p => {
+                        p.sizes.forEach(size => {
+                            $('#productList').append(`
+                                <div class="col-md-4 col-6 mb-3">
+                                    <div class="product-option-card" 
+                                         data-masp="${p.MaSP}" 
+                                         data-masize="${size.MaSize}"
+                                         data-tensp="${p.TenSP}"
+                                         data-tensize="${size.TenSize}"
+                                         data-gia="${size.Gia}"
+                                         data-anh="${p.Anh}">
+                                        <img src="${p.Anh}" class="product-option-image" alt="${p.TenSP}">
+                                        <div class="product-option-name">${p.TenSP}</div>
+                                        <div class="badge bg-info mb-2">${size.TenSize}</div>
+                                        <div class="product-option-price">${parseInt(size.Gia).toLocaleString()} VNĐ</div>
+                                    </div>
                                 </div>
-                            </div>
-                        `);
-                            });
+                            `);
                         });
+                    });
 
-                        $('.product-option-card').on('click', function() {
-                            $('.product-option-card').removeClass('selected');
-                            $(this).addClass('selected');
+                    // ✅ Sử dụng event delegation
+                    $(document).on('click', '.product-option-card', function() {
+                        $('.product-option-card').removeClass('selected');
+                        $(this).addClass('selected');
 
-                            selectedProduct = {
-                                masp: $(this).data('masp'),
-                                masize: $(this).data('masize'),
-                                tensp: $(this).data('tensp'),
-                                tensize: $(this).data('tensize'),
-                                gia: $(this).data('gia'),
-                                anh: $(this).data('anh')
-                            };
+                        selectedProduct = {
+                            masp: $(this).data('masp'),
+                            masize: $(this).data('masize'),
+                            tensp: $(this).data('tensp'),
+                            tensize: $(this).data('tensize'),
+                            gia: $(this).data('gia'),
+                            anh: $(this).data('anh')
+                        };
 
-                            $('#btnConfirmChange').prop('disabled', false);
-                        });
-                    } else {
-                        $('#productList').html(
-                            '<div class="col-12"><p class="text-muted text-center">Không có sản phẩm thay thế nào.</p></div>'
-                        );
-                    }
-                },
-                error: function(xhr, status, error) {
-                    $('#loadingProducts').addClass('d-none');
+                        $('#btnConfirmChange').prop('disabled', false);
+                    });
+                } else {
                     $('#productList').html(
-                        '<div class="col-12"><p class="text-danger text-center">Lỗi khi tải sản phẩm: ' +
-                        error + '</p></div>');
-                    console.error('AJAX Error:', error);
-                    console.error('Response:', xhr.responseText);
+                        '<div class="col-12"><p class="text-muted text-center">Không có sản phẩm thay thế nào.</p></div>'
+                    );
                 }
+            },
+            error: function(xhr, status, error) {
+                $('#loadingProducts').addClass('d-none');
+                $('#productList').html(
+                    '<div class="col-12"><p class="text-danger text-center">Lỗi khi tải sản phẩm: ' + error + '</p></div>'
+                );
+                console.error('AJAX Error:', error);
+                console.error('Response:', xhr.responseText);
+            }
+        });
+    });
+
+    // ✅ XỬ LÝ XÁC NHẬN THAY ĐỔI
+    $('#btnConfirmChange').on('click', function() {
+        if (selectedProduct && originalComboItem) {
+            const quantity = parseInt(originalComboItem.data('soluong')) || 1;
+            const newPrice = parseFloat(selectedProduct.gia);
+            const newTotal = newPrice * quantity;
+
+            // Cập nhật giao diện combo item
+            originalComboItem.find('img').attr('src', selectedProduct.anh);
+            originalComboItem.find('.combo-item-name').html(
+                selectedProduct.tensp +
+                ' <span class="badge bg-info ms-2">' + selectedProduct.tensize + '</span>'
+            );
+
+            // Cập nhật giá đơn vị
+            originalComboItem.find('.combo-item-qty .text-muted').text(
+                newPrice.toLocaleString('vi-VN') + ' VNĐ/món'
+            );
+
+            // Cập nhật tổng tiền item
+            originalComboItem.find('.combo-item-price').text(
+                newTotal.toLocaleString('vi-VN') + ' VNĐ'
+            );
+
+            // Cập nhật data attributes
+            originalComboItem.attr('data-masp', selectedProduct.masp);
+            originalComboItem.attr('data-masize', selectedProduct.masize);
+
+            // TÍNH LẠI TỔNG TIỀN COMBO
+            recalculateComboTotal();
+
+            // Đóng modal
+            const modalElement = document.getElementById('modalChangeProduct');
+            const modal = bootstrap.Modal.getInstance(modalElement);
+            modal.hide();
+
+            // Hiển thị thông báo
+            alert('Đã thay đổi sản phẩm thành công!');
+        }
+    });
+
+  
+    $('#btnOrderCombo').on('click', function() {
+        const comboId = <?php echo $combo_id; ?>;
+        const comboItems = [];
+
+        // Thu thập thông tin các sản phẩm trong combo
+        $('.combo-item').each(function() {
+            comboItems.push({
+                masp: $(this).data('masp'),
+                masize: $(this).data('masize'),
+                soluong: $(this).data('soluong')
             });
         });
 
-        // ✅ XỬ LÝ XÁC NHẬN THAY ĐỔI - CẬP NHẬT TỔNG TIỀN
-        $('#btnConfirmChange').on('click', function() {
-            if (selectedProduct && originalComboItem) {
-                const quantity = parseInt(originalComboItem.data('soluong')) || 1;
-                const newPrice = parseFloat(selectedProduct.gia);
-                const newTotal = newPrice * quantity;
-
-                // Cập nhật giao diện combo item
-                originalComboItem.find('img').attr('src', selectedProduct.anh);
-                originalComboItem.find('.combo-item-name').html(
-                    selectedProduct.tensp +
-                    ' <span class="badge bg-info ms-2">' + selectedProduct.tensize + '</span>'
-                );
-
-                // Cập nhật giá đơn vị
-                originalComboItem.find('.combo-item-qty .text-muted').text(
-                    newPrice.toLocaleString('vi-VN') + ' VNĐ/món'
-                );
-
-                // Cập nhật tổng tiền item
-                originalComboItem.find('.combo-item-price').text(
-                    newTotal.toLocaleString('vi-VN') + ' VNĐ'
-                );
-
-                // Cập nhật data attributes
-                originalComboItem.data('masp', selectedProduct.masp);
-                originalComboItem.data('masize', selectedProduct.masize);
-
-                // TÍNH LẠI TỔNG TIỀN COMBO
-                recalculateComboTotal();
-
-                // Đóng modal
-                $('#modalChangeProduct').modal('hide');
-
-                // Hiển thị thông báo
-                alert('Đã thay đổi sản phẩm thành công!');
+        // Gửi AJAX để lưu vào session
+        $.ajax({
+            url: 'handlers/save_combo_order.php',
+            method: 'POST',
+            data: {
+                combo_id: comboId,
+                combo_items: JSON.stringify(comboItems),
+                loaidatban: 'tiec'
+            },
+            success: function(response) {
+                window.location.href = `./datban/info_datban.php?combo_id=${comboId}&loaidatban=tiec`;
+            },
+            error: function() {
+                alert('Có lỗi xảy ra. Vui lòng thử lại!');
             }
         });
-
-        $('#btnOrderCombo').on('click', function() {
-    const comboId = <?php echo $combo_id; ?>;
-    const comboItems = [];
-    
-    // ✅ Thu thập thông tin các sản phẩm trong combo (kể cả đã thay đổi)
-    $('.combo-item').each(function() {
-        comboItems.push({
-            masp: $(this).data('masp'),
-            masize: $(this).data('masize'),
-            soluong: $(this).data('soluong')
-        });
-    });
-    
-    // ✅ Gửi AJAX để lưu vào session
-    $.ajax({
-        url: 'handlers/save_combo_order.php',
-        method: 'POST',
-        data: {
-            combo_id: comboId,
-            combo_items: JSON.stringify(comboItems),
-            loaidatban: 'tiec'
-        },
-        success: function(response) {
-            // Chuyển trang KHÔNG GỬI GIÁ
-            window.location.href = `./datban/info_datban.php?combo_id=${comboId}&loaidatban=tiec`;
-        },
-        error: function() {
-            alert('Có lỗi xảy ra. Vui lòng thử lại!');
-        }
     });
 });
-    });
-    </script>
+</script>
+
+
 
 
 </body>

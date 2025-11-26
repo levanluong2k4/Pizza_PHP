@@ -155,12 +155,13 @@ if ($loaidatban == 'thuong') {
         <?php include '../components/navbar.php'; ?>
     </header>
 
-    <div class="booking-container">
-        <div class="booking-header">
-            <h2>
-                <i class="fas fa-calendar-check me-2"></i>
-                <?php echo $loaidatban == 'tiec' ? 'Đặt Bàn Tiệc' : 'Đặt Bàn Thường'; ?>
-            </h2>
+    <div class="booking-container ">
+        <div class="bg-icon p-2 mt-3" >
+            <div class="text-start d-flex align-items-center">
+                <img src="../img/logo1.png" width="100" height="auto" alt="">
+              <h2 class="bg-global fs-3 text-warning"><?php echo $loaidatban == 'tiec' ? 'Đặt Bàn Tiệc' : 'Đặt Bàn Thường'; ?></h2>
+                
+            </div>
         </div>
 
         <div class="booking-body">

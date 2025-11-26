@@ -2,6 +2,7 @@
 session_start();
 require '../includes/db_connect.php';
 require '../includes/send_mail.php';
+require '../includes/email_validator.php'; // THÊM DÒNG NÀY
 header('Content-Type: application/json');
 
 $name = $_POST['name'] ?? '';
@@ -11,13 +12,17 @@ $password = $_POST['password'] ?? '';
 $password_confirm = $_POST['password_confirm'] ?? '';
 
 $_SESSION['old_name'] = $name;
-    $_SESSION['old_sdt'] = $sdt;
-    $_SESSION['old_password'] = $password;
-    $_SESSION['old_password_confirm'] = $password_confirm;
-    $_SESSION['old_email'] = $email;
+$_SESSION['old_sdt'] = $sdt;
+$_SESSION['old_password'] = $password;
+$_SESSION['old_password_confirm'] = $password_confirm;
+$_SESSION['old_email'] = $email;
 
-$sql = "SELECT COUNT(*) as dem FROM khachhang WHERE Email='$email'";
-$result = mysqli_query($ketnoi, $sql);
+// 1. Kiểm tra email đã tồn tại trong DB
+$sql = "SELECT COUNT(*) as dem FROM khachhang WHERE Email=?";
+$stmt = mysqli_prepare($ketnoi, $sql);
+mysqli_stmt_bind_param($stmt, "s", $email);
+mysqli_stmt_execute($stmt);
+$result = mysqli_stmt_get_result($stmt);
 $number_row = mysqli_fetch_array($result);
 
 if ($number_row["dem"] > 0) {
@@ -28,6 +33,8 @@ if ($number_row["dem"] > 0) {
     ]);
     exit;
 }
+
+// 2. Kiểm tra format email
 if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
     echo json_encode([
         'success' => false,
@@ -37,6 +44,17 @@ if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
     exit;
 }
 
+// 3. KIỂM TRA EMAIL CÓ TỒN TẠI THẬT (QUAN TRỌNG)
+if (!verifyEmailSMTP($email)) {
+    echo json_encode([
+        'success' => false,
+        'error_type' => 'email_not_exist',
+        'message' => 'Email không tồn tại hoặc không thể nhận thư. Vui lòng kiểm tra lại.'
+    ]);
+    exit;
+}
+
+// 4. Kiểm tra số điện thoại
 if (!preg_match('/^[0-9]{10}$/', $sdt)) {
     echo json_encode([
         'success' => false,
@@ -46,7 +64,7 @@ if (!preg_match('/^[0-9]{10}$/', $sdt)) {
     exit;
 }
 
-
+// 5. Kiểm tra mật khẩu
 if (strlen($password) < 6) {
     echo json_encode([
         'success' => false,
@@ -64,8 +82,10 @@ if ($password !== $password_confirm) {
     ]);
     exit;
 }
+
 $hashedPassword = password_hash($password, PASSWORD_DEFAULT);
-// Không có lỗi → gửi email xác nhận
+
+// 6. Tạo mã xác nhận
 $verification_code = rand(100000, 999999);
 $_SESSION['temp_user'] = [
     'name' => $name,
@@ -76,10 +96,11 @@ $_SESSION['temp_user'] = [
     'created_at' => time()
 ];
 
+// 7. Gửi email (chắc chắn email tồn tại rồi)
 $subject = "Mã xác nhận đăng ký Pizza Store";
 $body = "<p>Xin chào <b>$name</b>,</p>
 <p>Mã xác nhận của bạn là: <h1>$verification_code</h1></p>
-<p>Mã có hiệu lực trong 15 giây.</p>";
+<p>Mã có hiệu lực trong 15 phút.</p>";
 
 $result = sendMail($email, $name, $subject, $body);
 
@@ -88,8 +109,8 @@ if ($result === true) {
 } else {
     echo json_encode([
         'success' => false,
-        'error_type' => 'system',
-        'message' => 'Không thể gửi email xác nhận. Lỗi: ' . $result
+        'error_type' => 'email_send_failed',
+        'message' => 'Không thể gửi email. Vui lòng thử lại sau.'
     ]);
 }
 ?>

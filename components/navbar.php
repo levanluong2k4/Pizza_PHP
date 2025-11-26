@@ -98,7 +98,7 @@ if (!empty($_SESSION['cart'])) {
 }
 
 
-$sqlloaisp="SELECT * FROM loaisanpham";
+$sqlloaisp="SELECT * from loaisanpham";
 $loaisp=mysqli_query($ketnoi,$sqlloaisp);
 $sqlcombo="SELECT * FROM combo";
 $combo=mysqli_query($ketnoi,$sqlcombo);
@@ -113,6 +113,7 @@ $combo=mysqli_query($ketnoi,$sqlcombo);
     width: 65%;
 }
 </style>
+
 
 <nav class="inner-navbar   navbar navbar-expand-lg ">
     <div class="container-fluid justify-content-lg-around">
@@ -238,7 +239,7 @@ $combo=mysqli_query($ketnoi,$sqlcombo);
                         <img src="/unitop/backend/lesson/school/project_pizza/img/user.png" alt="" height="30px">
                     </a>
                     <ul class="dropdown-menu bg-global p-0 text-md-center text-lg-center">
-                        <li class="dropdown-item"><a href="info_user.php">Thông tin cá nhân</a></li>
+                        <li class="dropdown-item"><a href="/unitop/backend/lesson/school/project_pizza/info_user.php">Thông tin cá nhân</a></li>
 
                         <li class="dropdown-item"><a href="handlers/process_sign_out.php">Đăng xuất</a></li>
                         <li>
@@ -290,3 +291,6 @@ $combo=mysqli_query($ketnoi,$sqlcombo);
 
     </div>
 </nav>
+
+    <script src="js/search.js"></script>
+    <script src="js/add_to_cart.js"></script>

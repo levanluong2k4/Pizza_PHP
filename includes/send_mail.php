@@ -7,7 +7,18 @@ require __DIR__ . '/../PHPMailer/src/PHPMailer.php';
 require __DIR__ . '/../PHPMailer/src/SMTP.php';
 require __DIR__ . '/../PHPMailer/src/Exception.php';
 
-
+// THÊM HÀM NÀY
+function validateEmailExists($email) {
+    // Tách domain từ email
+    $domain = substr(strrchr($email, "@"), 1);
+    
+    // Kiểm tra MX record của domain
+    if (!checkdnsrr($domain, 'MX')) {
+        return false; // Domain không có mail server
+    }
+    
+    return true; // Domain có mail server
+}
 function sendMail($toEmail, $toName, $subject, $body)
 {
     $mail = new PHPMailer(true);
@@ -33,3 +44,4 @@ function sendMail($toEmail, $toName, $subject, $body)
         return "Mailer Error: {$mail->ErrorInfo}";
     }
 }
+

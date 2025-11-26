@@ -75,7 +75,10 @@ if (isset($_SESSION['user_id'])) {
             </div>
 
             <button class="submit">Đăng nhập</button>
-            <p class="signin">Already have an acount ? <a href="sign_up.php">Đăng ký</a> </p>
+            <p class="signin">Bạn chưa có tài khoản ? <a href="sign_up.php">Đăng ký</a> <br>
+          <a href="forget_password.php">Quên mật khẩu</a>
+          </p>
+            
         </form>
 
 

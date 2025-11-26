@@ -9,7 +9,7 @@
         }
         
         .booking-header {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(135deg, #66ea8e 0%, #1b8a2e 100%);
             color: white;
             padding: 30px;
             text-align: center;
@@ -67,7 +67,7 @@
             color: #333;
             margin-bottom: 20px;
             padding-bottom: 10px;
-            border-bottom: 2px solid #667eea;
+            border-bottom: 2px solid #5de67b;
         }
         
         .combo-summary {
@@ -106,14 +106,14 @@
         }
         
         .table-item:hover, .room-item:hover {
-            border-color: #667eea;
+            border-color: #66ea87;
             transform: translateY(-3px);
             box-shadow: 0 5px 15px rgba(102, 126, 234, 0.3);
         }
         
         .table-item.selected, .room-item.selected {
-            border-color: #667eea;
-            background: #667eea;
+            border-color: #66ea71;
+            background: #66ea7c;
             color: white;
         }
         
@@ -123,7 +123,7 @@
         }
         
         .btn-submit {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(135deg, #66ea83 0%, #4ba25e 100%);
             color: white;
             padding: 15px 40px;
             font-size: 18px;
@@ -136,7 +136,7 @@
         
         .btn-submit:hover {
             transform: translateY(-2px);
-            box-shadow: 0 10px 25px rgba(102, 126, 234, 0.4);
+            box-shadow: 0 10px 25px rgba(102, 234, 120, 0.4);
         }
         
         .required {

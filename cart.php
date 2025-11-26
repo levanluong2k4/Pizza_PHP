@@ -500,6 +500,8 @@ mysqli_close($ketnoi);
             </div>
             <?php endif; ?>
         </main>
+           <!-- Modal chọn size -->
+        <?php require "includes/modal_size.php" ?>
     </header>
 
 
@@ -510,7 +512,7 @@ mysqli_close($ketnoi);
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.8/dist/umd/popper.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.min.js"></script>
-
+ 
     <script>
     setTimeout(function() {
         var alert = document.querySelector('.alert-cart');
@@ -619,10 +621,11 @@ document.addEventListener('DOMContentLoaded', function() {
 </script>
 
 
-
+  <script src="js/search.js"></script>
+    <script src="js/add_to_cart.js"></script>
     <script src="./js/cart.js"></script>
     <script src="./API/api_address.js"></script>
-
+ 
 </body>
 
 </html>

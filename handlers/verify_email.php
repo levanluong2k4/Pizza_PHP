@@ -129,7 +129,7 @@ if ($time_left < 0) $time_left = 0;
             </button>
         </form>
 
-        <a href="sign_up.php" class="text-center d-block mt-3">← Quay lại đăng ký</a>
+        <a href="../sign_up.php" class="text-center d-block mt-3">← Quay lại đăng ký</a>
     </div>
 
     <script>
