@@ -4,7 +4,8 @@ $conn = new mysqli("localhost", "root", "", "php_pizza");
 $sql = "SELECT donhang.*, khachhang.HoTen 
         FROM donhang 
         LEFT JOIN khachhang ON donhang.MaKH = khachhang.MaKH
-        ORDER BY MaDH DESC";
+        ORDER BY ngaydat ASC";
+
 $result = $conn->query($sql);
 ?>
 
@@ -43,17 +44,19 @@ $result = $conn->query($sql);
             color: #fff;
         }
 
-        .dang-xu-ly {
-            background: #f1c40f;      /* btn-warning */
+        .cho-xu-ly {
+            background: #f1c40f;  /* vàng cho 'Chờ xử lý' */
         }
-
+        .dang-giao {
+            background:#28a745;   /* xanh lá cho 'Đang giao' */
+        }
         .hoan-thanh {
-            background: #007bff;      /* btn-primary */
+            background: #007bff;  /* xanh dương cho 'Hoàn thành' */
+        }
+        .da-huy {
+            background: #e74c3c;  /* đỏ cho 'Đã huỷ' */
         }
 
-        .da-huy {
-            background: #e74c3c;      /* btn-danger */
-        }
 
     </style>
 </head>
@@ -84,13 +87,17 @@ $result = $conn->query($sql);
                         <?php while ($row = $result->fetch_assoc()): ?>
 
                             <?php
-                            $st = $row['trangthai'];
+                            $st = trim($row['trangthai']); // loại bỏ khoảng trắng thừa
 
                             $class = match ($st) {
-                                "Đang xử lý" => "dang-xu-ly",
+                                "Chờ xử lý" => "cho-xu-ly",
+                                "Đang giao" => "dang-giao",
                                 "Hoàn thành" => "hoan-thanh",
-                                default => "da-huy"
+                                "Đã huỷ" => "da-huy",
+                                default => "da-huy" 
                             };
+
+
                             ?>
 
                             <tr>
@@ -99,9 +106,9 @@ $result = $conn->query($sql);
                                 <td><?= $row['ngaydat'] ?></td>
                                 <td><?= number_format($row['TongTien']) ?>₫</td>
 
-                                <td>
-                                    <span class="status-badge <?= $class ?>"><?= $st ?></span>
-                                </td>
+                                    <td>
+                                        <span class="status-badge <?= $class ?>"><?= $st ?></span>
+                                    </td>
 
                                 <td>
                                     <a href="detail.php?MaDH=<?= $row['MaDH'] ?>" class="btn btn-outline-success btn-sm">
@@ -111,7 +118,7 @@ $result = $conn->query($sql);
                             </tr>
 
                         <?php endwhile; ?>
-                    </tbody>
+                    </tbody>    
 
                 </table>
 

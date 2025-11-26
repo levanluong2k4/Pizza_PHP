@@ -42,7 +42,7 @@ $result = $conn->query($sql);
             color: #fff;
         }
 
-        .dang-xu-ly {
+        .cho-xu-ly {
             background: #f1c40f;      /* btn-warning */
         }
 
@@ -79,13 +79,14 @@ $result = $conn->query($sql);
                     </thead>
 
                     <tbody>
-                                <?php while($row = $result->fetch_assoc()): ?>
+                <?php while($row = $result->fetch_assoc()): ?>
                 <tr>
                     <td><?= $row['MaDH'] ?></td>
                     <td><?= $row['HoTen'] ?></td>
                     <td><?= $row['ngaydat'] ?></td>
                     <td><?= number_format($row['TongTien']) ?>₫</td>
-                    <td><a href="detail.php?MaDH=<?= $row['MaDH'] ?>">Xem</a></td>
+                    <td><a href="detail.php?MaDH=<?= $row['MaDH'] ?>" class="btn btn-outline-success btn-sm">
+                        <i class="fa-solid fa-eye"></i> Xem</a></td>
                 </tr>
                 <?php endwhile; ?>
                     </tbody>

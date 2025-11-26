@@ -10,11 +10,9 @@ $result = $conn->query($sql);
 ?>
 <!DOCTYPE html>
 <html lang="vi">
-
+<title>đơn hàng đã huỷ</title>
 <head>
     <meta charset="UTF-8">
-    <title>Đơn hàng đã huỷ</title>
-
     <!-- Bootstrap -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet">
     <!-- Font Awesome -->
@@ -75,21 +73,21 @@ $result = $conn->query($sql);
                             <th>Khách hàng</th>
                             <th>Ngày đặt</th>
                             <th>Tổng tiền</th>
-                            <th>Trạng thái</th>
                             <th>Chi tiết</th>
                         </tr>
                     </thead>
 
                     <tbody>
-                        <?php while($row = $result->fetch_assoc()): ?>
-                            <tr>
-                                <td><?= $row['MaDH'] ?></td>
-                                <td><?= $row['HoTen'] ?></td>
-                                <td><?= $row['ngaydat'] ?></td>
-                                <td><?= number_format($row['TongTien']) ?>₫</td>
-                                <td><a href="detail.php?MaDH=<?= $row['MaDH'] ?>">Xem</a></td>
-                            </tr>
-                            <?php endwhile; ?>
+                <?php while($row = $result->fetch_assoc()): ?>
+                <tr>
+                    <td><?= $row['MaDH'] ?></td>
+                    <td><?= $row['HoTen'] ?></td>
+                    <td><?= $row['ngaydat'] ?></td>
+                    <td><?= number_format($row['TongTien']) ?>₫</td>
+                    <td><a href="detail.php?MaDH=<?= $row['MaDH'] ?>" class="btn btn-outline-success btn-sm">
+                        <i class="fa-solid fa-eye"></i> Xem</a></td>
+                </tr>
+                <?php endwhile; ?>
                     </tbody>
 
                 </table>
@@ -99,6 +97,5 @@ $result = $conn->query($sql);
     </div>
 
 </body>
-
 </html>
 
