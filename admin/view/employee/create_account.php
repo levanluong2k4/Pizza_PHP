@@ -20,10 +20,6 @@ if (!$ketnoi) {
 $success = isset($_SESSION['success']) ? $_SESSION['success'] : "";
 $error = isset($_SESSION['error']) ? $_SESSION['error'] : "";
 unset($_SESSION['success'], $_SESSION['error']);
-
-// Lấy danh sách nhân viên
-$sql_list = "SELECT * FROM admin ORDER BY id DESC";
-$employees = mysqli_query($ketnoi, $sql_list);
 ?>
 
 <!DOCTYPE html>
@@ -51,15 +47,6 @@ $employees = mysqli_query($ketnoi, $sql_list);
             background: linear-gradient(90deg, #28a745, #66bb6a);
             border: none;
         }
-        .table-hover tbody tr:hover {
-            background-color: #e8f5e9;
-        }
-        .badge-admin {
-            background-color: #dc3545;
-        }
-        .badge-staff {
-            background-color: #17a2b8;
-        }
     </style>
 </head>
 <body>
@@ -67,9 +54,9 @@ $employees = mysqli_query($ketnoi, $sql_list);
 <?php include '../../navbar_admin.php'; ?>
 
 <div class="container mt-5">
-    <div class="row">
-        <!-- Form tạo tài khoản -->
-        <div class="col-lg-5 mb-4">
+    <div class="row justify-content-center">
+        <!-- Create account form -->
+        <div class="col-lg-6">
             <div class="card">
                 <div class="card-header bg-success text-white">
                     <h5 class="mb-0"><i class="fa-solid fa-user-plus"></i> Tạo Tài Khoản Nhân Viên</h5>
@@ -131,64 +118,116 @@ $employees = mysqli_query($ketnoi, $sql_list);
             </div>
         </div>
 
-        <!-- Danh sách nhân viên -->
-        <div class="col-lg-7">
+        <!-- Employee list restored below (improved detection & UI) -->
+        <div class="col-lg-6">
             <div class="card">
                 <div class="card-header bg-success text-white">
                     <h5 class="mb-0"><i class="fa-solid fa-users"></i> Danh Sách Nhân Viên</h5>
                 </div>
                 <div class="card-body">
-                    <div class="table-responsive">
-                        <table class="table table-hover table-bordered">
-                            <thead class="table-light">
-                                <tr>
-                                    <th>ID</th>
-                                    <th>Tên</th>
-                                    <th>Email</th>
-                                    <th>Phân quyền</th>
-                                    <th>Thao tác</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <?php if (mysqli_num_rows($employees) > 0): ?>
-                                    <?php while ($row = mysqli_fetch_assoc($employees)): ?>
-                                        <tr>
-                                            <td><?php echo $row['id']; ?></td>
-                                            <td><?php echo htmlspecialchars($row['ten']); ?></td>
-                                            <td><?php echo htmlspecialchars($row['email']); ?></td>
-                                            <td>
-                                                <?php if ($row['phanquyen'] == 0): ?>
-                                                    <span class="badge badge-admin">Quản lý</span>
-                                                <?php else: ?>
-                                                    <span class="badge badge-staff">Nhân viên</span>
-                                                <?php endif; ?>
-                                            </td>
-                                            <td>
-                                                <a href="edit_employee.php?id=<?php echo $row['id']; ?>" 
-                                                   class="btn btn-sm btn-warning">
-                                                    <i class="fa-solid fa-edit"></i>
-                                                </a>
-                                                <a href="../../process/delete_employee.php?id=<?php echo $row['id']; ?>" 
-                                                   class="btn btn-sm btn-danger"
-                                                   onclick="return confirm('Bạn có chắc muốn xóa?')">
-                                                    <i class="fa-solid fa-trash"></i>
-                                                </a>
-                                            </td>
-                                        </tr>
-                                    <?php endwhile; ?>
-                                <?php else: ?>
-                                    <tr>
-                                        <td colspan="5" class="text-center text-muted">
-                                            Chưa có nhân viên nào
-                                        </td>
-                                    </tr>
-                                <?php endif; ?>
-                            </tbody>
-                        </table>
-                    </div>
+                    <?php
+                    // detect common employee/user table names and columns
+                    $candidates = ['nhanvien','nhan_vien','employees','employee','admins','admin','users','staff','tbl_nhanvien'];
+                    $foundTable = '';
+                    foreach ($candidates as $cand) {
+                        $safe = mysqli_real_escape_string($ketnoi, $cand);
+                        $check = mysqli_query($ketnoi, "SHOW TABLES LIKE '$safe'");
+                        if ($check && mysqli_num_rows($check) > 0) { $foundTable = $cand; break; }
+                    }
+
+                    if ($foundTable) {
+                        $cols = [];
+                        $res_cols = mysqli_query($ketnoi, "SHOW COLUMNS FROM `$foundTable`");
+                        if ($res_cols) {
+                            while ($c = mysqli_fetch_assoc($res_cols)) $cols[] = $c['Field'];
+                        }
+
+                        $idCandidates = ['id','ID','MaNV','MaNhanVien','manv','ma_nv','ma'];
+                        $nameCandidates = ['name','ten','HoTen','hoten','fullname','full_name'];
+                        $emailCandidates = ['email','Email','EMAIL'];
+                        $roleCandidates = ['role','phanquyen','quyen','permission','level','role_id'];
+
+                        $idField = null; $nameField = null; $emailField = null; $roleField = null;
+                        foreach ($idCandidates as $f) if (in_array($f,$cols)) { $idField = $f; break; }
+                        foreach ($nameCandidates as $f) if (in_array($f,$cols)) { $nameField = $f; break; }
+                        foreach ($emailCandidates as $f) if (in_array($f,$cols)) { $emailField = $f; break; }
+                        foreach ($roleCandidates as $f) if (in_array($f,$cols)) { $roleField = $f; break; }
+
+                        $selectCols = [];
+                        if ($idField) $selectCols[] = "`$idField`";
+                        if ($nameField) $selectCols[] = "`$nameField`";
+                        if ($emailField) $selectCols[] = "`$emailField`";
+                        if ($roleField) $selectCols[] = "`$roleField`";
+                        if (empty($selectCols)) {
+                            $take = array_slice($cols,0,4);
+                            foreach ($take as $t) $selectCols[] = "`$t`";
+                        }
+                        $selectSQL = implode(',', $selectCols);
+
+                        $q = "SELECT $selectSQL FROM `$foundTable` ORDER BY ".($idField?"`$idField` DESC":"1 DESC")." LIMIT 200";
+                        $r = mysqli_query($ketnoi, $q);
+
+                        if ($r && mysqli_num_rows($r) > 0) {
+                            echo '<div class="table-responsive">';
+                            echo '<table class="table table-sm align-middle">';
+                            echo '<thead><tr>';
+                            // headers
+                            foreach ($selectCols as $col) {
+                                $clean = trim($col, '`');
+                                $label = '';
+                                if ($clean === $idField) $label = 'ID';
+                                elseif ($clean === $nameField) $label = 'Tên';
+                                elseif ($clean === $emailField) $label = 'Email';
+                                elseif ($clean === $roleField) $label = 'Phân quyền';
+                                else $label = ucfirst(str_replace('_',' ', $clean));
+                                echo '<th>'.htmlspecialchars($label).'</th>';
+                            }
+                            echo '<th>Thao tác</th>';
+                            echo '</tr></thead><tbody>';
+
+                            while ($rowEmp = mysqli_fetch_assoc($r)) {
+                                echo '<tr>';
+                                foreach ($selectCols as $col) {
+                                    $cname = trim($col,'`');
+                                    $val = $rowEmp[$cname] ?? '';
+                                    // role badge
+                                    if ($cname === $roleField) {
+                                        $badge = '<span class="badge bg-info">'.htmlspecialchars($val).'</span>';
+                                        // convert common numeric roles
+                                        if ($val === '0' || $val === 0) $badge = '<span class="badge bg-danger">Quản lý</span>';
+                                        if ($val === '1' || $val === 1) $badge = '<span class="badge bg-primary">Nhân viên</span>';
+                                        echo '<td>'.$badge.'</td>';
+                                    } else {
+                                        echo '<td>'.htmlspecialchars($val).'</td>';
+                                    }
+                                }
+                                // actions
+                                $idVal = $idField && isset($rowEmp[$idField]) ? $rowEmp[$idField] : '';
+                                $editLink = $idVal ? 'edit_employee.php?id='.urlencode($idVal) : '#';
+                                $delLink = $idVal ? '../../process/delete_employee.php?id='.urlencode($idVal) : '#';
+                                echo '<td class="text-nowrap">';
+                                echo '<a class="btn btn-sm btn-warning me-1" href="'.htmlspecialchars($editLink).'" title="Sửa"><i class="fa-solid fa-pen"></i></a>';
+                                echo '<a class="btn btn-sm btn-danger" href="'.htmlspecialchars($delLink).'" onclick="return confirm(\'Bạn chắc chắn muốn xóa?\')" title="Xóa"><i class="fa-solid fa-trash"></i></a>';
+                                echo '</td>';
+
+                                echo '</tr>';
+                            }
+
+                            echo '</tbody></table></div>';
+                        } else {
+                            echo '<p class="text-muted">Chưa có dữ liệu nhân viên trong bảng <strong>'.htmlspecialchars($foundTable).'</strong>.</p>';
+                            echo '<a href="create_account.php" class="btn btn-outline-secondary">Tạo tài khoản nhân viên</a>';
+                        }
+
+                    } else {
+                        echo '<p class="text-muted">Chưa có dữ liệu nhân viên. (Hiển thị placeholder)</p>';
+                        echo '<a href="create_account.php" class="btn btn-outline-secondary">Tạo tài khoản nhân viên</a>';
+                    }
+                    ?>
                 </div>
             </div>
         </div>
+
     </div>
 </div>
 

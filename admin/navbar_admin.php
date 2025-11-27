@@ -106,7 +106,6 @@
         font-weight: 700;
         margin-top: 50px;
     }
-
     .text-muted {
         color: #6c757d !important;
     }
@@ -170,28 +169,20 @@
                     </li>
 
                     <!-- Quản lý nhân viên -->
-                    <li class="nav-item dropdown">
-                        <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown"
-                            aria-expanded="false">
-                            <i class="fa-solid fa-user-tie"></i> Quản lý tài khoản
+                     <li class="nav-item">
+                        <a class="nav-link" href="/Pizza_PHP/admin/view/employee/create_account.php">
+                            <i class="fa-solid fa-user"></i> Quản lý tài khoản
                         </a>
-                        <ul class="dropdown-menu">
-             
-                            <li><a class="dropdown-item" href="create_account.php"><i class="fa-solid fa-id-card"></i> Tạo tài khoản nhân viên</a></li>
-              
-                        </ul>
                     </li>
 
-                    <!-- Quản lý khách hàng -->
+
+                    <!-- ✅ CẬP NHẬT: Quản lý khách hàng -->
                     <li class="nav-item dropdown">
-                        <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown"
-                            aria-expanded="false">
-                            <i class="fa-solid fa-users"></i> Quản lý khách hàng
-                        </a>
-                        <ul class="dropdown-menu">
-                            <li><a class="dropdown-item" href="list_customer.php"><i class="fa-solid fa-list"></i> Danh sách khách hàng</a></li>
-                            <li><a class="dropdown-item" href="add_customer.php"><i class="fa-solid fa-crown"></i> Khách hàng mua nhiều nhất</a></li>
-                            <li><a class="dropdown-item" href="add_customer.php"><i class="fa-solid fa-map-marked-alt"></i> Khu vực KH mua nhiều nhất</a></li>
+                        <a class="nav-link" href="/Pizza_PHP/admin/view/customer/list_customer.php"><i class="fa-solid fa-users"></i> Quản lý khách hàng</a>
+                        <ul class="dropdown-menu" aria-labelledby="customerDropdown">
+                            <li><a class="dropdown-item" href="/Pizza_PHP/admin/view/customer/list_customer.php"><i class="fa-solid fa-list"></i> Danh sách khách hàng</a></li>
+                            <li><a class="dropdown-item" href="/Pizza_PHP/admin/view/customer/top_customers.php"><i class="fa-solid fa-crown"></i> Khách hàng mua nhiều nhất</a></li>
+                            <li><a class="dropdown-item" href="/Pizza_PHP/admin/view/customer/top_regions.php"><i class="fa-solid fa-map-marked-alt"></i> Khu vực KH mua nhiều nhất</a></li>
                         </ul>
                     </li>
 
@@ -202,7 +193,7 @@
                             <i class="fa-solid fa-receipt"></i> Quản lý đơn hàng
                         </a>
                         <ul class="dropdown-menu">
-                            <li><a class="dropdown-item" href="list_orders.php"><i class="fa-solid fa-clipboard-list"></i> Danh sách đơn hàng</a></li>
+                            <li><a class="dropdown-item" href="/Pizza_PHP/admin/list_orders.php"><i class="fa-solid fa-clipboard-list"></i> Danh sách đơn hàng</a></li>
                             <li><a class="dropdown-item" href="#"><i class="fa-solid fa-hourglass-half"></i> Đơn hàng chờ xử lý</a></li>
                             <li><a class="dropdown-item" href="#"><i class="fa-solid fa-check-circle"></i> Đơn hàng đã hoàn thành</a></li>
                             <li><a class="dropdown-item" href="#"><i class="fa-solid fa-times-circle"></i> Đơn hàng đã hủy</a></li>
@@ -222,8 +213,8 @@
                                     <i class="fa-solid fa-box"></i> Thống kê sản phẩm
                                 </a>
                                 <ul class="dropdown-menu">
-                                    <li><a class="dropdown-item" href="./view/best_selling/best_selling_product.php"><i class="fa-solid fa-fire"></i> Sản phẩm bán chạy</a></li>
-                                    <li><a class="dropdown-item" href="./view/best_selling/best_selling_category.php"><i class="fa-solid fa-layer-group"></i> Loại sản phẩm bán chạy</a></li>
+                                    <li><a class="dropdown-item" href="/Pizza_PHP/admin/view/best_selling/best_selling_product.php"><i class="fa-solid fa-fire"></i> Sản phẩm bán chạy</a></li>
+                                    <li><a class="dropdown-item" href="/Pizza_PHP/admin/view/best_selling/best_selling_category.php"><i class="fa-solid fa-layer-group"></i> Loại sản phẩm bán chạy</a></li>
                                     <li><a class="dropdown-item" href="#"><i class="fa-solid fa-box-open"></i> Tồn kho sản phẩm</a></li>
                                     <li><a class="dropdown-item" href="#"><i class="fa-solid fa-exclamation-triangle"></i> Sản phẩm sắp hết hàng</a></li>
                                 </ul>
@@ -235,8 +226,8 @@
                                     <i class="fa-solid fa-money-bill-wave"></i> Thống kê doanh thu
                                 </a>
                                 <ul class="dropdown-menu">
-                                    <li><a class="dropdown-item" href="./view/revenue_statistic/revenue_statistic_table.php"><i class="fa-solid fa-table"></i> Doanh thu theo số liệu</a></li>
-                                    <li><a class="dropdown-item" href="./view/revenue_statistic/revenue_statistic_chart.php"><i class="fa-solid fa-chart-bar"></i> Doanh thu theo biểu đồ</a></li>
+                                    <li><a class="dropdown-item" href="/Pizza_PHP/admin/view/revenue_statistic/revenue_statistic_table.php"><i class="fa-solid fa-table"></i> Doanh thu theo số liệu</a></li>
+                                    <li><a class="dropdown-item" href="/Pizza_PHP/admin/view/revenue_statistic/revenue_statistic_chart.php"><i class="fa-solid fa-chart-bar"></i> Doanh thu theo biểu đồ</a></li>
                                 </ul>
                             </li>
 
@@ -263,7 +254,7 @@
 
                
                 <div class="ms-auto">
-                    <a href="logout.php" class="logout-btn"><i class="fa-solid fa-right-from-bracket"></i> Đăng xuất</a>
+                    <a href="/Pizza_PHP/admin/logout.php" class="logout-btn"><i class="fa-solid fa-right-from-bracket"></i> Đăng xuất</a>
                 </div>
             </div>
         </div>
@@ -313,6 +304,22 @@
                     menu.classList.remove('show');
                 });
             }
+        });
+    });
+
+    // Open dropdown on hover so label remains a normal link
+    document.addEventListener('DOMContentLoaded', function() {
+        document.querySelectorAll('.nav-item.dropdown').forEach(function(drop) {
+            drop.addEventListener('mouseenter', function() {
+                drop.classList.add('show');
+                var menu = drop.querySelector('.dropdown-menu');
+                if (menu) menu.classList.add('show');
+            });
+            drop.addEventListener('mouseleave', function() {
+                drop.classList.remove('show');
+                var menu = drop.querySelector('.dropdown-menu');
+                if (menu) menu.classList.remove('show');
+            });
         });
     });
     </script>
