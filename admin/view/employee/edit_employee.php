@@ -1,0 +1,164 @@
+<?php
+session_start();
+
+// ⚠️ SỬA: Thêm dòng này để giả lập đăng nhập (test tạm)
+$_SESSION['admin_id'] = 1;  // ← THÊM DÒNG NÀY
+
+// Kiểm tra đăng nhập admin
+if (!isset($_SESSION['admin_id'])) {
+    header("Location: ../../login.php");
+    exit();
+}
+
+// ⚠️ SỬA: Thay đổi port nếu cần
+$ketnoi = mysqli_connect("localhost:8889", "root", "root", "php_pizza");
+mysqli_set_charset($ketnoi, "utf8");
+
+if (!$ketnoi) {
+    die("Kết nối thất bại: " . mysqli_connect_error());
+}
+
+// Kiểm tra có ID không
+if (!isset($_GET['id']) || empty($_GET['id'])) {
+    $_SESSION['error'] = "ID không hợp lệ!";
+    header("Location: create_account.php");
+    exit();
+}
+
+$id = (int)$_GET['id'];
+
+// Lấy thông tin nhân viên
+$sql = "SELECT * FROM admin WHERE id='$id'";
+$result = mysqli_query($ketnoi, $sql);
+
+if (mysqli_num_rows($result) == 0) {
+    $_SESSION['error'] = "Nhân viên không tồn tại!";
+    header("Location: create_account.php");
+    exit();
+}
+
+$employee = mysqli_fetch_assoc($result);
+
+// Lấy thông báo từ session
+$success = isset($_SESSION['success']) ? $_SESSION['success'] : "";
+$error = isset($_SESSION['error']) ? $_SESSION['error'] : "";
+unset($_SESSION['success'], $_SESSION['error']);
+?>
+
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sửa Thông Tin Nhân Viên</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" />
+    <style>
+        body {
+            background-color: #f9fafb;
+        }
+        .card {
+            border: none;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+        .form-label {
+            font-weight: 600;
+            color: #495057;
+        }
+        .btn-warning {
+            background: linear-gradient(90deg, #ffc107, #ffb300);
+            border: none;
+            color: white;
+        }
+    </style>
+</head>
+<body>
+
+<?php include '../../navbar_admin.php'; ?>
+
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-6">
+            <div class="card">
+                <div class="card-header bg-warning text-white">
+                    <h5 class="mb-0"><i class="fa-solid fa-user-edit"></i> Sửa Thông Tin Nhân Viên</h5>
+                </div>
+                <div class="card-body">
+                    <?php if ($success): ?>
+                        <div class="alert alert-success alert-dismissible fade show">
+                            <i class="fa-solid fa-check-circle"></i> <?php echo $success; ?>
+                            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                        </div>
+                    <?php endif; ?>
+
+                    <?php if ($error): ?>
+                        <div class="alert alert-danger alert-dismissible fade show">
+                            <i class="fa-solid fa-exclamation-circle"></i> <?php echo $error; ?>
+                            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                        </div>
+                    <?php endif; ?>
+
+                    <form method="POST" action="../../process/process_edit_employee.php">
+                        <input type="hidden" name="id" value="<?php echo $employee['id']; ?>">
+
+                        <div class="mb-3">
+                            <label class="form-label">Tên nhân viên <span class="text-danger">*</span></label>
+                            <input type="text" name="ten" class="form-control" 
+                                   value="<?php echo htmlspecialchars($employee['ten']); ?>" 
+                                   placeholder="Nhập tên nhân viên" required>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Email <span class="text-danger">*</span></label>
+                            <input type="email" name="email" class="form-control" 
+                                   value="<?php echo htmlspecialchars($employee['email']); ?>" 
+                                   placeholder="email@example.com" required>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Mật khẩu mới</label>
+                            <input type="password" name="password" class="form-control" 
+                                   placeholder="Để trống nếu không đổi mật khẩu">
+                            <small class="text-muted">Chỉ nhập nếu muốn thay đổi mật khẩu</small>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Xác nhận mật khẩu mới</label>
+                            <input type="password" name="confirm_password" class="form-control" 
+                                   placeholder="Nhập lại mật khẩu mới">
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Phân quyền <span class="text-danger">*</span></label>
+                            <select name="phanquyen" class="form-select" required>
+                                <option value="1" <?php echo ($employee['phanquyen'] == 1) ? 'selected' : ''; ?>>
+                                    Nhân viên (1)
+                                </option>
+                                <option value="0" <?php echo ($employee['phanquyen'] == 0) ? 'selected' : ''; ?>>
+                                    Quản lý (0)
+                                </option>
+                            </select>
+                            <small class="text-muted">0: Quản lý | 1: Nhân viên</small>
+                        </div>
+
+                        <div class="d-grid gap-2">
+                            <button type="submit" class="btn btn-warning">
+                                <i class="fa-solid fa-save"></i> Cập Nhật Thông Tin
+                            </button>
+                            <a href="create_account.php" class="btn btn-secondary">
+                                <i class="fa-solid fa-arrow-left"></i> Quay Lại
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
+
+<?php mysqli_close($ketnoi); ?>
