@@ -180,9 +180,9 @@
                     <li class="nav-item dropdown">
                         <a class="nav-link" href="/Pizza_PHP/admin/view/customer/list_customer.php"><i class="fa-solid fa-users"></i> Quản lý khách hàng</a>
                         <ul class="dropdown-menu" aria-labelledby="customerDropdown">
-                            <li><a class="dropdown-item" href="/Pizza_PHP/admin/view/customer/list_customer.php"><i class="fa-solid fa-list"></i> Danh sách khách hàng</a></li>
-                            <li><a class="dropdown-item" href="/Pizza_PHP/admin/view/customer/top_customers.php"><i class="fa-solid fa-crown"></i> Khách hàng mua nhiều nhất</a></li>
-                            <li><a class="dropdown-item" href="/Pizza_PHP/admin/view/customer/top_regions.php"><i class="fa-solid fa-map-marked-alt"></i> Khu vực KH mua nhiều nhất</a></li>
+                            <li><a class="dropdown-item" href="/unitop/backend/lesson/school/project_pizza/admin/view/customer/list_customer.php"><i class="fa-solid fa-list"></i> Danh sách khách hàng</a></li>
+                            <li><a class="dropdown-item" href="/unitop/backend/lesson/school/project_pizza/admin/view/customer/top_customers.php"><i class="fa-solid fa-crown"></i> Khách hàng mua nhiều nhất</a></li>
+                            <li><a class="dropdown-item" href="/unitop/backend/lesson/school/project_pizza/admin/view/customer/top_regions.php"><i class="fa-solid fa-map-marked-alt"></i> Khu vực KH mua nhiều nhất</a></li>
                         </ul>
                     </li>
 
@@ -226,8 +226,8 @@
                                     <i class="fa-solid fa-money-bill-wave"></i> Thống kê doanh thu
                                 </a>
                                 <ul class="dropdown-menu">
-                                    <li><a class="dropdown-item" href="/Pizza_PHP/admin/view/revenue_statistic/revenue_statistic_table.php"><i class="fa-solid fa-table"></i> Doanh thu theo số liệu</a></li>
-                                    <li><a class="dropdown-item" href="/Pizza_PHP/admin/view/revenue_statistic/revenue_statistic_chart.php"><i class="fa-solid fa-chart-bar"></i> Doanh thu theo biểu đồ</a></li>
+                                    <li><a class="dropdown-item" href="/unitop/backend/lesson/school/project_pizza/admin/view/revenue_statistic/revenue_statistic_table.php"><i class="fa-solid fa-table"></i> Doanh thu theo số liệu</a></li>
+                                    <li><a class="dropdown-item" href="/unitop/backend/lesson/school/project_pizza/admin/view/revenue_statistic/revenue_statistic_chart.php"><i class="fa-solid fa-chart-bar"></i> Doanh thu theo biểu đồ</a></li>
                                 </ul>
                             </li>
 
