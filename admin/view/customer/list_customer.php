@@ -3,8 +3,7 @@ session_start();
 // include admin navbar
 
 // Kết nối database (giống create_account.php)
-$ketnoi = mysqli_connect("localhost:8889", "root", "root", "php_pizza");
-mysqli_set_charset($ketnoi, "utf8");
+require __DIR__ . '/../../../includes/db_connect.php';
 if (!$ketnoi) { die("Kết nối thất bại: " . mysqli_connect_error()); }
 
 // Pagination & search
@@ -120,7 +119,7 @@ $result = mysqli_query($ketnoi, $sql);
                                 <td><?php echo number_format(intval($r['orders_count'])); ?></td>
                                 <td><?php echo number_format(floatval($r['total_spent']), 0, '.', ','); ?></td>
                                 <td>
-                                    <a href="/Pizza_PHP/admin/view/customer/detail_customer.php?MaKH=<?php echo $r['MaKH']; ?>" class="btn btn-sm btn-primary">Chi tiết</a>
+                                    <a href="/unitop/backend/lesson/school/project_pizza/admin/view/customer/detail_customer.php?MaKH=<?php echo $r['MaKH']; ?>" class="btn btn-sm btn-primary">Chi tiết</a>
                                 </td>
                             </tr>
                         <?php endwhile; ?>

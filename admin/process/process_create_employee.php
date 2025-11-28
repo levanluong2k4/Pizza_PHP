@@ -10,9 +10,7 @@ if (!isset($_SESSION['admin_id'])) {
     exit();
 }
 
-// ⚠️ SỬA: Thay đổi port nếu cần (8889 cho MAMP, 3306 cho XAMPP)
-$ketnoi = mysqli_connect("localhost:8889", "root", "root", "php_pizza");
-mysqli_set_charset($ketnoi, "utf8");
+require __DIR__ . '/../../includes/db_connect.php';
 
 if (!$ketnoi) {
     die("Kết nối thất bại: " . mysqli_connect_error());

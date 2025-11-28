@@ -1,6 +1,7 @@
 <?php
 session_start();
-require_once '../../daiban.php';
+
+
 
 $customer_id = isset($_GET['id']) ? (int)$_GET['id'] : 0;
 

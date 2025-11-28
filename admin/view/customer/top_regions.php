@@ -1,8 +1,7 @@
 <?php
 session_start();
 // Top regions by orders or total spent
-$ketnoi = mysqli_connect("localhost:8889", "root", "root", "php_pizza");
-mysqli_set_charset($ketnoi, "utf8");
+require __DIR__ . '/../../../includes/db_connect.php';
 if (!$ketnoi) die('Kết nối thất bại: ' . mysqli_connect_error());
 
 $groupBy = isset($_GET['group']) ? $_GET['group'] : 'tinhthanhpho'; // tinhthanhpho | huyenquan | xaphuong

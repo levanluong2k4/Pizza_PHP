@@ -3,8 +3,7 @@ session_start();
 // Top customers by total spent / orders / items
 // Simple admin page
 
-$ketnoi = mysqli_connect("localhost:8889", "root", "root", "php_pizza");
-mysqli_set_charset($ketnoi, "utf8");
+require __DIR__ . '/../../../includes/db_connect.php';
 if (!$ketnoi) die('Kết nối thất bại: ' . mysqli_connect_error());
 
 // params
@@ -106,7 +105,7 @@ if ($res && mysqli_num_rows($res) > 0) {
         echo '<td>' . number_format($row['orders_count']) . '</td>';
         echo '<td>' . number_format($row['total_spent'],0,'.',',') . '</td>';
         echo '<td>' . number_format($row['items_count']) . '</td>';
-        echo '<td><a class="btn btn-sm btn-primary" href="/Pizza_PHP/admin/view/customer/detail_customer.php?MaKH=' . urlencode($row['MaKH']) . '">Chi tiết</a></td>';
+        echo '<td><a class="btn btn-sm btn-primary" href="/unitop/backend/lesson/school/project_pizza/admin/view/customer/detail_customer.php?MaKH=' . urlencode($row['MaKH']) . '">Chi tiết</a></td>';
         echo '</tr>';
     }
 } else {

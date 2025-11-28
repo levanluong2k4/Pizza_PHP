@@ -9,8 +9,7 @@ if (!isset($_SESSION['admin_id'])) {
 */
 
 // Kết nối DB
-$ketnoi = mysqli_connect("localhost:8889", "root", "root", "php_pizza");
-mysqli_set_charset($ketnoi, "utf8");
+require __DIR__ . '/../../../includes/db_connect.php';
 if (!$ketnoi) die('Kết nối thất bại: ' . mysqli_connect_error());
 
 $MaKH = isset($_GET['MaKH']) ? intval($_GET['MaKH']) : 0;
