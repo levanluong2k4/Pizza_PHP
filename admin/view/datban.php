@@ -291,6 +291,8 @@ foreach ($phong_list as $phong) {
 </head>
 <body>
 
+ <?php include __DIR__ . '/../navbar_admin.php'; ?>
+
 <div class="header-section">
     <div class="container">
         <h1>

@@ -110,6 +110,10 @@
     .text-muted {
         color: #6c757d !important;
     }
+    /* Dropdown chính hiện khi hover */
+.navbar-nav .dropdown:hover > .dropdown-menu {
+    display: block;
+}
     </style>
 </head>
 
@@ -141,12 +145,13 @@
                                 </a>
                                 <ul class="dropdown-menu">
                                     <li><a class="dropdown-item" href="#"><i class="fa-solid fa-list"></i> Danh sách sản phẩm</a></li>
-                                    <li><a class="dropdown-item" href="#"><i class="fa-solid fa-plus-circle"></i> Thêm sản phẩm</a></li>
+                                    <li><a class="dropdown-item" href="/unitop/backend/lesson/school/project_pizza/admin/view/combo/"><i class="fa-solid fa-list"></i> Danh sách combo</a></li>
+                       
                                     <li><a class="dropdown-item" href="#"><i class="fa-solid fa-layer-group"></i> Danh mục loại sản phẩm</a></li>
                                 </ul>
                             </li>
 
-                            <!-- ✅ NESTED DROPDOWN: Quản lý size sản phẩm -->
+                            <!--  NESTED DROPDOWN: Quản lý size sản phẩm -->
                             <li class="dropdown-submenu">
                                 <a class="dropdown-item" href="#" data-bs-toggle="dropdown">
                                     <i class="fa-solid fa-ruler-combined"></i> Quản lý size sản phẩm
@@ -169,7 +174,7 @@
                         </ul>
                     </li>
 
-                    <!-- Quản lý nhân viên -->
+               
                     <li class="nav-item dropdown">
                         <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown"
                             aria-expanded="false">
@@ -203,10 +208,16 @@
                         </a>
                         <ul class="dropdown-menu">
                             <li><a class="dropdown-item" href="list_orders.php"><i class="fa-solid fa-clipboard-list"></i> Danh sách đơn hàng</a></li>
-                            <li><a class="dropdown-item" href="#"><i class="fa-solid fa-hourglass-half"></i> Đơn hàng chờ xử lý</a></li>
-                            <li><a class="dropdown-item" href="#"><i class="fa-solid fa-check-circle"></i> Đơn hàng đã hoàn thành</a></li>
-                            <li><a class="dropdown-item" href="#"><i class="fa-solid fa-times-circle"></i> Đơn hàng đã hủy</a></li>
+                
                         </ul>
+                    </li>
+
+                    <li class="nav-item ">
+                        <a class="nav-link " href="/unitop/backend/lesson/school/project_pizza/admin/view/datban.php" 
+                            aria-expanded="false">
+                            <i class="fa-solid fa-chair"></i> Quản lý đơn đặt bàn
+                        </a>
+  
                     </li>
 
                     <!-- Thống kê -->
@@ -222,10 +233,9 @@
                                     <i class="fa-solid fa-box"></i> Thống kê sản phẩm
                                 </a>
                                 <ul class="dropdown-menu">
-                                    <li><a class="dropdown-item" href="./view/best_selling/best_selling_product.php"><i class="fa-solid fa-fire"></i> Sản phẩm bán chạy</a></li>
-                                    <li><a class="dropdown-item" href="./view/best_selling/best_selling_category.php"><i class="fa-solid fa-layer-group"></i> Loại sản phẩm bán chạy</a></li>
-                                    <li><a class="dropdown-item" href="#"><i class="fa-solid fa-box-open"></i> Tồn kho sản phẩm</a></li>
-                                    <li><a class="dropdown-item" href="#"><i class="fa-solid fa-exclamation-triangle"></i> Sản phẩm sắp hết hàng</a></li>
+                                    <li><a class="dropdown-item" href="/unitop/backend/lesson/school/project_pizza/admin/view/best_selling/best_selling_product.php"><i class="fa-solid fa-fire"></i> Sản phẩm bán chạy</a></li>
+                                    <li><a class="dropdown-item" href="/unitop/backend/lesson/school/project_pizza/admin/view/best_selling/best_selling_category.php"><i class="fa-solid fa-layer-group"></i> Loại sản phẩm bán chạy</a></li>
+                         
                                 </ul>
                             </li>
 
@@ -251,12 +261,18 @@
                                     <li><a class="dropdown-item" href="#"><i class="fa-solid fa-clock"></i> Đơn hàng theo thời gian</a></li>
                                 </ul>
                             </li>
+                               <li class="dropdown-submenu">
+                                <a class="dropdown-item" href="#" data-bs-toggle="dropdown">
+                                    <i class="fa-solid fa-shopping-cart"></i> Thống kê đơn đặt bàn
+                                </a>
+                                <ul class="dropdown-menu">
+                                    <li><a class="dropdown-item" href="/unitop/backend/lesson/school/project_pizza/admin/view/booking_statistic/booking_fillrate.php"><i class="fa-solid fa-list-alt"></i> Tỉ lệ lấp đầy bàn</a></li>
+                                    <li><a class="dropdown-item" href="/unitop/backend/lesson/school/project_pizza/admin/view/booking_statistic/booking_revenue.php"><i class="fa-solid fa-chart-pie"></i> Doanh thu đơn đặt bàn</a></li>
+                                    <li><a class="dropdown-item" href="/unitop/backend/lesson/school/project_pizza/admin/view/booking_statistic/booking_state.php"><i class="fa-solid fa-clock"></i> Trạng thái đơn đặt bàn</a></li>
+                                </ul>
+                            </li>
 
-                            <!-- Thống kê tổng hợp -->
-                            <li><hr class="dropdown-divider"></li>
-                            <li><a class="dropdown-item" href="#"><i class="fa-solid fa-chart-area"></i> Báo cáo tổng hợp</a></li>
-                            <li><a class="dropdown-item" href="#"><i class="fa-solid fa-file-export"></i> Xuất báo cáo Excel</a></li>
-                            <li><a class="dropdown-item" href="#"><i class="fa-solid fa-file-pdf"></i> Xuất báo cáo PDF</a></li>
+              
                         </ul>
                     </li>
                 </ul>
@@ -270,10 +286,7 @@
     </nav>
 
    
-    <div class="container text-center">
-        <h1 class="main-title">Chào mừng đến trang quản trị!</h1>
-        <p class="text-muted">Chọn menu trên để bắt đầu quản lý dữ liệu hệ thống.</p>
-    </div>
+    
 
  
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"></script>

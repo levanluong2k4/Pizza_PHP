@@ -6,7 +6,7 @@ $madatban = intval($_GET['id'] ?? 0);
 
 if ($madatban <= 0) {
     $_SESSION['error'] = 'Mã đặt bàn không hợp lệ';
-    header('Location: quan_ly_datban.php');
+    header('Location: datban.php');
     exit;
 }
 
@@ -330,6 +330,10 @@ if ($current_type == 'tiec' && $booking['MaPhong']) {
     </style>
 </head>
 <body>
+    <?php include '../navbar_admin.php';
+ ?>
+
+
 
 <div class="edit-container">
     <div class="edit-header">
@@ -373,29 +377,43 @@ if ($current_type == 'tiec' && $booking['MaPhong']) {
                 </div>
             </div>
             
-            <!-- Chọn loại đặt bàn -->
-            <div class="section-title">
-                <i class="fas fa-layer-group me-2"></i>
-                Loại đặt bàn
-            </div>
-            
-            <div class="type-selector">
-                <label class="type-option <?php echo $current_type == 'thuong' ? 'active' : ''; ?>">
-                    <input type="radio" name="loaidatban" value="thuong" 
-                           <?php echo $current_type == 'thuong' ? 'checked' : ''; ?>>
-                    <div class="type-icon"><i class="fas fa-chair"></i></div>
-                    <h5>Bàn thường</h5>
-                    <p class="text-muted mb-0">Không chọn combo</p>
-                </label>
-                
-                <label class="type-option <?php echo $current_type == 'tiec' ? 'active' : ''; ?>">
-                    <input type="radio" name="loaidatban" value="tiec" 
-                           <?php echo $current_type == 'tiec' ? 'checked' : ''; ?>>
-                    <div class="type-icon"><i class="fas fa-door-open"></i></div>
-                    <h5>Bàn tiệc</h5>
-                    <p class="text-muted mb-0">Có combo và quản lý sản phẩm</p>
-                </label>
-            </div>
+          <!-- Chọn loại đặt bàn -->
+<div class="section-title">
+    <i class="fas fa-layer-group me-2"></i>
+    Loại đặt bàn
+</div>
+
+<div class="alert alert-warning">
+    <i class="fas fa-info-circle me-2"></i>
+    <strong>Lưu ý:</strong> Không thể thay đổi loại đặt bàn khi chỉnh sửa. Nếu muốn đổi loại, vui lòng tạo đơn mới.
+</div>
+
+<div class="type-selector">
+    <label class="type-option <?php echo $current_type == 'thuong' ? 'active' : ''; ?>" style="opacity: 0.7; cursor: not-allowed;">
+        <input type="radio" name="loaidatban" value="thuong" 
+               <?php echo $current_type == 'thuong' ? 'checked' : ''; ?> disabled>
+        <div class="type-icon"><i class="fas fa-chair"></i></div>
+        <h5>Bàn thường</h5>
+        <p class="text-muted mb-0">Không chọn combo</p>
+        <?php if ($current_type == 'thuong'): ?>
+        <span class="badge bg-success mt-2">Đang chọn</span>
+        <?php endif; ?>
+    </label>
+    
+    <label class="type-option <?php echo $current_type == 'tiec' ? 'active' : ''; ?>" style="opacity: 0.7; cursor: not-allowed;">
+        <input type="radio" name="loaidatban" value="tiec" 
+               <?php echo $current_type == 'tiec' ? 'checked' : ''; ?> disabled>
+        <div class="type-icon"><i class="fas fa-door-open"></i></div>
+        <h5>Bàn tiệc</h5>
+        <p class="text-muted mb-0">Có combo và quản lý sản phẩm</p>
+        <?php if ($current_type == 'tiec'): ?>
+        <span class="badge bg-success mt-2">Đang chọn</span>
+        <?php endif; ?>
+    </label>
+</div>
+
+<!-- Hidden input để gửi giá trị loaidatban -->
+<input type="hidden" name="loaidatban" value="<?php echo $current_type; ?>">
             
             <!-- Ngày giờ -->
             <div class="section-title">
@@ -687,24 +705,24 @@ if ($current_type == 'tiec' && $booking['MaPhong']) {
 <script>
 $(document).ready(function() {
     // Xử lý chuyển đổi loại đặt bàn
-    $('input[name="loaidatban"]').on('change', function() {
-        const type = $(this).val();
+    // $('input[name="loaidatban"]').on('change', function() {
+    //     const type = $(this).val();
         
-        $('.type-option').removeClass('active');
-        $(this).closest('.type-option').addClass('active');
+    //     $('.type-option').removeClass('active');
+    //     $(this).closest('.type-option').addClass('active');
         
-        if (type === 'thuong') {
-            $('#banSection').show();
-            $('#phongSection').hide();
-            $('#phongGrid input[type="radio"]').prop('checked', false);
-        } else {
-            $('#banSection').hide();
-            $('#phongSection').show();
-            $('#banGrid input[type="radio"]').prop('checked', false);
-        }
+    //     if (type === 'thuong') {
+    //         $('#banSection').show();
+    //         $('#phongSection').hide();
+    //         $('#phongGrid input[type="radio"]').prop('checked', false);
+    //     } else {
+    //         $('#banSection').hide();
+    //         $('#phongSection').show();
+    //         $('#banGrid input[type="radio"]').prop('checked', false);
+    //     }
         
-        updateTotalPrice();
-    });
+    //     updateTotalPrice();
+    // });
     
     // Xử lý click chọn bàn/phòng
     $('.table-option').on('click', function() {

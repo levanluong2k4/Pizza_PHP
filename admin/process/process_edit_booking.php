@@ -5,7 +5,7 @@ require __DIR__ . '/../../includes/db_connect.php';
 // Kiểm tra phương thức POST
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     $_SESSION['error'] = 'Phương thức không hợp lệ';
-    header('Location: ../quan_ly_datban.php');
+     header("Location: ../view/datban.php?date=$date");
     exit;
 }
 
@@ -22,34 +22,48 @@ $combo_id = intval($_POST['combo_id'] ?? 0);
 $ghichu = trim($_POST['ghichu'] ?? '');
 $products = $_POST['products'] ?? [];
 
+$date=date("Y-m-d", strtotime($ngayden));
 // Validate dữ liệu
 if ($madatban <= 0) {
     $_SESSION['error'] = 'Mã đặt bàn không hợp lệ';
-    header('Location: ../quan_ly_datban.php');
+     header("Location: ../view/datban.php?date=$date");
+    exit;
+}
+$sql_check_type = "SELECT LoaiDatBan FROM datban WHERE MaDatBan = ?";
+$stmt = $ketnoi->prepare($sql_check_type);
+$stmt->bind_param("i", $madatban);
+$stmt->execute();
+$result = $stmt->get_result();
+$current_booking = $result->fetch_assoc();
+$stmt->close();
+
+if ($current_booking && $current_booking['LoaiDatBan'] != $loaidatban) {
+    $_SESSION['error'] = 'Không được phép thay đổi loại đặt bàn. Vui lòng tạo đơn mới nếu muốn đổi loại.';
+    header("Location: ../view/edit_booking.php?id=$madatban");
     exit;
 }
 
 if (empty($hoten) || empty($sdt)) {
     $_SESSION['error'] = 'Vui lòng điền đầy đủ thông tin khách hàng';
-    header("Location: ../edit_booking.php?id=$madatban");
+    header("Location: ../view/edit_booking.php?id=$madatban");
     exit;
 }
 
 if (!preg_match('/^[0-9]{10}$/', $sdt)) {
     $_SESSION['error'] = 'Số điện thoại không hợp lệ';
-    header("Location: ../edit_booking.php?id=$madatban");
+    header("Location: ../view/edit_booking.php?id=$madatban");
     exit;
 }
 
 if (empty($ngayden) || empty($gioden)) {
     $_SESSION['error'] = 'Vui lòng chọn ngày giờ đến';
-    header("Location: ../edit_booking.php?id=$madatban");
+    header("Location: ../view/edit_booking.php?id=$madatban");
     exit;
 }
 
 if (empty($table_id)) {
     $_SESSION['error'] = 'Vui lòng chọn bàn hoặc phòng';
-    header("Location: ../edit_booking.php?id=$madatban");
+    header("Location: ../view/edit_booking.php?id=$madatban");
     exit;
 }
 
@@ -60,7 +74,7 @@ $ngaygio = $ngayden . ' ' . $gioden . ':00';
 $table_parts = explode('_', $table_id);
 if (count($table_parts) != 2) {
     $_SESSION['error'] = 'Định dạng bàn/phòng không hợp lệ';
-    header("Location: ../edit_booking.php?id=$madatban");
+    header("Location: ../view/edit_booking.php?id=$madatban");
     exit;
 }
 
@@ -77,7 +91,7 @@ if ($loaidatban == 'thuong' && $table_type == 'ban') {
     $maphong = $table_id_num;
 } else {
     $_SESSION['error'] = 'Loại đặt bàn không khớp với bàn/phòng đã chọn';
-    header("Location: ../edit_booking.php?id=$madatban");
+    header("Location: ../view/edit_booking.php?id=$madatban");
     exit;
 }
 
@@ -87,7 +101,7 @@ if ($loaidatban == 'thuong' && $maban) {
                   WHERE MaBan = ? 
                   AND MaDatBan != ?
                   AND DATE(NgayGio) = ? 
-                  AND TrangThai NOT IN ('da_huy', 'hoan_thanh')";
+                  AND TrangThaiDatBan NOT IN ('da_huy', 'thanh_cong')";
     $stmt = $ketnoi->prepare($sql_check);
     $stmt->bind_param("iis", $maban, $madatban, $ngayden);
     $stmt->execute();
@@ -95,7 +109,7 @@ if ($loaidatban == 'thuong' && $maban) {
     
     if ($result->num_rows > 0) {
         $_SESSION['error'] = 'Bàn này đã được đặt trong ngày đã chọn';
-        header("Location: ../edit_booking.php?id=$madatban");
+        header("Location: ../view/edit_booking.php?id=$madatban");
         exit;
     }
     $stmt->close();
@@ -106,7 +120,7 @@ if ($loaidatban == 'tiec' && $maphong) {
                   WHERE MaPhong = ? 
                   AND MaDatBan != ?
                   AND DATE(NgayGio) = ? 
-                  AND TrangThai NOT IN ('da_huy', 'hoan_thanh')";
+                  AND TrangThaiDatBan NOT IN ('da_huy', 'thanh_cong')";
     $stmt = $ketnoi->prepare($sql_check);
     $stmt->bind_param("iis", $maphong, $madatban, $ngayden);
     $stmt->execute();
@@ -114,7 +128,7 @@ if ($loaidatban == 'tiec' && $maphong) {
     
     if ($result->num_rows > 0) {
         $_SESSION['error'] = 'Phòng này đã được đặt trong ngày đã chọn';
-        header("Location: ../edit_booking.php?id=$madatban");
+        header("Location: ../view/edit_booking.php?id=$madatban");
         exit;
     }
     $stmt->close();
@@ -248,7 +262,7 @@ try {
     $ketnoi->commit();
     
     $_SESSION['success'] = 'Cập nhật đặt bàn thành công!';
-    header('Location: ../quan_ly_datban.php');
+    header("Location: ../view/datban.php?date=$date");
     exit;
     
 } catch (Exception $e) {
@@ -256,7 +270,7 @@ try {
     $ketnoi->rollback();
     
     $_SESSION['error'] = 'Lỗi: ' . $e->getMessage();
-    header("Location: ../edit_booking.php?id=$madatban");
+    header("Location: ../view/edit_booking.php?id=$madatban");
     exit;
 }
 ?>
