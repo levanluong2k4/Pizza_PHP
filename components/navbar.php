@@ -6,8 +6,7 @@ if (session_status() == PHP_SESSION_NONE) {
 }
 $user_id =$_SESSION['user_id']?? null;
 
-$ketnoi = mysqli_connect("localhost:8889", "root", "root", "php_pizza");
-mysqli_set_charset($ketnoi, "utf8");
+$ketnoi = mysqli_connect("localhost", "root", "", "php_pizza");
 
 if (isset($_COOKIE['remember']) && !empty($_COOKIE['remember'])) {
     $token = mysqli_real_escape_string($ketnoi, $_COOKIE['remember']);
