@@ -144,10 +144,10 @@
                                     <i class="fa-solid fa-cubes"></i> Quản lý sản phẩm
                                 </a>
                                 <ul class="dropdown-menu">
-                                    <li><a class="dropdown-item" href="#"><i class="fa-solid fa-list"></i> Danh sách sản phẩm</a></li>
+                                    <li><a class="dropdown-item" href="list_products.php"><i class="fa-solid fa-list"></i> Danh sách sản phẩm</a></li>
+                                    <li><a class="dropdown-item" href="add_product.php"><i class="fa-solid fa-plus"></i> Thêm sản phẩm</a></li>
+                                    <li><a class="dropdown-item" href="manage_categories.php"><i class="fa-solid fa-layer-group"></i> Danh mục loại sản phẩm</a></li>
                                     <li><a class="dropdown-item" href="/unitop/backend/lesson/school/project_pizza/admin/view/combo/"><i class="fa-solid fa-list"></i> Danh sách combo</a></li>
-                       
-                                    <li><a class="dropdown-item" href="#"><i class="fa-solid fa-layer-group"></i> Danh mục loại sản phẩm</a></li>
                                 </ul>
                             </li>
 
@@ -157,8 +157,8 @@
                                     <i class="fa-solid fa-ruler-combined"></i> Quản lý size sản phẩm
                                 </a>
                                 <ul class="dropdown-menu">
-                                    <li><a class="dropdown-item" href="#"><i class="fa-solid fa-list-ul"></i> Danh sách size sản phẩm</a></li>
-                                    <li><a class="dropdown-item" href="#"><i class="fa-solid fa-plus-circle"></i> Thêm size sản phẩm</a></li>
+                                    <li><a class="dropdown-item" href="list_sizes.php"><i class="fa-solid fa-list-ul"></i> Danh sách size sản phẩm</a></li>
+                                    <li><a class="dropdown-item" href="add_size.php"><i class="fa-solid fa-plus-circle"></i> Thêm size sản phẩm</a></li>
                                 </ul>
                             </li>
                             
@@ -167,8 +167,8 @@
                                     <i class="fa-solid fa-tags"></i> Quản lý giá theo size
                                 </a>
                                 <ul class="dropdown-menu">
-                                    <li><a class="dropdown-item" href="#"><i class="fa-solid fa-list-ol"></i> Danh sách giá sản phẩm theo size</a></li>
-                                    <li><a class="dropdown-item" href="#"><i class="fa-solid fa-plus-circle"></i> Thêm giá sản phẩm</a></li>
+                                    <li><a class="dropdown-item" href="list_product_prices.php"><i class="fa-solid fa-list-ol"></i> Danh sách giá sản phẩm theo size</a></li>
+                                    <li><a class="dropdown-item" href="add_product_price.php"><i class="fa-solid fa-plus-circle"></i> Thêm giá sản phẩm</a></li>
                                 </ul>
                             </li>
                         </ul>
