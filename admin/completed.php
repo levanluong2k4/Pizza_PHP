@@ -35,24 +35,6 @@ $result = $conn->query($sql);
             border-radius: 12px;
         }
 
-        .status-badge {
-            padding: 6px 12px;
-            border-radius: 6px;
-            font-weight: 600;
-            color: #fff;
-        }
-
-        .dang-xu-ly {
-            background: #f1c40f;      /* btn-warning */
-        }
-
-        .hoan-thanh {
-            background: #007bff;      /* btn-primary */
-        }
-
-        .da-huy {
-            background: #e74c3c;      /* btn-danger */
-        }
 
     </style>
 </head>

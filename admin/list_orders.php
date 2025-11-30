@@ -4,7 +4,16 @@ $conn = new mysqli("localhost", "root", "", "php_pizza");
 $sql = "SELECT donhang.*, khachhang.HoTen 
         FROM donhang 
         LEFT JOIN khachhang ON donhang.MaKH = khachhang.MaKH
-        ORDER BY ngaydat ASC";
+        ORDER BY
+            CASE
+                WHEN donhang.trangthai = 'Chờ xử lý' THEN 1
+                WHEN donhang.trangthai IN ('Chờ giao', 'Đang giao') THEN 2
+                WHEN donhang.trangthai IN ('Giao thành công', 'Hoàn thành') THEN 3
+                WHEN donhang.trangthai = 'Đã huỷ' THEN 4
+                ELSE 5
+            END,
+            donhang.ngaydat DESC";  
+
 
 $result = $conn->query($sql);
 ?>
@@ -50,7 +59,7 @@ $result = $conn->query($sql);
         .dang-giao {
             background:#28a745;   /* xanh lá cho 'Đang giao' */
         }
-        .hoan-thanh {
+        .giao-thanh-cong {
             background: #007bff;  /* xanh dương cho 'Hoàn thành' */
         }
         .da-huy {
@@ -92,7 +101,7 @@ $result = $conn->query($sql);
                             $class = match ($st) {
                                 "Chờ xử lý" => "cho-xu-ly",
                                 "Đang giao" => "dang-giao",
-                                "Hoàn thành" => "hoan-thanh",
+                                "Hoàn thành" => "giao-thanh-cong",
                                 "Đã huỷ" => "da-huy",
                                 default => "da-huy" 
                             };

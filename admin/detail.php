@@ -4,32 +4,11 @@ if ($conn->connect_error) {
     die("Kết nối thất bại: " . $conn->connect_error);
 }
 
-// Lấy Mã ĐH từ URL
 $maDH = isset($_GET['MaDH']) ? (int)$_GET['MaDH'] : 0;
 if ($maDH <= 0) {
     die("Mã đơn hàng không hợp lệ.");
 }
 
-/* ========== CẬP NHẬT TRẠNG THÁI ========== */
-if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['trangthai'])) {
-    $newStatus = $_POST['trangthai'];
-
-    // (tuỳ chọn) giới hạn chỉ cho phép 1 số trạng thái cố định
-    $allowed = ["Chờ xử lý", "Chờ giao", "Đang giao", "Giao thành công", "Đã huỷ"];
-    if (!in_array($newStatus, $allowed, true)) {
-        $newStatus = "Chờ xử lý";
-    }
-
-    $stmt = $conn->prepare("UPDATE donhang SET trangthai = ? WHERE MaDH = ?");
-    $stmt->bind_param("si", $newStatus, $maDH);
-    $stmt->execute();
-    $stmt->close();
-
-    header("Location: detail.php?MaDH=" . $maDH);
-    exit;
-}
-
-/* ========== LẤY THÔNG TIN ĐƠN HÀNG + KHÁCH HÀNG ========== */
 $sqlOrder = "
     SELECT d.*,
            k.HoTen   AS TenKH,
@@ -50,13 +29,57 @@ if (!$order) {
     die("Không tìm thấy đơn hàng.");
 }
 
-/* ========== LẤY DANH SÁCH SẢN PHẨM TRONG ĐƠN ========== */
-/*
-   chitietdonhang: id, MaDH, MaSP, MaSize, SoLuong, ThanhTien
-   sanpham: MaSP, TenSP
-   size: MaSize, TenSize
-   sanpham_size: MaSP, MaSize, Gia (đơn giá)
-*/
+$st = trim($order['trangthai'] ?? '');
+
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
+    $action = $_POST['action']; // next | cancel
+    $currentStat = $st;
+    $newStatus = null;
+    $error = '';
+
+    if (strcasecmp($currentStat, 'Chờ xử lý') == 0) {
+        if ($action === 'next') {
+            $newStatus = 'Đang giao';
+        } elseif ($action === 'cancel') {
+            $newStatus = 'Đã huỷ';
+        }
+    } elseif (strcasecmp($currentStat, 'Đang giao') == 0 || strcasecmp($currentStat, 'Chờ giao') == 0) {
+        if ($action === 'next') {
+            $newStatus = 'Hoàn thành';
+        } elseif ($action === 'cancel') {
+            $error = "Đơn đang giao, không thể huỷ.";
+        }
+    } else {
+        $error = "Đơn ở trạng thái '$currentStat' không thể cập nhật nữa.";
+    }
+
+    if ($newStatus === null && $error === '') {
+        $error = "Hành động không hợp lệ.";
+    }
+
+    if ($error !== '') {
+        echo "<script>alert('$error'); window.location.href='detail.php?MaDH=$maDH';</script>";
+        exit;
+    }
+
+    // Cập nhật DB
+    $stmtUpd = $conn->prepare("UPDATE donhang SET trangthai = ? WHERE MaDH = ?");
+    $stmtUpd->bind_param("si", $newStatus, $maDH);
+    $stmtUpd->execute();
+    $stmtUpd->close();
+
+    header("Location: detail.php?MaDH=" . $maDH);
+    exit;
+}
+
+$classStatus = match ($st) {
+    "Chờ xử lý"          => "cho-xu-ly",
+    "Đang giao"                      => "dang-giao",
+    "Hoàn thành"  => "hoan-thanh",
+    "Đã huỷ"                         => "da-huy",
+    default                          => "cho-xu-ly",
+};
+
 $sqlItems = "
     SELECT c.*,
            sp.TenSP,
@@ -73,17 +96,6 @@ $stmtItems->bind_param("i", $maDH);
 $stmtItems->execute();
 $items = $stmtItems->get_result();
 $stmtItems->close();
-
-/* ========== XỬ LÝ TRẠNG THÁI ĐỂ ĐỔI MÀU ========== */
-$st = trim($order['trangthai'] ?? '');
-
-$classStatus = match ($st) {
-    "Chờ xử lý", "Chờ giao"      => "cho-xu-ly",
-    "Đang giao"                  => "dang-giao",
-    "Giao thành công", "Hoàn thành" => "hoan-thanh",
-    "Đã huỷ"                     => "da-huy",
-    default                      => "cho-xu-ly",
-};
 ?>
 <!DOCTYPE html>
 <html lang="vi">
@@ -187,7 +199,6 @@ $classStatus = match ($st) {
 
 <body>
 
-
 <!-- Banner -->
 <div class="page-hero">
     <div class="container">
@@ -253,39 +264,39 @@ $classStatus = match ($st) {
                         Cập nhật trạng thái
                     </h5>
 
-                    <form method="post" class="d-flex flex-column gap-3">
-                        <div>
-                            <label class="form-label fw-semibold">Trạng thái</label>
-                            <select name="trangthai" class="form-select">
+                    <?php if (strcasecmp($st, 'Chờ xử lý') == 0): ?>
+                        <form method="post" class="d-flex flex-column gap-3">
+                            <div class="small text-muted">
+                                Luồng xử lý: <strong>Chờ xử lý → Đang giao → Hoàn thành</strong>.<br>
+                                Từ trạng thái <strong>"Chờ xử lý"</strong> bạn có thể chuyển sang <strong>"Đang giao"</strong> hoặc <strong>Huỷ đơn</strong>.
+                            </div>
+                            <div class="d-flex flex-wrap gap-2">
+                                <button type="submit" name="action" value="next" class="btn btn-sm btn-primary">
+                                    Chuyển sang "Đang giao"
+                                </button>
+                                <button type="submit" name="action" value="cancel" class="btn btn-sm btn-danger"
+                                        onclick="return confirm('Bạn có chắc chắn muốn huỷ đơn này không?');">
+                                    Huỷ đơn
+                                </button>
+                            </div>
+                        </form>
 
-                                <option value="Chờ xử lý" 
-                                    <?php if ($st == "Chờ xử lý") echo "selected"; ?>>
-                                    Chờ xử lý
-                                </option>
+                    <?php elseif (strcasecmp($st, 'Đang giao') == 0 || strcasecmp($st, 'Chờ giao') == 0): ?>
+                        <form method="post" class="d-flex flex-column gap-3">
+                            <div class="small text-muted">
+                                Đơn đang ở trạng thái <strong>"<?= htmlspecialchars($st) ?>"</strong>.<br>
+                                Không thể huỷ đơn khi đang giao, chỉ có thể xác nhận <strong>"Giao thành công"</strong>.
+                            </div>
+                            <button type="submit" name="action" value="next" class="btn btn-sm btn-success">
+                                Xác nhận"hoàn thành"
+                            </button>
+                        </form>
 
-                                <option value="Đang giao" 
-                                    <?php if ($st == "Đang giao") echo "selected"; ?>>
-                                    Đang giao
-                                </option>
-
-                                <option value="Giao thành công" 
-                                    <?php if ($st == "Giao thành công") echo "selected"; ?>>
-                                    Giao thành công
-                                </option>
-
-                                <option value="Đã huỷ" 
-                                    <?php if ($st == "Đã huỷ") echo "selected"; ?>>
-                                    Đã huỷ
-                                </option>
-
-                            </select>
-                        </div>
-
-
-                        <button type="submit" class="btn btn-success align-self-start">
-                            <i class="fa-solid fa-rotate me-1"></i> Cập nhật
-                        </button>
-                    </form>
+                    <?php else: ?>
+                        <p class="text-muted mb-0">
+                            Đơn ở trạng thái <strong><?= htmlspecialchars($st) ?></strong>, không thể cập nhật thêm.
+                        </p>
+                    <?php endif; ?>
                 </div>
             </div>
         </div>
