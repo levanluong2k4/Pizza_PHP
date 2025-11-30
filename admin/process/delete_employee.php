@@ -1,18 +1,16 @@
 <?php
 session_start();
 
-// ⚠️ SỬA: Thêm dòng này để giả lập đăng nhập (test tạm)
-$_SESSION['admin_id'] = 1;  // ← THÊM DÒNG NÀY
+
 
 // Kiểm tra đăng nhập admin
-if (!isset($_SESSION['admin_id'])) {
-    header("Location: ../login.php");
+if (!isset($_SESSION['user_id'])) {
+    header("Location: /unitop/backend/lesson/school/project_pizza/sign_in.php");
     exit();
 }
 
-// ⚠️ SỬA: Thay đổi port nếu cần
-$ketnoi = mysqli_connect("localhost:8889", "root", "root", "php_pizza");
-mysqli_set_charset($ketnoi, "utf8");
+
+require __DIR__ . '/../../includes/db_connect.php';
 
 if (!$ketnoi) {
     die("Kết nối thất bại: " . mysqli_connect_error());
@@ -23,7 +21,7 @@ if (isset($_GET['id']) && !empty($_GET['id'])) {
     $id = (int)$_GET['id'];
 
     // Không cho phép xóa chính mình
-    if ($id == $_SESSION['admin_id']) {
+    if ($id == $_SESSION['user_id']) {
         $_SESSION['error'] = "Bạn không thể xóa chính tài khoản của mình!";
         header("Location: ../view/employee/create_account.php");
         exit();

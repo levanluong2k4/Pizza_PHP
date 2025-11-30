@@ -2,7 +2,7 @@
 
 
 session_start();
-$ketnoi = mysqli_connect("localhost", "root", "root", "php_pizza");
+$ketnoi = mysqli_connect("localhost", "root", "", "php_pizza");
 mysqli_set_charset($ketnoi, "utf8");
 if(isset($_SESSION['user_id'])){
     $user_id = $_SESSION['user_id'];

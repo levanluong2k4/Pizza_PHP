@@ -1,6 +1,10 @@
 <?php 
 session_start();
 require '../includes/db_connect.php';
+if(!isset($_SESSION['user_id'])&&$_SESSION['role']=='user'){
+    header("Location: sign_in.php");
+    exit();
+}
 
 $combo_id = $_GET['combo_id'] ?? $_SESSION['combo_order']['combo_id'] ?? null;
 $loaidatban = $_GET['loaidatban'] ?? 'thuong'; // Mặc định là đặt bàn thường
@@ -156,11 +160,12 @@ if ($loaidatban == 'thuong') {
     </header>
 
     <div class="booking-container ">
-        <div class="bg-icon p-2 mt-3" >
+        <div class="bg-icon p-2 mt-3">
             <div class="text-start d-flex align-items-center">
                 <img src="../img/logo1.png" width="100" height="auto" alt="">
-              <h2 class="bg-global fs-3 text-warning"><?php echo $loaidatban == 'tiec' ? 'Đặt Bàn Tiệc' : 'Đặt Bàn Thường'; ?></h2>
-                
+                <h2 class="bg-global fs-3 text-warning">
+                    <?php echo $loaidatban == 'tiec' ? 'Đặt Bàn Tiệc' : 'Đặt Bàn Thường'; ?></h2>
+
             </div>
         </div>
 
@@ -190,53 +195,53 @@ if ($loaidatban == 'thuong') {
             <?php endif; ?>
 
             <form id="formDatBan" method="POST" action="../handlers/process_datban.php">
-                 <input type="hidden" name="loaidatban" value="<?php echo $loaidatban; ?>">
-    <input type="hidden" name="combo_id" value="<?php echo $combo_id; ?>">
-    <input type="hidden" id="selectedTable" name="table_id" value="">
-    
-    <!-- ✅ THÊM HIDDEN INPUT ĐỂ GỬI GIÁ AN TOÀN -->
-    <?php if ($loaidatban == 'tiec' && isset($final_price)): ?>
-    <input type="hidden" name="final_price" value="<?php echo $final_price; ?>">
-    <input type="hidden" name="total_price" value="<?php echo $total_price; ?>">
-    <input type="hidden" name="discount_amount" value="<?php echo $discount_amount; ?>">
-    <?php endif; ?>
+                <input type="hidden" name="loaidatban" value="<?php echo $loaidatban; ?>">
+                <input type="hidden" name="combo_id" value="<?php echo $combo_id; ?>">
+                <input type="hidden" id="selectedTable" name="table_id" value="">
 
-    <?php if ($loaidatban == 'tiec' && $combo_info): ?>
-    <!-- Hiển thị thông tin combo -->
-    <div class="combo-summary">
-        <h5 class="mb-3">
-            <i class="fas fa-box-open me-2"></i>
-            Combo đã chọn
-        </h5>
-        <?php if (!empty($combo_info['Anh'])): ?>
-        <img src="../<?php echo $combo_info['Anh']; ?>" alt="<?php echo $combo_info['Tencombo']; ?>">
-        <?php endif; ?>
-        <h4><?php echo htmlspecialchars($combo_info['Tencombo']); ?></h4>
-    
-        <h5>Giá gốc: 
-            <span class="text-decoration-line-through text-muted">
-                <?php echo number_format($total_price, 0, ',', '.'); ?> VNĐ
-            </span>
-        </h5>
-        <div class="combo-price">
-            <i class="fas fa-tags me-2"></i>
-            Chỉ còn: <strong class="text-danger">
-                <?php echo number_format($final_price, 0, ',', '.'); ?> VNĐ
-            </strong>
-        </div>
-        <?php if ($discount_amount > 0): ?>
-        <div class="text-success mt-2">
-            <i class="fas fa-gift me-2"></i>
-            Tiết kiệm: <?php echo number_format($discount_amount, 0, ',', '.'); ?> VNĐ 
-            (<?php echo $combo_info['giamgia']; ?>%)
-        </div>
-        <?php endif; ?>
-        <button type="button" class="btn btn-sm btn-outline-primary mt-2" data-bs-toggle="modal"
-            data-bs-target="#comboDetailsModal">
-            <i class="fas fa-list me-2"></i>Xem chi tiết combo
-        </button>
-    </div>
-    <?php endif; ?>
+                <!-- ✅ THÊM HIDDEN INPUT ĐỂ GỬI GIÁ AN TOÀN -->
+                <?php if ($loaidatban == 'tiec' && isset($final_price)): ?>
+                <input type="hidden" name="final_price" value="<?php echo $final_price; ?>">
+                <input type="hidden" name="total_price" value="<?php echo $total_price; ?>">
+                <input type="hidden" name="discount_amount" value="<?php echo $discount_amount; ?>">
+                <?php endif; ?>
+
+                <?php if ($loaidatban == 'tiec' && $combo_info): ?>
+                <!-- Hiển thị thông tin combo -->
+                <div class="combo-summary">
+                    <h5 class="mb-3">
+                        <i class="fas fa-box-open me-2"></i>
+                        Combo đã chọn
+                    </h5>
+                    <?php if (!empty($combo_info['Anh'])): ?>
+                    <img src="../<?php echo $combo_info['Anh']; ?>" alt="<?php echo $combo_info['Tencombo']; ?>">
+                    <?php endif; ?>
+                    <h4><?php echo htmlspecialchars($combo_info['Tencombo']); ?></h4>
+
+                    <h5>Giá gốc:
+                        <span class="text-decoration-line-through text-muted">
+                            <?php echo number_format($total_price, 0, ',', '.'); ?> VNĐ
+                        </span>
+                    </h5>
+                    <div class="combo-price">
+                        <i class="fas fa-tags me-2"></i>
+                        Chỉ còn: <strong class="text-danger">
+                            <?php echo number_format($final_price, 0, ',', '.'); ?> VNĐ
+                        </strong>
+                    </div>
+                    <?php if ($discount_amount > 0): ?>
+                    <div class="text-success mt-2">
+                        <i class="fas fa-gift me-2"></i>
+                        Tiết kiệm: <?php echo number_format($discount_amount, 0, ',', '.'); ?> VNĐ
+                        (<?php echo $combo_info['giamgia']; ?>%)
+                    </div>
+                    <?php endif; ?>
+                    <button type="button" class="btn btn-sm btn-outline-primary mt-2" data-bs-toggle="modal"
+                        data-bs-target="#comboDetailsModal">
+                        <i class="fas fa-list me-2"></i>Xem chi tiết combo
+                    </button>
+                </div>
+                <?php endif; ?>
 
                 <!-- Thông tin khách hàng -->
                 <div class="form-section">
@@ -264,7 +269,9 @@ if ($loaidatban == 'thuong') {
                             <label class="form-label">
                                 Ngày đến <span class="required">*</span>
                             </label>
-                            <input type="date" class="form-control" name="ngayden" id="ngayden" required>
+                            <input type="date" class="form-control" name="ngayden" id="ngayden"
+                                min="<?= date('Y-m-d') ?>" max="<?= date('Y-m-d', strtotime('+7 days')) ?>" required>
+
                             <small class="text-muted">
                                 <i class="fas fa-info-circle me-1"></i>
                                 Chọn ngày để xem bàn/phòng khả dụng
@@ -309,139 +316,143 @@ if ($loaidatban == 'thuong') {
                     </div>
                 </div>
 
-             
+
 
                 <!-- Ghi chú -->
                 <div class="form-section">
                     <div class="form-section-title">
                         <i class="fas fa-comment me-2"></i>
-                        Ghi chú:(miễn phí decor nếu đặt phòng tiệc vui lòng ghi rõ trong phần ghi chú) 
+                        Ghi chú:(miễn phí decor nếu đặt phòng tiệc vui lòng ghi rõ trong phần ghi chú)
                     </div>
 
                     <textarea class="form-control" name="ghichu" rows="3"
                         placeholder="Yêu cầu đặc biệt (nếu có)..."></textarea>
                 </div>
                 <!-- Ghi chú -->
-                        <?php if($loaidatban=="tiec"):
+                <?php if($loaidatban=="tiec"):
                             
-                    ?>  
-                       <div class="form-section">
+                    ?>
+                <div class="form-section">
                     <div class="form-section-title">
                         <i class="fas fa-comment me-2"></i>
                         Thanh toán trực tuyến
                     </div>
 
                     <div class=" d-flex justify-content-around align-items-center mb-2">
-                       <div class="d-flex align-items-center">
-                         <input class="form-check-input me-2" type="radio" name="transfer_method" id="momo" value="momo" checked>
-                        <label class="form-check-label" for="momo">
-                            <img src="https://upload.wikimedia.org/wikipedia/vi/f/fe/MoMo_Logo.png" alt="MoMo"
-                                style="height: 50px; vertical-align: middle;">Thanh toán qua MoMo
-                        </label>
-                       </div>
                         <div class="d-flex align-items-center">
-                            <input class="form-check-input me-2" type="radio" name="transfer_method" id="vnpay" value="vnpay">
-                        <label class="form-check-label" for="vnpay">
-                            <img src="https://vnpay.vn/s1/statics.vnpay.vn/2023/6/0oxhzjmxbksr1686814746087.png"
-                                alt="VNPay" style="height: 50px; vertical-align: middle;">Thanh toán qua VNPay
-                        </label>
+                            <input class="form-check-input me-2" type="radio" name="transfer_method" id="momo"
+                                value="momo" checked>
+                            <label class="form-check-label" for="momo">
+                                <img src="https://upload.wikimedia.org/wikipedia/vi/f/fe/MoMo_Logo.png" alt="MoMo"
+                                    style="height: 50px; vertical-align: middle;">Thanh toán qua MoMo
+                            </label>
                         </div>
-                       
+                        <div class="d-flex align-items-center">
+                            <input class="form-check-input me-2" type="radio" name="transfer_method" id="vnpay"
+                                value="vnpay">
+                            <label class="form-check-label" for="vnpay">
+                                <img src="https://vnpay.vn/s1/statics.vnpay.vn/2023/6/0oxhzjmxbksr1686814746087.png"
+                                    alt="VNPay" style="height: 50px; vertical-align: middle;">Thanh toán qua VNPay
+                            </label>
+                        </div>
+
                     </div>
-                   
+
                 </div>
-                    <?php endif; ?>     
+                <?php endif; ?>
 
                 <!-- Nút submit -->
                 <button type="submit" class="btn-submit">
-                   
-                   <?php if($loaidatban=="tiec"):
+
+                    <?php if($loaidatban=="tiec"):
                        
                     ?>
 
                     Yêu cầu thanh toán trước <?php echo number_format($final_price, 0, ',', '.'); ?>VNĐ
-                     <?php else:
+                    <?php else:
                        
                         ?>
-                         Đặt bàn ngay
-                            <?php endif; ?>
+                    Đặt bàn ngay
+                    <?php endif; ?>
                 </button>
             </form>
         </div>
     </div>
 
     <!-- Modal chi tiết combo -->
-   <!-- Modal chi tiết combo -->
-<?php if ($loaidatban == 'tiec' && $combo_info): ?>
-<div class="modal fade" id="comboDetailsModal" tabindex="-1">
-    <div class="modal-dialog modal-lg">
-        <div class="modal-content" style="top: 50px;">
-            <div class="modal-header">
-                <h5 class="modal-title">
-                    <i class="fas fa-list me-2"></i>
-                    Chi tiết combo
-                </h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-            </div>
-            <div class="modal-body">
-                <?php foreach ($combo_details as $item): ?>
-                <div class="d-flex align-items-center mb-3 pb-3 border-bottom">
-                    <img src="../<?php echo $item['Anh']; ?>"
-                        style="width: 80px; height: 80px; object-fit: contain; border-radius: 8px;" class="me-3">
-                    <div class="flex-grow-1">
-                        <h6 class="mb-1"><?php echo $item['TenSP']; ?></h6>
-                        <small class="text-muted">Size: <?php echo $item['TenSize']; ?></small>
-                        <div class="mt-1">
-                            Số lượng: <strong><?php echo $item['SoLuong']; ?></strong>
+    <!-- Modal chi tiết combo -->
+    <?php if ($loaidatban == 'tiec' && $combo_info): ?>
+    <div class="modal fade" id="comboDetailsModal" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content" style="top: 50px;">
+                <div class="modal-header">
+                    <h5 class="modal-title">
+                        <i class="fas fa-list me-2"></i>
+                        Chi tiết combo
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <?php foreach ($combo_details as $item): ?>
+                    <div class="d-flex align-items-center mb-3 pb-3 border-bottom">
+                        <img src="../<?php echo $item['Anh']; ?>"
+                            style="width: 80px; height: 80px; object-fit: contain; border-radius: 8px;" class="me-3">
+                        <div class="flex-grow-1">
+                            <h6 class="mb-1"><?php echo $item['TenSP']; ?></h6>
+                            <small class="text-muted">Size: <?php echo $item['TenSize']; ?></small>
+                            <div class="mt-1">
+                                Số lượng: <strong><?php echo $item['SoLuong']; ?></strong>
+                            </div>
+                        </div>
+                        <div class="text-end">
+                            <div class="text-muted"><?php echo number_format($item['Gia'], 0, ',', '.'); ?> VNĐ/món
+                            </div>
+                            <strong class="text-success">
+                                <?php echo number_format($item['ThanhTien'], 0, ',', '.'); ?> VNĐ
+                            </strong>
                         </div>
                     </div>
-                    <div class="text-end">
-                        <div class="text-muted"><?php echo number_format($item['Gia'], 0, ',', '.'); ?> VNĐ/món</div>
-                        <strong class="text-success">
-                            <?php echo number_format($item['ThanhTien'], 0, ',', '.'); ?> VNĐ
-                        </strong>
-                    </div>
-                </div>
-                <?php endforeach; ?>
+                    <?php endforeach; ?>
 
-                <div class="text-end mt-3">
-                    <div class="d-flex justify-content-between align-items-center mb-2">
-                        <h5 class="mb-0">Tổng giá trị sản phẩm:</h5>
-                        <h5 class="mb-0">
-                            <span class="text-decoration-line-through text-muted">
-                                <?php echo number_format($total_price, 0, ',', '.'); ?> VNĐ
-                            </span>
-                        </h5>
+                    <div class="text-end mt-3">
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <h5 class="mb-0">Tổng giá trị sản phẩm:</h5>
+                            <h5 class="mb-0">
+                                <span class="text-decoration-line-through text-muted">
+                                    <?php echo number_format($total_price, 0, ',', '.'); ?> VNĐ
+                                </span>
+                            </h5>
+                        </div>
+
+                        <?php if ($discount_amount > 0): ?>
+                        <div class="d-flex justify-content-between align-items-center text-success mb-2">
+                            <span>Giảm giá (<?php echo $combo_info['giamgia']; ?>%):</span>
+                            <span>-<?php echo number_format($discount_amount, 0, ',', '.'); ?> VNĐ</span>
+                        </div>
+                        <?php endif; ?>
+
+                        <hr>
+
+                        <div class="d-flex justify-content-between align-items-center">
+                            <h4 class="mb-0">Tổng thanh toán:</h4>
+                            <h4 class="mb-0 text-danger">
+                                <?php echo number_format($final_price, 0, ',', '.'); ?> VNĐ
+                            </h4>
+                        </div>
+
+                        <?php if ($discount_amount > 0): ?>
+                        <div class="alert alert-success mt-3 mb-0">
+                            <i class="fas fa-gift me-2"></i>
+                            Bạn tiết kiệm được: <strong><?php echo number_format($discount_amount, 0, ',', '.'); ?>
+                                VNĐ</strong>
+                        </div>
+                        <?php endif; ?>
                     </div>
-                    
-                    <?php if ($discount_amount > 0): ?>
-                    <div class="d-flex justify-content-between align-items-center text-success mb-2">
-                        <span>Giảm giá (<?php echo $combo_info['giamgia']; ?>%):</span>
-                        <span>-<?php echo number_format($discount_amount, 0, ',', '.'); ?> VNĐ</span>
-                    </div>
-                    <?php endif; ?>
-                    
-                    <hr>
-                    
-                    <div class="d-flex justify-content-between align-items-center">
-                        <h4 class="mb-0">Tổng thanh toán:</h4>
-                        <h4 class="mb-0 text-danger">
-                            <?php echo number_format($final_price, 0, ',', '.'); ?> VNĐ
-                        </h4>
-                    </div>
-                    
-                    <?php if ($discount_amount > 0): ?>
-                    <div class="alert alert-success mt-3 mb-0">
-                        <i class="fas fa-gift me-2"></i>
-                        Bạn tiết kiệm được: <strong><?php echo number_format($discount_amount, 0, ',', '.'); ?> VNĐ</strong>
-                    </div>
-                    <?php endif; ?>
                 </div>
             </div>
         </div>
     </div>
-</div>
-<?php endif; ?>
+    <?php endif; ?>
 
     <?php include '../components/footer.php'; ?>
 

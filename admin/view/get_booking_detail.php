@@ -1,6 +1,87 @@
 <?php
-session_start();
-require __DIR__ . '/../../includes/db_connect.php';
+
+require_once __DIR__ . '/../../includes/db_connect.php';
+
+$selected_month = $_GET['month'] ?? date('Y-m');
+$month_start = $selected_month . '-01';
+$month_end = date('Y-m-t', strtotime($month_start));
+
+// Lấy thống kê đơn đặt theo ngày trong tháng
+$sql_calendar = "SELECT 
+    DATE(NgayGio) as ngay,
+    COUNT(*) as so_don,
+    SUM(CASE WHEN MaBan IS NOT NULL THEN 1 ELSE 0 END) as so_ban,
+    SUM(CASE WHEN MaPhong IS NOT NULL THEN 1 ELSE 0 END) as so_phong
+FROM datban
+WHERE DATE(NgayGio) BETWEEN ? AND ?
+    AND TrangThaiDatBan IN ('da_dat', 'da_xac_nhan', 'dang_su_dung')
+GROUP BY DATE(NgayGio)";
+
+$stmt_calendar = $ketnoi->prepare($sql_calendar);
+$stmt_calendar->bind_param("ss", $month_start, $month_end);
+$stmt_calendar->execute();
+$result_calendar = $stmt_calendar->get_result();
+$booking_stats = [];
+while ($row = $result_calendar->fetch_assoc()) {
+    $booking_stats[$row['ngay']] = $row;
+}
+$stmt_calendar->close();
+
+// Hàm tạo lịch
+function generateCalendar($month, $booking_stats, $selected_date) {
+    $first_day = strtotime($month . '-01');
+    $days_in_month = date('t', $first_day);
+    $first_weekday = date('w', $first_day); // 0 = Chủ nhật
+    
+    $calendar = '<div class="calendar-grid">';
+    
+    // Header ngày trong tuần
+    $weekdays = ['CN', 'T2', 'T3', 'T4', 'T5', 'T6', 'T7'];
+    foreach ($weekdays as $day) {
+        $calendar .= '<div class="calendar-header">' . $day . '</div>';
+    }
+    
+    // Ô trống cho các ngày trước ngày 1
+    for ($i = 0; $i < $first_weekday; $i++) {
+        $calendar .= '<div class="calendar-day empty"></div>';
+    }
+    
+    // Các ngày trong tháng
+    for ($day = 1; $day <= $days_in_month; $day++) {
+        $current_date = date('Y-m-d', strtotime($month . '-' . sprintf('%02d', $day)));
+        $is_today = ($current_date == date('Y-m-d'));
+        $is_selected = ($current_date == $selected_date);
+        $has_booking = isset($booking_stats[$current_date]);
+        
+        $class = 'calendar-day';
+        if ($is_today) $class .= ' today';
+        if ($is_selected) $class .= ' selected';
+        if ($has_booking) $class .= ' has-booking';
+        
+        $calendar .= '<a href="?date=' . $current_date . '&month=' . $month . '" class="' . $class . '">';
+        $calendar .= '<div class="day-number">' . $day . '</div>';
+        
+        if ($has_booking) {
+            $stats = $booking_stats[$current_date];
+            $calendar .= '<div class="booking-badge">';
+            $calendar .= '<span class="total">' . $stats['so_don'] . '</span>';
+            if ($stats['so_ban'] > 0) {
+                $calendar .= '<span class="detail">🪑' . $stats['so_ban'] . '</span>';
+            }
+            if ($stats['so_phong'] > 0) {
+                $calendar .= '<span class="detail">🚪' . $stats['so_phong'] . '</span>';
+            }
+            $calendar .= '</div>';
+        }
+        
+        $calendar .= '</a>';
+    }
+    
+    $calendar .= '</div>';
+    return $calendar;
+}
+
+
 
 $madatban = intval($_GET['madatban'] ?? 0);
 $loai = $_GET['loai'] ?? 'thuong';
@@ -72,92 +153,7 @@ $trangThai = [
 $status = $trangThai[$booking['TrangThaiDatBan']] ?? ['text' => 'Không xác định', 'class' => 'secondary', 'icon' => 'question'];
 ?>
 
-<style>
-.info-section {
-    margin-bottom: 25px;
-    padding: 20px;
-    background: #f8f9fa;
-    border-radius: 10px;
-}
 
-.info-section h6 {
-    color: #667eea;
-    font-weight: 600;
-    margin-bottom: 15px;
-    border-bottom: 2px solid #667eea;
-    padding-bottom: 10px;
-}
-
-.info-row {
-    display: flex;
-    justify-content: space-between;
-    padding: 10px 0;
-    border-bottom: 1px solid #dee2e6;
-}
-
-.info-row:last-child {
-    border-bottom: none;
-}
-
-.info-label {
-    font-weight: 600;
-    color: #666;
-}
-
-.info-value {
-    color: #333;
-    text-align: right;
-}
-
-.products-table {
-    width: 100%;
-    margin-top: 15px;
-}
-
-.products-table th {
-    background: #667eea;
-    color: white;
-    padding: 12px;
-    font-weight: 600;
-}
-
-.products-table td {
-    padding: 12px;
-    border-bottom: 1px solid #dee2e6;
-}
-
-.total-box {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    color: white;
-    padding: 20px;
-    border-radius: 10px;
-    margin-top: 15px;
-}
-
-.total-row {
-    display: flex;
-    justify-content: space-between;
-    padding: 8px 0;
-}
-
-.total-row.main {
-    border-top: 2px solid rgba(255,255,255,0.3);
-    margin-top: 10px;
-    padding-top: 12px;
-    font-size: 18px;
-    font-weight: 700;
-}
-
-.action-buttons {
-    display: flex;
-    gap: 10px;
-    margin-top: 20px;
-}
-
-.action-buttons .btn {
-    flex: 1;
-}
-</style>
 
 <!-- Thông tin đặt bàn -->
 <div class="info-section">
@@ -238,7 +234,7 @@ $status = $trangThai[$booking['TrangThaiDatBan']] ?? ['text' => 'Không xác đ�
 </div>
 
 <!-- Chi tiết combo và sản phẩm (nếu là tiệc) -->
-<?php if ($loai == 'tiec' && $booking['MaPhong']): ?>
+
 <div class="info-section">
     <h6><i class="fas fa-utensils me-2"></i>Chi tiết đơn hàng</h6>
     
@@ -300,7 +296,7 @@ $status = $trangThai[$booking['TrangThaiDatBan']] ?? ['text' => 'Không xác đ�
     </div>
     <?php endif; ?>
 </div>
-<?php endif; ?>
+
 
 <!-- Nút hành động -->
 <div class="action-buttons">
@@ -321,7 +317,7 @@ $status = $trangThai[$booking['TrangThaiDatBan']] ?? ['text' => 'Không xác đ�
     <?php endif; ?>
     
     <?php if ($booking['TrangThaiDatBan'] == 'dang_su_dung'): ?>
-    <button onclick="updateStatus(<?php echo $madatban; ?>, 'hoan_thanh')" class="btn btn-success">
+    <button onclick="updateStatus(<?php echo $madatban; ?>, 'thanh_cong')" class="btn btn-success">
         <i class="fas fa-check-double me-2"></i>Hoàn thành
     </button>
     <?php endif; ?>

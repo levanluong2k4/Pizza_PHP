@@ -1,4 +1,10 @@
 <?php
+
+
+if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'admin') {
+    header("Location: /unitop/backend/lesson/school/project_pizza/sign_in.php");
+    exit();
+}
 require __DIR__ . '/../../../includes/db_connect.php';
 
 // =============== BỘ LỌC ================

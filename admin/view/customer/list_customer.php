@@ -1,7 +1,10 @@
 <?php
 session_start();
 // include admin navbar
-
+if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'admin') {
+    header("Location: /unitop/backend/lesson/school/project_pizza/sign_in.php");
+    exit();
+}
 // Kết nối database (giống create_account.php)
 require __DIR__ . '/../../../includes/db_connect.php';
 if (!$ketnoi) { die("Kết nối thất bại: " . mysqli_connect_error()); }

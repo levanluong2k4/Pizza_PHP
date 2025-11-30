@@ -1,5 +1,10 @@
 <?php
 session_start();
+
+if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'admin') {
+    header("Location: /unitop/backend/lesson/school/project_pizza/sign_in.php");
+    exit();
+}
 // Top regions by orders or total spent
 require __DIR__ . '/../../../includes/db_connect.php';
 if (!$ketnoi) die('Kết nối thất bại: ' . mysqli_connect_error());

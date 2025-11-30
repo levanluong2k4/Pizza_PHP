@@ -2,8 +2,8 @@
 session_start();
 require "includes/db_connect.php";
 
-if (!isset($_SESSION['user_id'])) {
-    header("Location: trangchu.php");
+if(!isset($_SESSION['user_id'])&&$_SESSION['role']=='user'){
+    header("Location: sign_in.php");
     exit();
 }
 

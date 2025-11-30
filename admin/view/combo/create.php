@@ -1,4 +1,10 @@
 <?php
+
+if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'admin') {
+    header("Location: /unitop/backend/lesson/school/project_pizza/sign_in.php");
+    exit();
+}
+
 require __DIR__ . '/../../../includes/db_connect.php';
 
 $errors = [];
@@ -167,7 +173,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
     <div class="container mt-4">
         <h2 class="main-title"><i class="fa-solid fa-plus"></i> Thêm Combo</h2>
 
-        <a href="./index.php" class="btn btn-secondary mt-2">
+        <a href="/unitop/backend/lesson/school/project_pizza/admin/view/combo" class="btn btn-secondary mt-2">
             <i class="fa-solid fa-arrow-left"></i> Quay lại danh sách
         </a>
 

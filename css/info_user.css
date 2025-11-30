@@ -114,4 +114,15 @@
             font-style: italic;
             color: #495057;
         }
+
+.profile-body.nav-item.nav-link:hover{
+    background-color: #ac3535;
+    cursor: pointer;
+}
+
+
+
+
+
+
  

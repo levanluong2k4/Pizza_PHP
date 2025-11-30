@@ -150,7 +150,7 @@
                                 </ul>
                             </li>
 
-                            <!--  NESTED DROPDOWN: Quản lý size sản phẩm -->
+                          
                             <li class="dropdown-submenu">
                                 <a class="dropdown-item" href="#" data-bs-toggle="dropdown">
                                     <i class="fa-solid fa-ruler-combined"></i> Quản lý size sản phẩm
@@ -224,7 +224,7 @@
                                     <i class="fa-solid fa-box"></i> Thống kê sản phẩm
                                 </a>
                                 <ul class="dropdown-menu">
-                                    <li><a class="dropdown-item" href="/unitop/backend/lesson/school/project_pizza/admin/view/best_selling/best_selling_product.php"><i class="fa-solid fa-fire"></i> Sản phẩm bán chạy</a></li>
+                                    <li><a class="dropdown-item" href="/unitop/backend/lesson/school/project_pizza/admin/view/best_selling/index.php"><i class="fa-solid fa-fire"></i> Sản phẩm bán chạy</a></li>
                                     <li><a class="dropdown-item" href="/unitop/backend/lesson/school/project_pizza/admin/view/best_selling/best_selling_category.php"><i class="fa-solid fa-layer-group"></i> Loại sản phẩm bán chạy</a></li>
                          
                                 </ul>
@@ -270,7 +270,7 @@
 
                
                 <div class="ms-auto">
-                    <a href="/unitop/backend/lesson/school/project_pizza/admin/logout.php" class="logout-btn"><i class="fa-solid fa-right-from-bracket"></i> Đăng xuất</a>
+                    <a href="/unitop/backend/lesson/school/project_pizza/handlers/process_sign_out.php" class="logout-btn"><i class="fa-solid fa-right-from-bracket"></i> Đăng xuất</a>
                 </div>
             </div>
         </div>

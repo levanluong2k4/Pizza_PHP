@@ -346,11 +346,8 @@ if ($booking['LoaiDatBan'] == 'tiec' && $booking['MaCombo']) {
             <i class="fas fa-home me-2"></i>
             Về trang chủ
         </a>
-        <button onclick="window.print()" class="btn btn-outline-primary btn-action">
-            <i class="fas fa-print me-2"></i>
-            In phiếu đặt bàn
-        </button>
-        <a href="tra-cuu-dat-ban.php" class="btn btn-outline-secondary btn-action">
+      
+        <a href="/unitop/backend/lesson/school/project_pizza/search_order.php" class="btn btn-outline-secondary btn-action">
             <i class="fas fa-search me-2"></i>
             Tra cứu đặt bàn
         </a>

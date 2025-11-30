@@ -20,14 +20,14 @@ document.addEventListener("DOMContentLoaded", function () {
             data.forEach(p => provinceSelect.add(new Option(p.name, p.code)));
 
             // ✅ Nếu có dữ liệu cũ
-            if (typeof oldAddress2 !== "undefined" && oldAddress2.province) {
-                provinceSelect.value = oldAddress2.province;
-                loadDistricts(oldAddress2.province);
+            if (typeof oldAddress !== "undefined" && oldAddress.province) {
+                provinceSelect.value = oldAddress.province;
+                loadDistricts(oldAddress.province);
             }
 
             // ✅ Gán lại số nhà nếu có
-            if (typeof oldAddress2 !== "undefined" && oldAddress2.so_nha) {
-                soNhaInput.value = oldAddress2.so_nha;
+            if (typeof oldAddress !== "undefined" && oldAddress.so_nha) {
+                soNhaInput.value = oldAddress.so_nha;
             }
         })
    
@@ -76,9 +76,9 @@ document.addEventListener("DOMContentLoaded", function () {
                 districtSelect.disabled = false;
 
                 // Nếu có dữ liệu cũ
-                if (typeof oldAddress2 !== "undefined" && oldAddress2.district) {
-                    districtSelect.value = oldAddress2.district;
-                    loadWards(oldAddress2.district);
+                if (typeof oldAddress !== "undefined" && oldAddress.district) {
+                    districtSelect.value = oldAddress.district;
+                    loadWards(oldAddress.district);
                 }
             })
          
@@ -97,8 +97,8 @@ document.addEventListener("DOMContentLoaded", function () {
                 wardSelect.disabled = false;
 
                 // Nếu có dữ liệu cũ
-                if (typeof oldAddress2 !== "undefined" && oldAddress2.ward) {
-                    wardSelect.value = oldAddress2.ward;
+                if (typeof oldAddress !== "undefined" && oldAddress.ward) {
+                    wardSelect.value = oldAddress.ward;
                     updateAddress();
                 }
             })

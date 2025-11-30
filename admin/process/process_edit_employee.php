@@ -2,11 +2,11 @@
 session_start();
 
 // ⚠️ SỬA: Thêm dòng này để giả lập đăng nhập (test tạm)
-$_SESSION['admin_id'] = 1;  // ← THÊM DÒNG NÀY
+$_SESSION['user_id'] = 1;  // ← THÊM DÒNG NÀY
 
 // Kiểm tra đăng nhập admin
-if (!isset($_SESSION['admin_id'])) {
-    header("Location: ../login.php");
+if (!isset($_SESSION['user_id'])) {
+    header("Location: /unitop/backend/lesson/school/project_pizza/sign_in.php");
     exit();
 }
 

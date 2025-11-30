@@ -46,6 +46,13 @@ if (mysqli_num_rows($result_admin) > 0) {
         $_SESSION['name'] = $admin['ten'];
         $_SESSION['role'] = 'admin';
         $_SESSION['phanquyen'] = $admin['phanquyen'];
+
+        if ($remember) {
+            $token = bin2hex(random_bytes(16));
+            $sql_update = "UPDATE admin SET token='$token' WHERE id='{$admin['id']}'";
+            mysqli_query($ketnoi, $sql_update);
+            setcookie('remember', $token, time() + (30 * 24 * 60 * 60), "/");
+        }
         
         sendJSON([
             'success' => true,

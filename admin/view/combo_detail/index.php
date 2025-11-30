@@ -1,6 +1,11 @@
 <?php
 require __DIR__ . '/../../../includes/db_connect.php';
 
+if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'admin') {
+    header("Location: /unitop/backend/lesson/school/project_pizza/sign_in.php");
+    exit();
+}
+
 if (!isset($_GET["MaCombo"])) {
     die("Thiếu tham số MaCombo!");
 }
@@ -56,6 +61,9 @@ if ($kq_ct && $kq_ct->num_rows > 0) {
 
 $giamgia = $combo["giamgia"];
 $tongSauGiam = $tongTruocGiam - ($tongTruocGiam * $giamgia / 100);
+
+$sqlupdate = "UPDATE combo SET TongTien = $tongSauGiam WHERE MaCombo = $MaCombo";
+mysqli_query($ketnoi, $sqlupdate);
 
 // delete chi tiết combo
 if (isset($_POST["delete_id"])) {
@@ -198,7 +206,7 @@ if (isset($_POST["delete_id"])) {
     <!-- Nội dung -->
     <div class="container mt-4">
 
-        <a href="/admin/view/combo/index.php" class="btn btn-secondary back-btn">
+        <a href="/unitop/backend/lesson/school/project_pizza/admin/view/combo/index.php" class="btn btn-secondary back-btn">
             <i class="fa-solid fa-arrow-left"></i> Quay lại combo
         </a>
 

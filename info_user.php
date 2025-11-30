@@ -4,18 +4,18 @@ session_start();
 require "includes/db_connect.php";
 
 // Kiểm tra đăng nhập
-if(!isset($_SESSION['user_id'])){
-    header("Location: dangnhap.php");
+if(!isset($_SESSION['user_id'])&&$_SESSION['role']=='user'){
+    header("Location: sign_in.php");
     exit();
 }
 
 $user_id = $_SESSION['user_id'];
 
-echo '<pre>';
-print_r($_SESSION);
-print_r($_POST);
+// echo '<pre>';
+// print_r($_SESSION);
+// print_r($_POST);
 
-echo '</pre>';
+// echo '</pre>';
 // Lấy thông tin người dùng
 $sql_user = "SELECT * FROM `khachhang` WHERE MaKH='$user_id'";
 $result_user = mysqli_query($ketnoi, $sql_user);
@@ -115,8 +115,8 @@ $updateMessage = '';
 if (isset($_POST['save_address'])) {
 
 
-    // Lưu tạm old_address2 (giữ codes để frontend có thể prefill select)
-        $_SESSION['old_address2'] = [
+    // Lưu tạm old_address (giữ codes để frontend có thể prefill select)
+        $_SESSION['old_address'] = [
             'province' => $province_code,
             'district' => $district_code,
             'ward' => $ward_name,
@@ -268,17 +268,18 @@ if($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['change_password'])){
             </script>
             <?php endif; ?>
 
-            <div class="profile-card">
-                <div class="profile-header">
-                    <div class="profile-avatar">
-                        <i class="fas fa-user"></i>
-                    </div>
-                    <h3 class="mb-1"><?php echo htmlspecialchars($user['HoTen']); ?></h3>
-                    <p class="mb-0"><i class="fas fa-envelope"></i> <?php echo htmlspecialchars($user['Email']); ?></p>
-                </div>
+            <div class=" profile-card ">
+               
 
-                <div class="profile-body">
+                <div class=" profile-body">
+                     <div>
+                    
+                    <h3 class="mb-1"><i class="fas fa-user"></i>  <?php echo htmlspecialchars($user['HoTen']); ?></h3>
+                    <p class="mb-0"><i class="fas fa-envelope"></i> <?php echo htmlspecialchars($user['Email']); ?></p>
+                        </div>
+                    
                     <ul class="nav nav-tabs mb-4 justify-content-center" role="tablist">
+                       
                         <li class="nav-item" role="presentation">
                             <button class="nav-link active" data-bs-toggle="tab" data-bs-target="#info" type="button">
                                 <i class="fas fa-info-circle"></i> Thông tin cá nhân
@@ -455,9 +456,7 @@ if($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['change_password'])){
                                             <button type="submit" name="change_password" class="btn btn-save">
                                                 <i class="fas fa-key"></i> Đổi mật khẩu
                                             </button>
-                                            <button type="submit" name="forget_password" class="btn btn-save">
-                                                <i class="fa-solid fa-unlock-keyhole"></i> Quên mật khẩu
-                                            </button>
+                                        
                                         </div>
                                     </div>
                                 </div>
@@ -514,7 +513,7 @@ if($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['change_password'])){
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.min.js"></script>
 
 <script>
-    const oldAddress2 = <?php echo json_encode($_SESSION['old_address2'] ?? []); ?>;
+    const oldAddress = <?php echo json_encode($_SESSION['old_address'] ?? []); ?>;
 
     window.addEventListener('load', function() {
         if (oldAddress.province) {

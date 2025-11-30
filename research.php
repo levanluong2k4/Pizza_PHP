@@ -174,7 +174,10 @@ else {
                         mysqli_data_seek($combo_details, 0);
                         while ($item = mysqli_fetch_assoc($combo_details)): 
                             $item_total = $item['ThanhTien'] * $item['SoLuong'];
+                            echo $item_total;
                             $total_combo += $item_total;
+                            echo '<br>';
+                            echo $total_combo;
                     ?>
                     <div class="combo-item" data-masp="<?php echo $item['MaSP']; ?>"
                         data-maloai="<?php echo $item['MaLoai']; ?>" data-masize="<?php echo $item['MaSize']; ?>"
@@ -575,7 +578,10 @@ $('#loadMoreBtn').on('click', function() {
     }, 100);
 });
 
-// ✅ XỬ LÝ THAY ĐỔI SẢN PHẨM TRONG COMBO
+
+</script>
+<script>
+    // ✅ XỬ LÝ THAY ĐỔI SẢN PHẨM TRONG COMBO
 $(document).ready(function() {
     let selectedProduct = null;
     let originalComboItem = null;

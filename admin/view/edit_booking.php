@@ -2,6 +2,11 @@
 session_start();
 require __DIR__ . '/../../includes/db_connect.php';
 
+if(!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'admin') {
+    header('Location: /unitop/backend/lesson/school/project_pizza/sign_in.php');
+    exit;
+}
+
 $madatban = intval($_GET['id'] ?? 0);
 
 if ($madatban <= 0) {
@@ -64,8 +69,9 @@ $sql_loai = "SELECT DISTINCT lsp.MaLoai, lsp.TenLoai
 $loai_list = $ketnoi->query($sql_loai)->fetch_all(MYSQLI_ASSOC);
 
 // Lấy danh sách sản phẩm đã đặt (nếu là tiệc)
+// Lấy danh sách sản phẩm đã đặt (cho cả bàn thường và tiệc)
 $chitiet_list = [];
-if ($current_type == 'tiec' && $booking['MaPhong']) {
+if ($booking['MaBan'] || $booking['MaPhong']) {
     $sql_chitiet = "SELECT ct.*, sp.TenSP, sps.Gia, s.TenSize, ct.MaSize
                     FROM chitietdatban ct
                     INNER JOIN size s ON ct.MaSize = s.MaSize
@@ -78,6 +84,19 @@ if ($current_type == 'tiec' && $booking['MaPhong']) {
     $chitiet_list = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
     $stmt->close();
 }
+
+// Tính tổng tiền hiện tại
+$current_total = 0;
+foreach ($chitiet_list as $item) {
+    $current_total += $item['Gia'] * $item['SoLuong'];
+}
+
+// Áp dụng giảm giá combo nếu có (chỉ cho tiệc)
+$discount_amount = 0;
+if ($current_type == 'tiec' && $booking['MaCombo']) {
+    $discount_percent = floatval($booking['giamgia'] ?? 0);
+    $discount_amount = ($current_total * $discount_percent) / 100;
+}
 ?>
 
 <!DOCTYPE html>
@@ -88,246 +107,7 @@ if ($current_type == 'tiec' && $booking['MaPhong']) {
     <title>Chỉnh sửa đặt bàn - Admin</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
-    <style>
-        body {
-            background: #f5f7fa;
-        }
-        
-        .edit-container {
-            max-width: 1200px;
-            margin: 50px auto;
-            background: white;
-            border-radius: 20px;
-            box-shadow: 0 5px 30px rgba(0,0,0,0.1);
-            overflow: hidden;
-        }
-        
-        .edit-header {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            padding: 30px;
-        }
-        
-        .edit-body {
-            padding: 40px;
-        }
-        
-        .section-title {
-            font-size: 18px;
-            font-weight: 600;
-            color: #333;
-            margin-bottom: 20px;
-            padding-bottom: 10px;
-            border-bottom: 2px solid #667eea;
-        }
-        
-        .type-selector {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 20px;
-            margin-bottom: 30px;
-        }
-        
-        .type-option {
-            border: 3px solid #ddd;
-            border-radius: 15px;
-            padding: 30px 20px;
-            text-align: center;
-            cursor: pointer;
-            transition: all 0.3s;
-        }
-        
-        .type-option:hover {
-            border-color: #667eea;
-            transform: translateY(-3px);
-            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.3);
-        }
-        
-        .type-option.active {
-            border-color: #667eea;
-            background: #f0f4ff;
-        }
-        
-        .type-option input[type="radio"] {
-            display: none;
-        }
-        
-        .type-icon {
-            font-size: 48px;
-            margin-bottom: 15px;
-            color: #667eea;
-        }
-        
-        .table-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
-            gap: 15px;
-        }
-        
-        .table-option {
-            border: 2px solid #ddd;
-            border-radius: 10px;
-            padding: 15px 10px;
-            text-align: center;
-            cursor: pointer;
-            transition: all 0.3s;
-        }
-        
-        .table-option:hover {
-            border-color: #667eea;
-            transform: translateY(-3px);
-        }
-        
-        .table-option.selected {
-            border-color: #667eea;
-            background: #f0f4ff;
-        }
-        
-        .table-option.unavailable {
-            opacity: 0.5;
-            cursor: not-allowed;
-            background: #f8f9fa;
-        }
-        
-        .table-option input[type="radio"] {
-            display: none;
-        }
-        
-        /* Combo Products Section */
-        .combo-products-section {
-            background: #f8f9fa;
-            border-radius: 15px;
-            padding: 30px;
-            margin-top: 30px;
-        }
-        
-        .product-list {
-            max-height: 400px;
-            overflow-y: auto;
-            background: white;
-            border-radius: 10px;
-            padding: 15px;
-        }
-        
-        .product-item {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 15px;
-            border: 1px solid #e0e0e0;
-            border-radius: 10px;
-            margin-bottom: 10px;
-            transition: all 0.3s;
-        }
-        
-        .product-item:hover {
-            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-        }
-        
-        .product-info {
-            flex: 1;
-        }
-        
-        .product-actions {
-            display: flex;
-            gap: 10px;
-            align-items: center;
-        }
-        
-        .quantity-control {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-        
-        .quantity-control input {
-            width: 60px;
-            text-align: center;
-            border: 1px solid #ddd;
-            border-radius: 5px;
-            padding: 5px;
-        }
-        
-        .btn-quantity {
-            width: 30px;
-            height: 30px;
-            border-radius: 50%;
-            border: none;
-            background: #667eea;
-            color: white;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-        }
-        
-        .btn-quantity:hover {
-            background: #5568d3;
-        }
-        
-        .add-product-box {
-            background: white;
-            border-radius: 10px;
-            padding: 20px;
-            margin-top: 20px;
-        }
-        
-        .product-select-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-            gap: 15px;
-            margin-top: 15px;
-        }
-        
-        .product-card {
-            border: 2px solid #e0e0e0;
-            border-radius: 10px;
-            padding: 15px;
-            cursor: pointer;
-            transition: all 0.3s;
-        }
-        
-        .product-card:hover {
-            border-color: #667eea;
-            transform: translateY(-2px);
-        }
-        
-        .product-card.selected {
-            border-color: #667eea;
-            background: #f0f4ff;
-        }
-        
-        .alert-info {
-            background: #e7f3ff;
-            border-left: 4px solid #007bff;
-            border-radius: 8px;
-        }
-        
-        .btn-submit {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            padding: 15px 40px;
-            font-size: 18px;
-            font-weight: 600;
-            border: none;
-            border-radius: 50px;
-            width: 100%;
-            transition: all 0.3s;
-        }
-        
-        .btn-submit:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 10px 25px rgba(102, 126, 234, 0.4);
-        }
-        
-        .total-summary {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            padding: 20px;
-            border-radius: 10px;
-            margin-top: 20px;
-        }
-    </style>
+ <link rel="stylesheet" href="../css/editbooking.css">
 </head>
 <body>
     <?php include '../navbar_admin.php';
@@ -448,6 +228,7 @@ if ($current_type == 'tiec' && $booking['MaPhong']) {
             
             <!-- Chọn bàn (hiện khi chọn bàn thường) -->
             <div id="banSection" style="display: <?php echo $current_type == 'thuong' ? 'block' : 'none'; ?>;">
+                
                 <div class="section-title">
                     <i class="fas fa-chair me-2"></i>
                     Chọn bàn <span class="text-danger">*</span>
@@ -472,6 +253,153 @@ if ($current_type == 'tiec' && $booking['MaPhong']) {
                         <div><small class="text-muted"><?php echo $ban['KhuVuc']; ?></small></div>
                     </label>
                     <?php endforeach; ?>
+                </div>
+                     <div class="combo-products-section" id="comboProductsSection">
+                    <div class="section-title">
+                        <i class="fas fa-utensils me-2"></i>
+                        Quản lý sản phẩm 
+                        <button type="button" class="btn btn-sm btn-primary float-end" id="btnShowAddProduct">
+                            <i class="fas fa-plus me-2"></i>Thêm sản phẩm
+                        </button>
+                    </div>
+                    
+                    <!-- Danh sách sản phẩm đã chọn -->
+                    <div class="product-list" id="selectedProductsList">
+                        <?php if (!empty($chitiet_list)): ?>
+                            <?php foreach ($chitiet_list as $item): ?>
+                            <div class="product-item" data-product-id="<?php echo $item['MaSP']; ?>-<?php echo $item['MaSize']; ?>">
+                                <div class="product-info">
+                                    <h6 class="mb-1"><?php echo htmlspecialchars($item['TenSP']); ?> - <?php echo htmlspecialchars($item['TenSize']); ?></h6>
+                                    <small class="text-muted">
+                                        <?php echo number_format($item['Gia']); ?> VNĐ
+                                    </small>
+                                </div>
+                                <div class="product-actions">
+                                    <div class="quantity-control">
+                                        <button type="button" class="btn-quantity btn-decrease">
+                                            <i class="fas fa-minus"></i>
+                                        </button>
+                                        <input type="number" class="form-control product-quantity" 
+                                               name="products[<?php echo $item['MaSP']; ?>_<?php echo $item['MaSize']; ?>][quantity]" 
+                                               value="<?php echo $item['SoLuong']; ?>" min="1">
+                                        <button type="button" class="btn-quantity btn-increase">
+                                            <i class="fas fa-plus"></i>
+                                        </button>
+                                    </div>
+                                    <button type="button" class="btn btn-danger btn-sm btn-remove-product">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                </div>
+                                <input type="hidden" name="products[<?php echo $item['MaSP']; ?>_<?php echo $item['MaSize']; ?>][masp]" value="<?php echo $item['MaSP']; ?>">
+                                <input type="hidden" name="products[<?php echo $item['MaSP']; ?>_<?php echo $item['MaSize']; ?>][masize]" value="<?php echo $item['MaSize']; ?>">
+                                <input type="hidden" name="products[<?php echo $item['MaSP']; ?>_<?php echo $item['MaSize']; ?>][price]" value="<?php echo $item['Gia']; ?>">
+                            </div>
+                            <?php endforeach; ?>
+                        <?php else: ?>
+                            <div class="text-center text-muted py-4" id="emptyMessage">
+                                <i class="fas fa-box-open fa-3x mb-3"></i>
+                                <p>Chưa có sản phẩm nào được thêm</p>
+                            </div>
+                        <?php endif; ?>
+                    </div>
+                    
+                    <!-- Form thêm sản phẩm -->
+                    <div class="add-product-box" id="addProductBox" style="display: none;">
+                        <h6 class="mb-3">Chọn sản phẩm để thêm:</h6>
+                        
+                        <!-- Bộ lọc tìm kiếm -->
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <div class="input-group">
+                                    <span class="input-group-text"><i class="fas fa-search"></i></span>
+                                    <input type="text" class="form-control" id="searchProduct" placeholder="Tìm kiếm sản phẩm...">
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="input-group">
+                                    <span class="input-group-text"><i class="fas fa-filter"></i></span>
+                                    <select class="form-control" id="filterCategory">
+                                        <option value="">-- Tất cả loại sản phẩm --</option>
+                                        <?php foreach ($loai_list as $loai): ?>
+                                        <option value="<?php echo $loai['MaLoai']; ?>">
+                                            <?php echo htmlspecialchars($loai['TenLoai']); ?>
+                                        </option>
+                                        <?php endforeach; ?>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="product-select-grid" id="productGrid">
+                            <?php 
+                            if (!empty($sanpham_list)) {
+                                foreach ($sanpham_list as $sp): 
+                            ?>
+                            <div class="product-card" 
+                                 data-product-id="<?php echo isset($sp['MaSP']) ? $sp['MaSP'] : '0'; ?>-<?php echo isset($sp['MaSize']) ? $sp['MaSize'] : '0'; ?>"
+                                 data-masp="<?php echo isset($sp['MaSP']) ? $sp['MaSP'] : '0'; ?>"
+                                 data-masize="<?php echo isset($sp['MaSize']) ? $sp['MaSize'] : '0'; ?>"
+                                 data-maloai="<?php echo isset($sp['MaLoai']) ? $sp['MaLoai'] : '0'; ?>"
+                                 data-product-name="<?php echo isset($sp['TenSP']) ? htmlspecialchars($sp['TenSP']) : 'N/A'; ?>"
+                                 data-product-price="<?php echo isset($sp['Gia']) ? $sp['Gia'] : '0'; ?>"
+                                 data-product-unit="<?php echo isset($sp['TenSize']) ? htmlspecialchars($sp['TenSize']) : 'N/A'; ?>"
+                                 data-search-text="<?php echo isset($sp['TenSP']) ? strtolower(htmlspecialchars($sp['TenSP'])) : ''; ?> <?php echo isset($sp['TenSize']) ? strtolower(htmlspecialchars($sp['TenSize'])) : ''; ?>">
+                                <?php if (isset($sp['Anh']) && !empty($sp['Anh'])): ?>
+                                <img src="../../<?php echo $sp['Anh']; ?>" 
+                                     alt="<?php echo isset($sp['TenSP']) ? htmlspecialchars($sp['TenSP']) : 'Product'; ?>" 
+                                     style="width: 100%; height: 120px; object-fit: cover; border-radius: 8px; margin-bottom: 10px;">
+                                <?php else: ?>
+                                <div style="width: 100%; height: 120px; background: #f0f0f0; border-radius: 8px; margin-bottom: 10px; display: flex; align-items: center; justify-content: center;">
+                                    <i class="fas fa-image fa-3x text-muted"></i>
+                                </div>
+                                <?php endif; ?>
+                                <h6><?php echo isset($sp['TenSP']) ? htmlspecialchars($sp['TenSP']) : 'N/A'; ?></h6>
+                                <p class="text-muted mb-0">
+                                    <small>
+                                        <?php echo isset($sp['TenSize']) ? htmlspecialchars($sp['TenSize']) : 'N/A'; ?> - 
+                                        <?php echo isset($sp['Gia']) ? number_format($sp['Gia']) : '0'; ?> VNĐ
+                                    </small>
+                                </p>
+                                <?php if (isset($sp['TenLoai']) && !empty($sp['TenLoai'])): ?>
+                                <p class="mb-0 mt-1">
+                                    <small class="badge bg-secondary"><?php echo htmlspecialchars($sp['TenLoai']); ?></small>
+                                </p>
+                                <?php endif; ?>
+                            </div>
+                            <?php 
+                                endforeach;
+                            } else {
+                                echo '<div class="col-12"><p class="text-center text-muted">Không có sản phẩm nào</p></div>';
+                            }
+                            ?>
+                        </div>
+                        
+                        <div class="text-center mt-3" id="noResultMessage" style="display: none;">
+                            <i class="fas fa-search fa-3x text-muted mb-2"></i>
+                            <p class="text-muted">Không tìm thấy sản phẩm phù hợp</p>
+                        </div>
+                        
+                        <div class="text-end mt-3">
+                            <button type="button" class="btn btn-secondary" id="btnCancelAdd">Đóng</button>
+                        </div>
+                    </div>
+                    
+                    <!-- Tổng kết -->
+                    <div class="total-summary">
+                        <div class="d-flex justify-content-between mb-2">
+                            <span>Tổng tiền sản phẩm:</span>
+                            <strong id="totalProducts">0 VNĐ</strong>
+                        </div>
+                        <div class="d-flex justify-content-between mb-2">
+                            <span>Giảm giá combo:</span>
+                            <strong id="discountAmount">0 VNĐ</strong>
+                        </div>
+                        <hr style="border-color: rgba(255,255,255,0.3)">
+                        <div class="d-flex justify-content-between">
+                            <h5>Tổng thanh toán:</h5>
+                            <h5 id="finalTotal">0 VNĐ</h5>
+                        </div>
+                    </div>
                 </div>
             </div>
             
@@ -509,7 +437,7 @@ if ($current_type == 'tiec' && $booking['MaPhong']) {
                         Chọn combo (tùy chọn)
                     </div>
                     
-                    <select class="form-control" name="combo_id" id="comboSelect">
+                    <select class="form-control" name="combo_id" id="comboSelect" disabled>
                         <option value="">-- Không chọn combo --</option>
                         <?php foreach ($combo_list as $combo): ?>
                         <option value="<?php echo $combo['MaCombo']; ?>" 
@@ -528,7 +456,7 @@ if ($current_type == 'tiec' && $booking['MaPhong']) {
                 <div class="combo-products-section" id="comboProductsSection">
                     <div class="section-title">
                         <i class="fas fa-utensils me-2"></i>
-                        Quản lý sản phẩm combo
+                        Quản lý sản phẩm 
                         <button type="button" class="btn btn-sm btn-primary float-end" id="btnShowAddProduct">
                             <i class="fas fa-plus me-2"></i>Thêm sản phẩm
                         </button>
@@ -919,7 +847,7 @@ $(document).ready(function() {
         
         // Lấy giảm giá từ combo
         const discountPercent = parseFloat($('#comboSelect option:selected').data('discount')) || 0;
-        const discountAmount = (totalProducts * discountPercent) / 100;
+        const discountAmount = totalProducts *(discountPercent / 100);
         const finalTotal = totalProducts - discountAmount;
         
         // Cập nhật hiển thị

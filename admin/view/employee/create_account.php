@@ -1,12 +1,9 @@
 <?php
 session_start();
-/*
-// Kiểm tra đăng nhập admin
-if (!isset($_SESSION['admin_id'])) {
-    header("Location: ../../login.php");
+if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'admin') {
+    header("Location: /unitop/backend/lesson/school/project_pizza/sign_in.php");
     exit();
 }
-*/
 
 // Kết nối database
 require __DIR__ . '/../../../includes/db_connect.php';

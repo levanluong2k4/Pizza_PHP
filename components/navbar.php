@@ -240,7 +240,7 @@ $loaisp=mysqli_query($ketnoi,$sqlloaisp);
                     <ul class="dropdown-menu bg-global p-0 text-md-center text-lg-center">
                         <li class="dropdown-item"><a href="/unitop/backend/lesson/school/project_pizza/info_user.php">Thông tin cá nhân</a></li>
 
-                        <li class="dropdown-item"><a href="handlers/process_sign_out.php">Đăng xuất</a></li>
+                        <li class="dropdown-item"><a href="/unitop/backend/lesson/school/project_pizza/handlers/process_sign_out.php">Đăng xuất</a></li>
                         <li>
                             <hr class="dropdown-divider">
                         </li>
@@ -256,8 +256,8 @@ $loaisp=mysqli_query($ketnoi,$sqlloaisp);
                         <img src="/unitop/backend/lesson/school/project_pizza/img/user.png" alt="" height="30px">
                     </a>
                     <ul class="dropdown-menu bg-global p-0 text-md-center text-lg-center">
-                        <li class="dropdown-item"><a href="./sign_in.php">Đăng nhập</a></li>
-                        <li class="dropdown-item"><a href="./sign_up.php">Đăng ký</a></li>
+                        <li class="dropdown-item"><a href="/unitop/backend/lesson/school/project_pizza/sign_in.php">Đăng nhập</a></li>
+                        <li class="dropdown-item"><a href="/unitop/backend/lesson/school/project_pizza/sign_up.php">Đăng ký</a></li>
                         <li>
                             <hr class="dropdown-divider">
                         </li>
@@ -291,5 +291,4 @@ $loaisp=mysqli_query($ketnoi,$sqlloaisp);
     </div>
 </nav>
 
-    <script src="js/search.js"></script>
-    <script src="js/add_to_cart.js"></script>
+ 

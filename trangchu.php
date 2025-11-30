@@ -1,4 +1,6 @@
 <?php 
+session_start();
+
 
 require "includes/load_products.php";
 

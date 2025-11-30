@@ -76,7 +76,7 @@ $('#addToCartBtn').on('click', function(e) {
                 }, 800);
             }
         } else {
-            showNotification('❌ ' + (data.message || 'Có lỗi xảy ra!'), 'error');
+            showNotification('' + ( 'Tài khoản này ko thể thêm sản phẩm'), 'error');
             $('#addToCartBtn').prop('disabled', false).text('Thêm vào giỏ hàng');
         }
     })

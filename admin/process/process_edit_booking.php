@@ -137,6 +137,8 @@ if ($loaidatban == 'tiec' && $maphong) {
 // Bắt đầu transaction
 $ketnoi->begin_transaction();
 
+
+
 try {
     // Cập nhật bảng datban
     $sql_update = "UPDATE datban SET 
@@ -147,12 +149,13 @@ try {
                    MaBan = ?,
                    MaPhong = ?,
                    MaCombo = ?,
-                  
                    GhiChu = ?
                    WHERE MaDatBan = ?";
     
     $stmt = $ketnoi->prepare($sql_update);
-    $combo_id_val = $combo_id > 0 ? $combo_id : null;
+    
+    // Bàn thường không có combo
+    $combo_id_val = ($loaidatban == 'tiec' && $combo_id > 0) ? $combo_id : null;
     
     $stmt->bind_param(
         "ssssiiisi",
@@ -163,7 +166,6 @@ try {
         $maban,
         $maphong,
         $combo_id_val,
-      
         $ghichu,
         $madatban
     );
@@ -173,8 +175,8 @@ try {
     }
     $stmt->close();
     
-    // Xử lý sản phẩm cho bàn tiệc
-    if ($loaidatban == 'tiec' && $maphong) {
+    // Xử lý sản phẩm (cho cả bàn thường và bàn tiệc)
+    if (!empty($products)) {
         // Xóa tất cả chi tiết cũ
         $sql_delete = "DELETE FROM chitietdatban WHERE MaDatBan = ?";
         $stmt = $ketnoi->prepare($sql_delete);
@@ -183,30 +185,28 @@ try {
         $stmt->close();
         
         // Thêm chi tiết mới
-        if (!empty($products)) {
-            $sql_insert = "INSERT INTO chitietdatban (MaDatBan, MaSP, MaSize, SoLuong, ThanhTien) 
-                          VALUES (?, ?, ?, ?, ?)";
-            $stmt = $ketnoi->prepare($sql_insert);
-            
-            foreach ($products as $product) {
-                if (isset($product['masp']) && isset($product['masize']) && isset($product['quantity']) && isset($product['price'])) {
-                    $masp = intval($product['masp']);
-                    $masize = intval($product['masize']);
-                    $soluong = intval($product['quantity']);
-                    $dongia = floatval($product['price']);
-                    $thanhtien = $soluong * $dongia;
+        $sql_insert = "INSERT INTO chitietdatban (MaDatBan, MaSP, MaSize, SoLuong, ThanhTien) 
+                      VALUES (?, ?, ?, ?, ?)";
+        $stmt = $ketnoi->prepare($sql_insert);
+        
+        foreach ($products as $product) {
+            if (isset($product['masp']) && isset($product['masize']) && isset($product['quantity']) && isset($product['price'])) {
+                $masp = intval($product['masp']);
+                $masize = intval($product['masize']);
+                $soluong = intval($product['quantity']);
+                $dongia = floatval($product['price']);
+                $thanhtien = $soluong * $dongia;
+                
+                if ($masp > 0 && $masize > 0 && $soluong > 0) {
+                    $stmt->bind_param("iiiid", $madatban, $masp, $masize, $soluong, $thanhtien);
                     
-                    if ($masp > 0 && $masize > 0 && $soluong > 0) {
-                        $stmt->bind_param("iiiid", $madatban, $masp, $masize, $soluong, $thanhtien);
-                        
-                        if (!$stmt->execute()) {
-                            throw new Exception('Lỗi thêm chi tiết sản phẩm: ' . $stmt->error);
-                        }
+                    if (!$stmt->execute()) {
+                        throw new Exception('Lỗi thêm chi tiết sản phẩm: ' . $stmt->error);
                     }
                 }
             }
-            $stmt->close();
         }
+        $stmt->close();
         
         // Tính tổng tiền
         $sql_total = "SELECT SUM(ThanhTien) as TongTien 
@@ -220,9 +220,9 @@ try {
         $tongtien = $row['TongTien'] ?? 0;
         $stmt->close();
         
-        // Áp dụng giảm giá combo nếu có
+        // Áp dụng giảm giá combo (chỉ cho bàn tiệc)
         $tongtien_sau_giam = $tongtien;
-        if ($combo_id > 0) {
+        if ($loaidatban == 'tiec' && $combo_id > 0) {
             $sql_combo = "SELECT giamgia FROM combo WHERE MaCombo = ?";
             $stmt = $ketnoi->prepare($sql_combo);
             $stmt->bind_param("i", $combo_id);
@@ -243,14 +243,13 @@ try {
         $stmt->execute();
         $stmt->close();
     } else {
-        // Nếu là bàn thường, xóa hết chi tiết (nếu có)
+        // Không có sản phẩm - xóa hết chi tiết và set TongTien = 0
         $sql_delete = "DELETE FROM chitietdatban WHERE MaDatBan = ?";
         $stmt = $ketnoi->prepare($sql_delete);
         $stmt->bind_param("i", $madatban);
         $stmt->execute();
         $stmt->close();
         
-        // Set TongTien = 0 cho bàn thường
         $sql_update_total = "UPDATE datban SET TongTien = 0 WHERE MaDatBan = ?";
         $stmt = $ketnoi->prepare($sql_update_total);
         $stmt->bind_param("i", $madatban);

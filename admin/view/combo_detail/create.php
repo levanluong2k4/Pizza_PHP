@@ -1,4 +1,9 @@
 <?php
+
+if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'admin') {
+    header("Location: /unitop/backend/lesson/school/project_pizza/sign_in.php");
+    exit();
+}
 require __DIR__ . '/../../../includes/db_connect.php';
 
 $MaCombo  = isset($_GET['MaCombo']) ? intval($_GET['MaCombo']) : 0;
@@ -42,8 +47,10 @@ if (isset($_POST['submit_add'])) {
                    AND MaSP = $MaSP 
                    AND MaSize = $MaSize
                  LIMIT 1";
+    
 
     $kqCheck = mysqli_query($ketnoi, $sqlCheck);
+
 
     // Nếu tồn tại → update tăng số lượng
     if (mysqli_num_rows($kqCheck) > 0) {
@@ -64,6 +71,49 @@ if (isset($_POST['submit_add'])) {
 
         mysqli_query($ketnoi, $insert);
     }
+
+    $sql_ct = "
+SELECT 
+    ct.id,
+    ct.SoLuong,
+    sp.MaSP,
+    sp.TenSP,
+    sp.Anh AS AnhSP,
+    sz.TenSize,
+    ss.Gia
+FROM chitietcombo ct
+JOIN sanpham sp      ON ct.MaSP = sp.MaSP
+LEFT JOIN size sz     ON ct.MaSize = sz.MaSize
+LEFT JOIN sanpham_size ss ON ct.MaSP = ss.MaSP AND ct.MaSize = ss.MaSize
+WHERE ct.MaCombo = $MaCombo
+";
+
+$kq_ct = mysqli_query($ketnoi, $sql_ct);
+
+// Tính tổng tiền combo:
+$tongTruocGiam = 0;
+$dataCombo = [];
+
+if ($kq_ct && $kq_ct->num_rows > 0) {
+    while ($row = mysqli_fetch_assoc($kq_ct)) {
+
+        $donGia = $row["Gia"] ?? 0;
+        $soLuong = $row["SoLuong"];
+        $thanhTien = $donGia * $soLuong;
+
+        $row["ThanhTien"] = $thanhTien;
+
+        $tongTruocGiam += $thanhTien;
+
+        $dataCombo[] = $row;
+    }
+}
+
+$giamgia = $combo["giamgia"];
+$tongSauGiam = $tongTruocGiam - ($tongTruocGiam * $giamgia / 100);
+
+$sqlupdate = "UPDATE combo SET TongTien = $tongSauGiam WHERE MaCombo = $MaCombo";
+mysqli_query($ketnoi, $sqlupdate);
 
     header("Location: index.php?MaCombo=$MaCombo");
     exit;
@@ -190,7 +240,7 @@ if (isset($_POST['submit_add'])) {
 
     <div class="container mt-5">
 
-        <a href="index.php?MaCombo=<?= $MaCombo ?>" class="btn btn-secondary ">
+        <a href="/unitop/backend/lesson/school/project_pizza/admin/view/combo_detail/index.php?MaCombo=<?= $MaCombo ?>" class="btn btn-secondary ">
             <i class="fa-solid fa-arrow-left"></i> Quay lại
         </a>
 
