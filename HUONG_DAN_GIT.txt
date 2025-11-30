@@ -1,0 +1,113 @@
+========================================
+HƯỚNG DẪN GIT CHO NHÓM - PIZZA_PHP
+========================================
+
+User: tthai5206
+Email: tthai5206@gmail.com
+Repo: https://github.com/levanluong2k4/Pizza_PHP.git
+
+========================================
+1. TẠO NHÁNH MỚI ĐỂ CODE
+========================================
+
+Trước khi bắt đầu code chức năng mới, luôn tạo nhánh mới:
+
+git checkout master
+git pull origin master
+git checkout -b "tên-nhánh-mới"
+
+Ví dụ:
+git checkout -b feature/tthai5206_login
+git checkout -b feature/tthai5206_cart
+
+========================================
+2. PUSH CODE LÊN GITHUB
+========================================
+
+Sau khi code xong:
+
+git add .
+git commit -m "Mô tả chức năng vừa làm"
+git push origin tên-nhánh-hiện-tại
+
+Ví dụ:
+git add .
+git commit -m "Thêm chức năng đăng nhập"
+git push origin feature/tthai5206_login
+
+========================================
+3. LẤY CODE MỚI TỪ MASTER
+========================================
+
+Khi nhóm trưởng đã merge code của người khác vào master,
+bạn cần cập nhật code mới nhất:
+
+git checkout master
+git pull origin master
+
+Sau đó quay lại nhánh đang làm việc:
+git checkout tên-nhánh-của-bạn
+git merge master
+
+(Nếu có conflict thì sửa file, rồi chạy: git add . && git commit)
+
+========================================
+4. TẠO PULL REQUEST (PR)
+========================================
+
+Sau khi push code lên, vào GitHub:
+
+1. Vào repo: https://github.com/levanluong2k4/Pizza_PHP
+2. Bấm tab "Pull requests"
+3. Bấm "New Pull Request"
+4. Chọn:
+   - Base: master
+   - Compare: tên-nhánh-của-bạn
+5. Viết mô tả ngắn
+6. Bấm "Create Pull Request"
+
+Nhóm trưởng sẽ review và merge code.
+
+========================================
+5. XEM TRẠNG THÁI HIỆN TẠI
+========================================
+
+Xem đang ở nhánh nào:
+git branch
+
+Xem có thay đổi gì chưa:
+git status
+
+Xem lịch sử commit:
+git log --oneline -5
+
+========================================
+6. XỬ LÝ LỖI THƯỜNG GẶP
+========================================
+
+Lỗi: "Permission denied"
+-> Chưa được add vào repo hoặc chưa accept invitation
+-> Liên hệ nhóm trưởng
+
+Lỗi: "Authentication failed"
+-> Nhập sai Token
+-> Tạo Token mới tại: https://github.com/settings/tokens/new
+-> Tick "repo", copy Token và dùng làm mật khẩu
+
+Lỗi: "Conflict"
+-> Có người sửa cùng file với bạn
+-> Sửa file bị conflict, tìm dòng "<<<<<<", "======", ">>>>>>"
+-> Xóa các dòng đó, giữ lại code đúng
+-> Chạy: git add . && git commit
+
+========================================
+7. LƯU Ý QUAN TRỌNG
+========================================
+
+- KHÔNG BAO GIỜ code trực tiếp trên nhánh master
+- Luôn tạo nhánh mới cho mỗi chức năng
+- Commit thường xuyên, mô tả rõ ràng
+- Pull code mới từ master trước khi bắt đầu code
+- Không push file tạm (node_modules, .env, .DS_Store...)
+
+========================================
