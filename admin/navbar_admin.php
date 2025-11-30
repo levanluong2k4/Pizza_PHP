@@ -147,7 +147,7 @@
                                     <li><a class="dropdown-item" href="list_products.php"><i class="fa-solid fa-list"></i> Danh sách sản phẩm</a></li>
                                     <li><a class="dropdown-item" href="add_product.php"><i class="fa-solid fa-plus"></i> Thêm sản phẩm</a></li>
                                     <li><a class="dropdown-item" href="manage_categories.php"><i class="fa-solid fa-layer-group"></i> Danh mục loại sản phẩm</a></li>
-                                    <li><a class="dropdown-item" href="/unitop/backend/lesson/school/project_pizza/admin/view/combo/"><i class="fa-solid fa-list"></i> Danh sách combo</a></li>
+                                    <li><a class="dropdown-item" href="/admin/view/combo/"><i class="fa-solid fa-list"></i> Danh sách combo</a></li>
                                 </ul>
                             </li>
 
@@ -213,7 +213,7 @@
                     </li>
 
                     <li class="nav-item ">
-                        <a class="nav-link " href="/unitop/backend/lesson/school/project_pizza/admin/view/datban.php" 
+                        <a class="nav-link " href="/admin/view/datban.php" 
                             aria-expanded="false">
                             <i class="fa-solid fa-chair"></i> Quản lý đơn đặt bàn
                         </a>
@@ -233,8 +233,8 @@
                                     <i class="fa-solid fa-box"></i> Thống kê sản phẩm
                                 </a>
                                 <ul class="dropdown-menu">
-                                    <li><a class="dropdown-item" href="/unitop/backend/lesson/school/project_pizza/admin/view/best_selling/best_selling_product.php"><i class="fa-solid fa-fire"></i> Sản phẩm bán chạy</a></li>
-                                    <li><a class="dropdown-item" href="/unitop/backend/lesson/school/project_pizza/admin/view/best_selling/best_selling_category.php"><i class="fa-solid fa-layer-group"></i> Loại sản phẩm bán chạy</a></li>
+                                    <li><a class="dropdown-item" href="/admin/view/best_selling/best_selling_product.php"><i class="fa-solid fa-fire"></i> Sản phẩm bán chạy</a></li>
+                                    <li><a class="dropdown-item" href="/admin/view/best_selling/best_selling_category.php"><i class="fa-solid fa-layer-group"></i> Loại sản phẩm bán chạy</a></li>
                          
                                 </ul>
                             </li>
@@ -266,9 +266,9 @@
                                     <i class="fa-solid fa-shopping-cart"></i> Thống kê đơn đặt bàn
                                 </a>
                                 <ul class="dropdown-menu">
-                                    <li><a class="dropdown-item" href="/unitop/backend/lesson/school/project_pizza/admin/view/booking_statistic/booking_fillrate.php"><i class="fa-solid fa-list-alt"></i> Tỉ lệ lấp đầy bàn</a></li>
-                                    <li><a class="dropdown-item" href="/unitop/backend/lesson/school/project_pizza/admin/view/booking_statistic/booking_revenue.php"><i class="fa-solid fa-chart-pie"></i> Doanh thu đơn đặt bàn</a></li>
-                                    <li><a class="dropdown-item" href="/unitop/backend/lesson/school/project_pizza/admin/view/booking_statistic/booking_state.php"><i class="fa-solid fa-clock"></i> Trạng thái đơn đặt bàn</a></li>
+                                    <li><a class="dropdown-item" href="/admin/view/booking_statistic/booking_fillrate.php"><i class="fa-solid fa-list-alt"></i> Tỉ lệ lấp đầy bàn</a></li>
+                                    <li><a class="dropdown-item" href="/admin/view/booking_statistic/booking_revenue.php"><i class="fa-solid fa-chart-pie"></i> Doanh thu đơn đặt bàn</a></li>
+                                    <li><a class="dropdown-item" href="/admin/view/booking_statistic/booking_state.php"><i class="fa-solid fa-clock"></i> Trạng thái đơn đặt bàn</a></li>
                                 </ul>
                             </li>
 

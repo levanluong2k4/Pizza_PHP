@@ -87,33 +87,6 @@ if (!empty($_SESSION['cart'])) {
     if ($res) {
         $row = mysqli_fetch_assoc($res);
         $count = (int)($row['cnt'] ?? 0);
-    }
-} else {
-    // fallback: tính từ session nếu có
-    if (!empty($_SESSION['cart']) && is_array($_SESSION['cart'])) {
-        foreach ($_SESSION['cart'] as $item) {
-            $count += isset($item['quantity']) ? (int)$item['quantity'] : 0;
-        }
-    }
-}
-
-
-$sqlloaisp="SELECT * from loaisanpham";
-$loaisp=mysqli_query($ketnoi,$sqlloaisp);
-$sqlcombo="SELECT * FROM combo";
-$combo=mysqli_query($ketnoi,$sqlcombo);
-
-
-
-
-
-?>
-<style>
-.list-group-item-action {
-    width: 65%;
-}
-</style>
-
 
 <nav class="inner-navbar   navbar navbar-expand-lg ">
     <div class="container-fluid justify-content-lg-around">
@@ -123,7 +96,7 @@ $combo=mysqli_query($ketnoi,$sqlcombo);
         </button>
 
         <div class="d-flex flex-column align-align-items-end">
-            <a class=" inner-logo me-lg-3" href="/unitop/backend/lesson/school/project_pizza/trangchu.php"><img src="/unitop/backend/lesson/school/project_pizza/img/logo.png" alt="logo"></a>
+            <a class=" inner-logo me-lg-3" href="trangchu.php"><img src="img/logo.png" alt="logo"></a>
             <?php if (isset($_SESSION['user_id'])): ?>
             <p class="m-0">
                 <span class=" fw-bolder me-2" style="color:#1F6C11">Xin chào,
@@ -134,7 +107,7 @@ $combo=mysqli_query($ketnoi,$sqlcombo);
 
         <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent1"
             aria-controls="navbarSupportedContent1" aria-expanded="false" aria-label="Toggle navigation">
-            <img src="/unitop/backend/lesson/school/project_pizza/img/user.png" alt height="30px">
+            <img src="img/user.png" alt height="30px">
         </button>
         <button class="button_cart navbar-toggler" type="button" data-bs-toggle="collapse"
             data-bs-target="#navbarSupportedContent2" aria-controls="navbarSupportedContent2" aria-expanded="false"
@@ -173,7 +146,7 @@ $combo=mysqli_query($ketnoi,$sqlcombo);
 
             <ul class="navbar-nav me-auto mb-2 mb-lg-0 bg-global listmenu ms-lg-auto  ">
                  <li class="nav-item col-md-12 ">
-                        <a class="nav-link " aria-current="page" href="/unitop/backend/lesson/school/project_pizza/trangchu.php">Trang chủ</a>
+                        <a class="nav-link " aria-current="page" href="trangchu.php">Trang chủ</a>
                     </li>
                 <li class="nav-item dropdown col-md-12  text-md-center ">
                    
@@ -184,7 +157,7 @@ $combo=mysqli_query($ketnoi,$sqlcombo);
                     <ul class="dropdown-menu bg-global p-0 text-md-center text-lg-start scrollable-menu">
                         <?php foreach($loaisp as $value): ?>
                         <li class="dropdown-item">
-                            <a href="/unitop/backend/lesson/school/project_pizza/research.php?category_id=<?php echo $value['MaLoai'] ?>">
+                            <a href="research.php?category_id=<?php echo $value['MaLoai'] ?>">
                                 <?php echo $value['TenLoai'] ?>
                             </a>
                         </li>
@@ -193,7 +166,7 @@ $combo=mysqli_query($ketnoi,$sqlcombo);
 
                 </li>
                 <li class="nav-item col-md-12 ">
-                    <a class="nav-link " aria-current="page" href="/unitop/backend/lesson/school/project_pizza/order_user.php">Đơn hàng</a>
+                    <a class="nav-link " aria-current="page" href="order_user.php">Đơn hàng</a>
                 </li>
                 <li class="nav-item dropdown col-md-12  text-md-center">
                     <a class="nav-link dropdown-toggle text-warning" href="#" role="button" data-bs-toggle="dropdown"
@@ -202,19 +175,19 @@ $combo=mysqli_query($ketnoi,$sqlcombo);
                     </a>
                     <ul class="dropdown-menu bg-global p-0 text-md-center text-lg-start scrollable-menu">
                          <li class="dropdown-item ">
-                            <a href="/unitop/backend/lesson/school/project_pizza/order_table_user.php">
+                            <a href="order_table_user.php">
                                Đơn Đặt bàn 
                             </a>
                         </li>
                         <li class="dropdown-item ">
-                            <a href="/unitop/backend/lesson/school/project_pizza/datban/info_datban.php?loaidatban=thuong">
+                            <a href="datban/info_datban.php?loaidatban=thuong">
                                 Đặt bàn thường
                             </a>
                         </li>
                        
 
                         <li class="dropdown-item">
-                            <a  href="/unitop/backend/lesson/school/project_pizza/research.php?loaidatban=tiec">
+                            <a  href="research.php?loaidatban=tiec">
                                 🎉Đặt bàn tiệc</a>
                             
                         </li>
@@ -236,10 +209,10 @@ $combo=mysqli_query($ketnoi,$sqlcombo);
                 <li class="nav-item dropdown col-12 col-md-12 text-center text-md-center">
                     <a class="nav-link dropdown-toggle text-warning p-0" href="#" role="button"
                         data-bs-toggle="dropdown" aria-expanded="false">
-                        <img src="/unitop/backend/lesson/school/project_pizza/img/user.png" alt="" height="30px">
+                        <img src="img/user.png" alt="" height="30px">
                     </a>
                     <ul class="dropdown-menu bg-global p-0 text-md-center text-lg-center">
-                        <li class="dropdown-item"><a href="/unitop/backend/lesson/school/project_pizza/info_user.php">Thông tin cá nhân</a></li>
+                        <li class="dropdown-item"><a href="info_user.php">Thông tin cá nhân</a></li>
 
                         <li class="dropdown-item"><a href="handlers/process_sign_out.php">Đăng xuất</a></li>
                         <li>
@@ -254,7 +227,7 @@ $combo=mysqli_query($ketnoi,$sqlcombo);
                 <li class="nav-item dropdown col-12 col-md-12 text-center text-md-center">
                     <a class="nav-link dropdown-toggle text-warning p-0" href="#" role="button"
                         data-bs-toggle="dropdown" aria-expanded="false">
-                        <img src="/unitop/backend/lesson/school/project_pizza/img/user.png" alt="" height="30px">
+                        <img src="img/user.png" alt="" height="30px">
                     </a>
                     <ul class="dropdown-menu bg-global p-0 text-md-center text-lg-center">
                         <li class="dropdown-item"><a href="./sign_in.php">Đăng nhập</a></li>
