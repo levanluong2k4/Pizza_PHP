@@ -119,6 +119,31 @@ footer {
 
     <script>
 $(document).ready(function () {
+  // Kiểm tra email theo thời gian thực và gửi OTP nếu hợp lệ
+  $("#email").on("input", function () {
+    let email = $(this).val();
+    if (email.length > 0) {
+      $.ajax({
+        url: "handlers/check_email.php",
+        type: "POST",
+        dataType: "json",
+        data: { email: email },
+        success: function (response) {
+          if (!response.success) {
+            $("#error-email").text(response.message).css("color", "red");
+          } else {
+            $("#error-email").text(response.message).css("color", "green");
+          }
+        },
+        error: function (xhr, status, error) {
+          console.error("AJAX Error:", error);
+        },
+      });
+    } else {
+      $("#error-email").text("");
+    }
+  });
+
   $(".form").on("submit", function (e) {
     e.preventDefault();
 

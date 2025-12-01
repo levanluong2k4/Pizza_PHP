@@ -9,7 +9,8 @@ if (!isset($_SESSION['admin_id'])) {
 */
 
 // Kết nối DB
-require __DIR__ . '/../../../includes/db_connect.php';
+$ketnoi = mysqli_connect("localhost:8889", "root", "root", "php_pizza");
+mysqli_set_charset($ketnoi, "utf8");
 if (!$ketnoi) die('Kết nối thất bại: ' . mysqli_connect_error());
 
 $MaKH = isset($_GET['MaKH']) ? intval($_GET['MaKH']) : 0;
@@ -125,58 +126,6 @@ if ($r2 && mysqli_num_rows($r2) > 0) {
     }
 } else {
     echo '<tr><td colspan="' . max(1,count($headers)) . '" class="text-center text-muted">Không có đơn hàng</td></tr>';
-}
-?>
-                    </tbody>
-                </table>
-            </div>
-
-            <hr>
-            <h6>Sản phẩm mua nhiều nhất</h6>
-            <div class="table-responsive">
-                <table class="table table-sm table-bordered">
-                    <thead>
-                        <tr>
-                            <th>Hình ảnh</th>
-                            <th>Tên sản phẩm</th>
-                            <th>Tổng số lượng</th>
-                            <th>Số đơn hàng</th>
-                            <th>Kích thước</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-<?php
-// Query sản phẩm mua nhiều nhất của khách hàng này
-$sql_products = "
-    SELECT
-        sp.TenSP,
-        sp.Anh,
-        SUM(ct.SoLuong) AS tong_so_luong,
-        COUNT(DISTINCT d.MaDH) AS so_don_hang,
-        GROUP_CONCAT(DISTINCT s.TenSize ORDER BY s.TenSize SEPARATOR ', ') AS kich_thuoc
-    FROM donhang d
-    JOIN chitietdonhang ct ON d.MaDH = ct.MaDH
-    JOIN sanpham sp ON ct.MaSP = sp.MaSP
-    LEFT JOIN size s ON ct.MaSize = s.MaSize
-    WHERE d.MaKH = $MaKH AND d.trangthai = 'Giao thành công'
-    GROUP BY sp.MaSP, sp.TenSP, sp.Anh
-    ORDER BY tong_so_luong DESC
-    LIMIT 10
-";
-
-$result_products = mysqli_query($ketnoi, $sql_products);
-if ($result_products && mysqli_num_rows($result_products) > 0) {
-    while ($product = mysqli_fetch_assoc($result_products)) {
-        echo '<tr>';
-        echo '<td><img src="../../../' . htmlspecialchars($product['Anh']) . '" alt="' . htmlspecialchars($product['TenSP']) . '" style="width: 50px; height: 50px; object-fit: cover;"></td>';
-        echo '<td>' . htmlspecialchars($product['TenSP']) . '</td>';
-        echo '<td>' . number_format($product['tong_so_luong']) . '</td>';
-        echo '<td>' . number_format($product['so_don_hang']) . '</td>';
-        echo '<td>' . htmlspecialchars($product['kich_thuoc'] ?: 'N/A') . '</td>';
-        echo '</tr>';
-    }
-} else {
-    echo '<tr><td colspan="5" class="text-center text-muted">Không có dữ liệu sản phẩm</td></tr>';
 }
 ?>
                     </tbody>

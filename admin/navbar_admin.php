@@ -180,9 +180,10 @@
                     <li class="nav-item dropdown">
                         <a class="nav-link" href="/unitop/backend/lesson/school/project_pizza/admin/view/customer/list_customer.php"><i class="fa-solid fa-users"></i> Quản lý khách hàng</a>
                         <ul class="dropdown-menu" aria-labelledby="customerDropdown">
-                            <li><a class="dropdown-item" href="/unitop/backend/lesson/school/project_pizza/admin/view/customer/list_customer.php"><i class="fa-solid fa-list"></i> Danh sách khách hàng</a></li>
-                            <li><a class="dropdown-item" href="/unitop/backend/lesson/school/project_pizza/admin/view/customer/top_customers.php"><i class="fa-solid fa-crown"></i> Khách hàng mua nhiều nhất</a></li>
-                            <li><a class="dropdown-item" href="/unitop/backend/lesson/school/project_pizza/admin/view/customer/top_regions.php"><i class="fa-solid fa-map-marked-alt"></i> Khu vực KH mua nhiều nhất</a></li>
+                            <li><a class="dropdown-item" href="/Pizza_PHP/admin/view/customer/list_customer.php"><i class="fa-solid fa-list"></i> Danh sách khách hàng</a></li>
+                            <li><a class="dropdown-item" href="/Pizza_PHP/admin/view/customer/top_customers.php"><i class="fa-solid fa-crown"></i> Khách hàng mua nhiều nhất</a></li>
+                            <li><a class="dropdown-item" href="/Pizza_PHP/admin/view/best_selling/best_selling_area.php"><i class="fa-solid fa-map-marked-alt"></i> Khu vực KH mua nhiều nhất</a></li>
+
                         </ul>
                     </li>
 
