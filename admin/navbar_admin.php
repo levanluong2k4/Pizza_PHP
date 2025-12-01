@@ -117,6 +117,7 @@
 </head>
 
 <body>
+
  
     <nav class="navbar navbar-expand-lg">
         <div class="container-fluid">
@@ -143,32 +144,26 @@
                                     <i class="fa-solid fa-cubes"></i> Quản lý sản phẩm
                                 </a>
                                 <ul class="dropdown-menu">
-                                    <li><a class="dropdown-item" href="#"><i class="fa-solid fa-list"></i> Danh sách sản phẩm</a></li>
-                                    <li><a class="dropdown-item" href="/unitop/backend/lesson/school/project_pizza/admin/view/combo/"><i class="fa-solid fa-list"></i> Danh sách combo</a></li>
+                                    <li><a class="dropdown-item" href="/unitop/backend/lesson/school/project_pizza/admin/view/product/list_products.php"><i class="fa-solid fa-list"></i> Danh sách sản phẩm</a></li>
+                                    <li><a class="dropdown-item" href="/unitop/backend/lesson/school/project_pizza/admin/view/combo/listcombo.php"><i class="fa-solid fa-list"></i> Danh sách combo</a></li>
                        
-                                    <li><a class="dropdown-item" href="#"><i class="fa-solid fa-layer-group"></i> Danh mục loại sản phẩm</a></li>
+                                    <li><a class="dropdown-item" href="/unitop/backend/lesson/school/project_pizza/admin/view/product/manage_categories.php"><i class="fa-solid fa-layer-group"></i> Danh mục loại sản phẩm</a></li>
                                 </ul>
                             </li>
 
                           
-                            <li class="dropdown-submenu">
-                                <a class="dropdown-item" href="#" data-bs-toggle="dropdown">
+                            <li class="">
+                                <a class="dropdown-item" href="/unitop/backend/lesson/school/project_pizza/admin/view/product/list_sizes.php" >
                                     <i class="fa-solid fa-ruler-combined"></i> Quản lý size sản phẩm
                                 </a>
-                                <ul class="dropdown-menu">
-                                    <li><a class="dropdown-item" href="#"><i class="fa-solid fa-list-ul"></i> Danh sách size sản phẩm</a></li>
-                                    <li><a class="dropdown-item" href="#"><i class="fa-solid fa-plus-circle"></i> Thêm size sản phẩm</a></li>
-                                </ul>
+                              
                             </li>
                             
-                            <li class="dropdown-submenu">
-                                <a class="dropdown-item" href="#" data-bs-toggle="dropdown">
+                            <li class="">
+                                <a class="dropdown-item" href="/unitop/backend/lesson/school/project_pizza/admin/view/product/list_product_prices.php" >
                                     <i class="fa-solid fa-tags"></i> Quản lý giá theo size
                                 </a>
-                                <ul class="dropdown-menu">
-                                    <li><a class="dropdown-item" href="#"><i class="fa-solid fa-list-ol"></i> Danh sách giá sản phẩm theo size</a></li>
-                                    <li><a class="dropdown-item" href="#"><i class="fa-solid fa-plus-circle"></i> Thêm giá sản phẩm</a></li>
-                                </ul>
+                             
                             </li>
                         </ul>
                     </li>
@@ -193,14 +188,11 @@
 
                     <!-- Quản lý đơn hàng -->
                     <li class="nav-item dropdown">
-                        <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown"
-                            aria-expanded="false">
+                        <a class="nav-link " href="/unitop/backend/lesson/school/project_pizza/admin/view/order/order_list.php" 
+                           >
                             <i class="fa-solid fa-receipt"></i> Quản lý đơn hàng
                         </a>
-                        <ul class="dropdown-menu">
-                            <li><a class="dropdown-item" href="list_orders.php"><i class="fa-solid fa-clipboard-list"></i> Danh sách đơn hàng</a></li>
-                
-                        </ul>
+                     
                     </li>
 
                     <li class="nav-item ">
@@ -224,7 +216,7 @@
                                     <i class="fa-solid fa-box"></i> Thống kê sản phẩm
                                 </a>
                                 <ul class="dropdown-menu">
-                                    <li><a class="dropdown-item" href="/unitop/backend/lesson/school/project_pizza/admin/view/best_selling/index.php"><i class="fa-solid fa-fire"></i> Sản phẩm bán chạy</a></li>
+                                    <li><a class="dropdown-item" href="/unitop/backend/lesson/school/project_pizza/admin/view/best_selling/best_selling_product.php"><i class="fa-solid fa-fire"></i> Sản phẩm bán chạy</a></li>
                                     <li><a class="dropdown-item" href="/unitop/backend/lesson/school/project_pizza/admin/view/best_selling/best_selling_category.php"><i class="fa-solid fa-layer-group"></i> Loại sản phẩm bán chạy</a></li>
                          
                                 </ul>
@@ -247,9 +239,10 @@
                                     <i class="fa-solid fa-shopping-cart"></i> Thống kê đơn hàng
                                 </a>
                                 <ul class="dropdown-menu">
-                                    <li><a class="dropdown-item" href="#"><i class="fa-solid fa-list-alt"></i> Tổng quan đơn hàng</a></li>
-                                    <li><a class="dropdown-item" href="#"><i class="fa-solid fa-chart-pie"></i> Tỷ lệ đơn hàng theo trạng thái</a></li>
-                                    <li><a class="dropdown-item" href="#"><i class="fa-solid fa-clock"></i> Đơn hàng theo thời gian</a></li>
+                           <li>
+                            <a class="dropdown-item" href="/unitop/backend/lesson/school/project_pizza/admin/view/revenue_statistic/order_statistics.php?page=overview"><i class="fa-solid fa-list-alt"></i> Tổng quan đơn hàng</a></li>
+<li><a class="dropdown-item" href="/unitop/backend/lesson/school/project_pizza/admin/view/revenue_statistic/order_statistics.php?page=status"><i class="fa-solid fa-chart-pie"></i> Tỷ lệ đơn hàng theo trạng thái</a></li>
+<li><a class="dropdown-item" href="/unitop/backend/lesson/school/project_pizza/admin/view/revenue_statistic/order_statistics.php?page=timeline"><i class="fa-solid fa-clock"></i> Đơn hàng theo thời gian</a></li>
                                 </ul>
                             </li>
                                <li class="dropdown-submenu">

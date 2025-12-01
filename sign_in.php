@@ -144,7 +144,7 @@ $(document).ready(function () {
           }
         } else {
           if (response.admin) {
-            window.location.href = "admin/navbar_admin.php";
+            window.location.href = "admin/view/order/order_list.php";
           } else {
             window.location.href = "trangchu.php";
           }

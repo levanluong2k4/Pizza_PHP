@@ -34,6 +34,23 @@ if ($number_row["dem"] > 0) {
     exit;
 }
 
+// 1. Kiểm tra email đã tồn tại trong DB
+$sql = "SELECT COUNT(*) as dem FROM admin WHERE email=?";
+$stmt = mysqli_prepare($ketnoi, $sql);
+mysqli_stmt_bind_param($stmt, "s", $email);
+mysqli_stmt_execute($stmt);
+$result = mysqli_stmt_get_result($stmt);
+$number_row_admin = mysqli_fetch_array($result);
+
+if ($number_row_admin["dem"] > 0) {
+    echo json_encode([
+        'success' => false,
+        'error_type' => 'email',
+        'message' => 'Email đã tồn tại! Vui lòng chọn email khác.'
+    ]);
+    exit;
+}
+
 // 2. Kiểm tra format email
 if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
     echo json_encode([

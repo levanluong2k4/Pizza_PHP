@@ -5,7 +5,7 @@ mysqli_set_charset($ketnoi,"utf8");
 $sql="delete from sanpham where MaSP=$id";
 mysqli_query($ketnoi,$sql);
 mysqli_close($ketnoi);
-header("location: ../view/indexadmin.php");
+header("location: ../view/product/list_products.php");
 
 
 ?>
