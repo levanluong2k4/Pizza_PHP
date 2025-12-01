@@ -30,7 +30,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
     } elseif (strcasecmp($currentStat, 'Đang giao') == 0) {
         if ($action === 'next') {
-            $newStatus = 'Giao thành công';
+            $newStatus = 'Hoàn thành';
         } elseif ($action === 'cancel') {
             $error = "Đơn đang giao, không thể huỷ.";
         }
