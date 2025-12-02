@@ -1,5 +1,15 @@
 <?php
+session_start();
 require __DIR__ . '/../../../includes/db_connect.php';
+
+if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'admin') {
+    header("Location: /unitop/backend/lesson/school/project_pizza/sign_in.php");
+    exit();
+}
+if($_SESSION['phanquyen'] != 0){
+    echo "Bạn không có quyền truy cập trang này.";
+    exit();
+}
 
 date_default_timezone_set('Asia/Ho_Chi_Minh');
 $now = new DateTime();

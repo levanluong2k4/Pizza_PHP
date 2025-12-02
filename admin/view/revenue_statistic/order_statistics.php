@@ -1,7 +1,15 @@
 <?php
 // order_statistics.php - Thống kê tổng quan đơn hàng
 session_start();
+if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'admin') {
+    header("Location: /unitop/backend/lesson/school/project_pizza/sign_in.php");
+    exit();
+}
 require __DIR__ . '/../../../includes/db_connect.php';
+if($_SESSION['phanquyen'] != 0){
+    echo "Bạn không có quyền truy cập trang này.";
+    exit();
+}
 
 $page = $_GET['page'] ?? 'overview';
 

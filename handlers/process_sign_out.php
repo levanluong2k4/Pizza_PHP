@@ -1,6 +1,9 @@
 <?php session_start();
 // Xóa session và cookie liên quan đến người dùng
 unset($_SESSION['user_id']);
+unset($_SESSION['role']);
+unset($_SESSION['phanquyen']);
+
 unset($_SESSION['temp_hoten']);
 unset($_SESSION['temp_sodt']);
 unset($_SESSION['temp_diachi']);

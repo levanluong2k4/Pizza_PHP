@@ -6,6 +6,10 @@ if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'admin') {
     header("Location: /unitop/backend/lesson/school/project_pizza/sign_in.php");
     exit();
 }
+if($_SESSION['phanquyen'] != 0){
+    echo "Bạn không có quyền truy cập trang này.";
+    exit();
+}
 
 // Kiểm tra có thông tin tạm trong session không
 if (!isset($_SESSION['temp_employee'])) {

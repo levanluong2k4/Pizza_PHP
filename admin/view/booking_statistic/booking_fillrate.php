@@ -1,9 +1,8 @@
 <?php
 
-session_start();
-
-if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'admin') {
-    header("Location: http://localhost/unitop/backend/lesson/school/project_pizza/sign_in.php");
+require __DIR__ . '/../../process/check_admin.php';
+if($_SESSION['phanquyen'] != 0){
+    echo "Bạn không có quyền truy cập trang này.";
     exit();
 }
 require __DIR__ . '/../../../includes/db_connect.php';
