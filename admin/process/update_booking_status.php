@@ -24,9 +24,18 @@ if (!in_array($status, $allowed_status)) {
 }
 
 try {
-    $sql = "UPDATE datban SET TrangThaiDatBan = ? WHERE MaDatBan = ?";
-    $stmt = $ketnoi->prepare($sql);
-    $stmt->bind_param("si", $status, $madatban);
+
+    if ($status == 'thanh_cong' || $status == 'hoan_thanh') {
+        $sql = "UPDATE datban SET TrangThaiDatBan = ?, TrangThaiThanhToan = 'da_thanh_toan' WHERE MaDatBan = ?";
+        $stmt = $ketnoi->prepare($sql);
+        $stmt->bind_param("si", $status, $madatban);
+    } else {
+        // Các trạng thái khác chỉ cập nhật trạng thái đặt bàn
+        $sql = "UPDATE datban SET TrangThaiDatBan = ? WHERE MaDatBan = ?";
+        $stmt = $ketnoi->prepare($sql);
+        $stmt->bind_param("si", $status, $madatban);
+    }
+   
     
     if ($stmt->execute()) {
         echo json_encode([

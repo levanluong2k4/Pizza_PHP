@@ -117,7 +117,7 @@ if (!$booking) {
 $chitiet_list = [];
 $tongtien_sanpham = 0;
 
-if ($loai == 'tiec' && $booking['MaPhong']) {
+
     $sql_chitiet = "SELECT ct.*, sp.TenSP, s.TenSize
                     FROM chitietdatban ct
                     INNER JOIN sanpham sp ON sp.MaSP = ct.MaSP
@@ -132,7 +132,7 @@ if ($loai == 'tiec' && $booking['MaPhong']) {
     foreach ($chitiet_list as $item) {
         $tongtien_sanpham += $item['ThanhTien'];
     }
-}
+
 
 // Tính giảm giá
 $giamgia_amount = 0;

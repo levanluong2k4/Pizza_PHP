@@ -347,23 +347,29 @@ function updateStatus(madatban, status) {
             madatban: madatban,
             status: status
         },
+        dataType: 'json',
         success: function(response) {
-            const res = JSON.parse(response);
-            if (res.success) {
-                // Đóng modal trước
-                $('#bookingDetailModal').modal('hide');
+            if (response.success) {
+                // Đóng modal
+                const modal = bootstrap.Modal.getInstance(document.getElementById('bookingDetailModal'));
+                if (modal) {
+                    modal.hide();
+                }
                 
-                // Chờ modal đóng xong mới reload
-                setTimeout(function() {
-                    alert('Cập nhật thành công!');
-                    location.reload();
-                }, 300);
+                // Xóa backdrop nếu còn
+                $('.modal-backdrop').remove();
+                $('body').removeClass('modal-open').css('padding-right', '');
+                
+                // Hiện thông báo và reload
+                alert('Cập nhật thành công!');
+                location.reload();
             } else {
-                alert('Lỗi: ' + res.message);
+                alert('Lỗi: ' + response.message);
             }
         },
-        error: function() {
-            alert('Lỗi khi cập nhật');
+        error: function(xhr, status, error) {
+            console.error('Error:', error);
+            alert('Lỗi khi cập nhật: ' + error);
         }
     });
 }
@@ -377,23 +383,29 @@ function cancelBooking(madatban) {
         data: {
             madatban: madatban
         },
+        dataType: 'json',
         success: function(response) {
-            const res = JSON.parse(response);
-            if (res.success) {
-                // Đóng modal trước
-                $('#bookingDetailModal').modal('hide');
+            if (response.success) {
+                // Đóng modal
+                const modal = bootstrap.Modal.getInstance(document.getElementById('bookingDetailModal'));
+                if (modal) {
+                    modal.hide();
+                }
                 
-                // Chờ modal đóng xong mới reload
-                setTimeout(function() {
-                    alert('Đã hủy đặt bàn!');
-                    location.reload();
-                }, 300);
+                // Xóa backdrop nếu còn
+                $('.modal-backdrop').remove();
+                $('body').removeClass('modal-open').css('padding-right', '');
+                
+                // Hiện thông báo và reload
+                alert('Đã hủy đặt bàn!');
+                location.reload();
             } else {
-                alert('Lỗi: ' + res.message);
+                alert('Lỗi: ' + response.message);
             }
         },
-        error: function() {
-            alert('Lỗi khi hủy');
+        error: function(xhr, status, error) {
+            console.error('Error:', error);
+            alert('Lỗi khi hủy: ' + error);
         }
     });
 }
