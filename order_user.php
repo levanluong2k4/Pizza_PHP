@@ -104,16 +104,16 @@ $result = mysqli_query($ketnoi, $sql);
             <main>
                 <div id="order-list">
                     <?php 
-    if (mysqli_num_rows($result) > 0):
-      while ($value = mysqli_fetch_assoc($result)): 
-        $danhSachAnh = explode(',', $value['DanhSachAnh']);
-    ?>
+            if (mysqli_num_rows($result) > 0):
+            while ($value = mysqli_fetch_assoc($result)): 
+                $danhSachAnh = explode(',', $value['DanhSachAnh']);
+            ?>
 
-            <div class="order-item mb-3 p-3 pb-0 border rounded">
-                        <div class="d-flex justify-content-between mb-2">
-                            <b>Đơn hàng #<?php echo $value["MaDHcode"]; ?></b>
-                            <a href="detail_order_user.php?madon=<?php echo $value["MaDH"]; ?>">Xem chi tiết ></a>
-                        </div>
+                    <div class="order-item mb-3 p-3 pb-0 border rounded">
+                                <div class="d-flex justify-content-between mb-2">
+                                    <b>Đơn hàng #<?php echo $value["MaDHcode"]; ?></b>
+                                    <a href="detail_order_user.php?madon=<?php echo $value["MaDH"]; ?>">Xem chi tiết ></a>
+                                </div>
 
                         <div class="d-flex justify-content-between mb-2">
                             <div>

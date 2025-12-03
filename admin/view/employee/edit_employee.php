@@ -13,10 +13,8 @@ if($_SESSION['phanquyen'] != 0){
     echo "Bạn không có quyền truy cập trang này.";
     exit();
 }
+require __DIR__ . '/../../../includes/db_connect.php';
 
-// ⚠️ SỬA: Thay đổi port nếu cần
-$ketnoi = mysqli_connect("localhost:8889", "root", "root", "php_pizza");
-mysqli_set_charset($ketnoi, "utf8");
 
 if (!$ketnoi) {
     die("Kết nối thất bại: " . mysqli_connect_error());
@@ -54,7 +52,7 @@ unset($_SESSION['success'], $_SESSION['error']);
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sửa Thông Tin Nhân Viên</title>
+    <title>Sửa Phân Quyền Nhân Viên</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" />
     <style>
@@ -75,6 +73,12 @@ unset($_SESSION['success'], $_SESSION['error']);
             border: none;
             color: white;
         }
+        .info-text {
+            background-color: #f8f9fa;
+            padding: 10px;
+            border-radius: 8px;
+            margin-bottom: 10px;
+        }
     </style>
 </head>
 <body>
@@ -86,7 +90,7 @@ unset($_SESSION['success'], $_SESSION['error']);
         <div class="col-lg-6">
             <div class="card">
                 <div class="card-header bg-warning text-white">
-                    <h5 class="mb-0"><i class="fa-solid fa-user-edit"></i> Sửa Thông Tin Nhân Viên</h5>
+                    <h5 class="mb-0"><i class="fa-solid fa-user-shield"></i> Sửa Phân Quyền Nhân Viên</h5>
                 </div>
                 <div class="card-body">
                     <?php if ($success): ?>
@@ -107,30 +111,17 @@ unset($_SESSION['success'], $_SESSION['error']);
                         <input type="hidden" name="id" value="<?php echo $employee['id']; ?>">
 
                         <div class="mb-3">
-                            <label class="form-label">Tên nhân viên <span class="text-danger">*</span></label>
-                            <input type="text" name="ten" class="form-control" 
-                                   value="<?php echo htmlspecialchars($employee['ten']); ?>" 
-                                   placeholder="Nhập tên nhân viên" required>
+                            <label class="form-label">Tên nhân viên</label>
+                            <div class="info-text">
+                                <i class="fa-solid fa-user"></i> <?php echo htmlspecialchars($employee['ten']); ?>
+                            </div>
                         </div>
 
                         <div class="mb-3">
-                            <label class="form-label">Email <span class="text-danger">*</span></label>
-                            <input type="email" name="email" class="form-control" 
-                                   value="<?php echo htmlspecialchars($employee['email']); ?>" 
-                                   placeholder="email@example.com" required>
-                        </div>
-
-                        <div class="mb-3">
-                            <label class="form-label">Mật khẩu mới</label>
-                            <input type="password" name="password" class="form-control" 
-                                   placeholder="Để trống nếu không đổi mật khẩu">
-                            <small class="text-muted">Chỉ nhập nếu muốn thay đổi mật khẩu</small>
-                        </div>
-
-                        <div class="mb-3">
-                            <label class="form-label">Xác nhận mật khẩu mới</label>
-                            <input type="password" name="confirm_password" class="form-control" 
-                                   placeholder="Nhập lại mật khẩu mới">
+                            <label class="form-label">Email</label>
+                            <div class="info-text">
+                                <i class="fa-solid fa-envelope"></i> <?php echo htmlspecialchars($employee['email']); ?>
+                            </div>
                         </div>
 
                         <div class="mb-3">
@@ -148,7 +139,7 @@ unset($_SESSION['success'], $_SESSION['error']);
 
                         <div class="d-grid gap-2">
                             <button type="submit" class="btn btn-warning">
-                                <i class="fa-solid fa-save"></i> Cập Nhật Thông Tin
+                                <i class="fa-solid fa-save"></i> Cập Nhật Phân Quyền
                             </button>
                             <a href="create_account.php" class="btn btn-secondary">
                                 <i class="fa-solid fa-arrow-left"></i> Quay Lại

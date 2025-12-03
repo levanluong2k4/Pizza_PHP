@@ -1,3 +1,21 @@
+
+<?php
+
+
+if (!isset($_SESSION['user_id']) || $_SESSION['role'] != 'admin')
+{
+
+   header('Location: /unitop/backend/lesson/school/project_pizza/sign_in.php');
+   exit();
+}
+
+?>
+
+
+
+
+
+
 <!DOCTYPE html>
 <html lang="vi">
 
@@ -15,6 +33,7 @@
     body {
         background-color: #f9fafb;
         font-family: "Segoe UI", sans-serif;
+        padding: 0px;
     }
 
 
@@ -123,7 +142,18 @@
 
     <nav class="navbar navbar-expand-lg">
         <div class="container-fluid">
-            <a class="navbar-brand" href="#"><i class="fa-solid fa-leaf"></i> Admin Panel</a>
+            <div>
+                <a class="navbar-brand" href="#"><i class="fa-solid fa-leaf"></i> Pizza Company</a>
+                <br>
+                  <?php if (isset($_SESSION['user_id'])): ?>
+            <p class="m-0">
+                <span class=" fw-bolder me-2" style="color:white">Xin chào,
+                    <?php echo htmlspecialchars($_SESSION['name']); ?>!</span>
+            </p>
+            <?php endif; ?>
+            </div>
+            
+            
 
             <button class="navbar-toggler text-white" type="button" data-bs-toggle="collapse"
                 data-bs-target="#navbarNavDropdown" aria-controls="navbarNavDropdown" aria-expanded="false"
@@ -180,17 +210,29 @@
 
                     <!-- Quản lý nhân viên -->
 
-                    <?php if($_SESSION['phanquyen'] == 0):
+     
 
-                    ?>
-
-                    <li class="nav-item">
-                        <a class="nav-link"
-                            href="/unitop/backend/lesson/school/project_pizza/admin/view/employee/create_account.php">
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown"
+                            aria-expanded="false">
                             <i class="fa-solid fa-user"></i> Quản lý tài khoản
                         </a>
-                    </li>
+                        <ul class="dropdown-menu">
+                            <li><a class="dropdown-item"
+                                    href="/unitop/backend/lesson/school/project_pizza/admin/view/employee/profile.php"><i
+                                        class="fa-solid fa-user"></i> tài khoản nhân viên</a></li>
+
+                                           <?php if($_SESSION['phanquyen'] == 0):
+
+                    ?>
+                            <li><a class="dropdown-item"
+                                    href="/unitop/backend/lesson/school/project_pizza/admin/view/employee/create_account.php"><i
+                                        class="fa-solid fa-users-cog"></i>Quản lý tài khoản</a></li>
                     <?php endif; ?>
+
+                        </ul>
+                    </li>
+                   
 
 
                     <?php if($_SESSION['phanquyen'] == 0):
@@ -199,8 +241,9 @@
 
                     <!-- ✅ CẬP NHẬT: Quản lý khách hàng -->
                     <li class="nav-item dropdown">
-                        <a class="nav-link"
-                            href="/unitop/backend/lesson/school/project_pizza/admin/view/customer/list_customer.php"><i
+                        <a class="nav-link ropdown-toggle" href="#" role="button" data-bs-toggle="dropdown"
+                            aria-expanded="false"
+                            ><i
                                 class="fa-solid fa-users"></i> Quản lý khách hàng</a>
                         <ul class="dropdown-menu" aria-labelledby="customerDropdown">
                             <li><a class="dropdown-item"
@@ -325,6 +368,7 @@
                     <a href="/unitop/backend/lesson/school/project_pizza/handlers/process_sign_out.php"
                         class="logout-btn"><i class="fa-solid fa-right-from-bracket"></i> Đăng xuất</a>
                 </div>
+              
             </div>
         </div>
     </nav>

@@ -7,11 +7,11 @@ mysqli_set_charset($ketnoi, "utf8");
 if(isset($_SESSION['user_id'])){
     $user_id = $_SESSION['user_id'];
 }
-echo '<pre>';
-print_r($_SESSION);
-print_r($_POST);
+// echo '<pre>';
+// print_r($_SESSION);
+// print_r($_POST);
 
-echo '</pre>';
+// echo '</pre>';
 
 
 

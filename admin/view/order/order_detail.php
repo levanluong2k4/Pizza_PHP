@@ -434,7 +434,15 @@ $details = $stmt->get_result();
                         <th>Đơn giá</th>
                         <th>Số lượng</th>
                         <th>Thành tiền</th>
+                          <?php
+                            if($order['trangthai'] == 'Chờ xử lý' || $order['trangthai'] == 'Chờ giao'):
+                         
+                         
+                         ?>
                         <th>Hành động</th>
+                        <?php
+                           endif;
+                        ?>
                     </tr>
                 </thead>
                 <tbody>
@@ -463,16 +471,35 @@ $details = $stmt->get_result();
                                        class="quantity-input" 
                                        value="<?php echo $item['SoLuong']; ?>" 
                                        min="1"
+                                          <?php
+                            if($order['trangthai'] != 'Chờ xử lý' && $order['trangthai'] != 'Chờ giao'):
+                         
+                         
+                         ?>
+                         readonly
+                            <?php
+                                 endif;
+                            ?>
+
                                        data-madh="<?php echo $maDH; ?>"
                                        data-masp="<?php echo $item['MaSP']; ?>"
                                        data-masize="<?php echo $item['MaSize']; ?>"
                                        data-price="<?php echo $item['GiaSP']; ?>">
-                                <button class="btn btn-primary btn-update" 
+                                 <?php
+                            if($order['trangthai'] == 'Chờ xử lý' || $order['trangthai'] == 'Chờ giao'):
+                         
+                         
+                         ?>
+                          <button class="btn btn-primary btn-update" 
                                         data-madh="<?php echo $maDH; ?>"
                                         data-masp="<?php echo $item['MaSP']; ?>"
                                         data-masize="<?php echo $item['MaSize']; ?>">
                                     Cập nhật
                                 </button>
+
+                            <?php 
+                               endif;
+                            ?>
                             </td>
                             <td class="subtotal-cell">
                                 <strong style="color: #e74c3c;">
@@ -482,6 +509,11 @@ $details = $stmt->get_result();
                                     ?>đ
                                 </strong>
                             </td>
+                         <?php
+                            if($order['trangthai'] == 'Chờ xử lý' || $order['trangthai'] == 'Chờ giao'):
+                         
+                         
+                         ?>
                             <td>
                                 <button class="btn btn-danger btn-delete"
                                         data-madh="<?php echo $maDH; ?>"
@@ -490,6 +522,10 @@ $details = $stmt->get_result();
                                     🗑 Xóa
                                 </button>
                             </td>
+                            <?php
+                               endif;
+                               
+                            ?>
                         </tr>
                     <?php endwhile; ?>
                 </tbody>

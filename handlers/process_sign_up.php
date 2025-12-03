@@ -117,7 +117,7 @@ $_SESSION['temp_user'] = [
 $subject = "Mã xác nhận đăng ký Pizza Store";
 $body = "<p>Xin chào <b>$name</b>,</p>
 <p>Mã xác nhận của bạn là: <h1>$verification_code</h1></p>
-<p>Mã có hiệu lực trong 15 phút.</p>";
+<p>Mã có hiệu lực trong 200 giây.</p>";
 
 $result = sendMail($email, $name, $subject, $body);
 

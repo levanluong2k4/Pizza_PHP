@@ -17,7 +17,7 @@ function validateEmailExists($email) {
         return false; // Domain không có mail server
     }
     
-    return true; // Domain có mail server
+    return true; 
 }
 function sendMail($toEmail, $toName, $subject, $body)
 {

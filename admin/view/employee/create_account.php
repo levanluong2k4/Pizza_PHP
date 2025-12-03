@@ -47,6 +47,9 @@ unset($_SESSION['success'], $_SESSION['error']);
             background: linear-gradient(90deg, #28a745, #66bb6a);
             border: none;
         }
+        .current-user-row {
+            background-color: #fff3cd;
+        }
     </style>
 </head>
 <body>
@@ -118,7 +121,7 @@ unset($_SESSION['success'], $_SESSION['error']);
             </div>
         </div>
 
-        <!-- Employee list restored below (improved detection & UI) -->
+        <!-- Employee list -->
         <div class="col-lg-6">
             <div class="card">
                 <div class="card-header bg-success text-white">
@@ -186,7 +189,13 @@ unset($_SESSION['success'], $_SESSION['error']);
                             echo '</tr></thead><tbody>';
 
                             while ($rowEmp = mysqli_fetch_assoc($r)) {
-                                echo '<tr>';
+                                $idVal = $idField && isset($rowEmp[$idField]) ? $rowEmp[$idField] : '';
+                                $isCurrentUser = ($idVal == $_SESSION['user_id']);
+                                
+                                // Thêm class để highlight tài khoản đang đăng nhập
+                                $rowClass = $isCurrentUser ? 'current-user-row' : '';
+                                echo '<tr class="'.$rowClass.'">';
+                                
                                 foreach ($selectCols as $col) {
                                     $cname = trim($col,'`');
                                     $val = $rowEmp[$cname] ?? '';
@@ -198,16 +207,28 @@ unset($_SESSION['success'], $_SESSION['error']);
                                         if ($val === '1' || $val === 1) $badge = '<span class="badge bg-primary">Nhân viên</span>';
                                         echo '<td>'.$badge.'</td>';
                                     } else {
-                                        echo '<td>'.htmlspecialchars($val).'</td>';
+                                        $displayVal = htmlspecialchars($val);
+                                        // Thêm label "Bạn" nếu là tài khoản đang đăng nhập
+                                        if ($cname === $nameField && $isCurrentUser) {
+                                            $displayVal .= ' <span class="badge bg-warning text-dark">Bạn</span>';
+                                        }
+                                        echo '<td>'.$displayVal.'</td>';
                                     }
                                 }
+                                
                                 // actions
-                                $idVal = $idField && isset($rowEmp[$idField]) ? $rowEmp[$idField] : '';
                                 $editLink = $idVal ? 'edit_employee.php?id='.urlencode($idVal) : '#';
                                 $delLink = $idVal ? '../../process/delete_employee.php?id='.urlencode($idVal) : '#';
+                                
                                 echo '<td class="text-nowrap">';
                                 echo '<a class="btn btn-sm btn-warning me-1" href="'.htmlspecialchars($editLink).'" title="Sửa"><i class="fa-solid fa-pen"></i></a>';
-                                echo '<a class="btn btn-sm btn-danger" href="'.htmlspecialchars($delLink).'" onclick="return confirm(\'Bạn chắc chắn muốn xóa?\')" title="Xóa"><i class="fa-solid fa-trash"></i></a>';
+                                
+                                // Chỉ hiển thị nút xóa nếu KHÔNG PHẢI tài khoản đang đăng nhập
+                                if (!$isCurrentUser) {
+                                    echo '<a class="btn btn-sm btn-danger" href="'.htmlspecialchars($delLink).'" onclick="return confirm(\'Bạn chắc chắn muốn xóa?\')" title="Xóa"><i class="fa-solid fa-trash"></i></a>';
+                                } else {
+                                    echo '<button class="btn btn-sm btn-secondary" disabled title="Không thể xóa tài khoản đang đăng nhập"><i class="fa-solid fa-ban"></i></button>';
+                                }
                                 echo '</td>';
 
                                 echo '</tr>';

@@ -15,8 +15,9 @@ if (!isset($_SESSION['user_id'])) {
     exit;
 }
 
-require '../includes/db_connect.php';
-require '../includes/send_mail.php';
+require __DIR__ . '/../../includes/db_connect.php';
+require __DIR__ . '/../../includes/send_mail.php';
+
 
 // ✅ Kiểm tra POST có tồn tại không
 if (!isset($_POST['email'])) {
@@ -30,7 +31,7 @@ if (!isset($_POST['email'])) {
 
 $email = trim($_POST['email']);
 $user_id = $_SESSION['user_id'];
-$user = $_SESSION['name'] ?? 'Khách';
+$user = $_SESSION['name'] ;
 
 
 error_log("Email after trim: '$email'");
@@ -61,7 +62,7 @@ if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
 $email_safe = mysqli_real_escape_string($ketnoi, $email);
 
 
-$sql = "SELECT COUNT(*) AS dem FROM khachhang WHERE Email='$email_safe' AND MaKH != '$user_id'";
+$sql = "SELECT COUNT(*) AS dem FROM admin WHERE email='$email_safe' AND id != '$user_id'";
 $result = mysqli_query($ketnoi, $sql);
 $row = mysqli_fetch_assoc($result);
 
