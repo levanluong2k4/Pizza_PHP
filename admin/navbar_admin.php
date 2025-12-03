@@ -1,3 +1,13 @@
+<?php
+session_start();
+if (!isset($_SESSION['user_id']) || $_SESSION['role'] != 'admin')
+{
+
+   header('Location: /pizza/Pizza_PHP/sign_in.php');
+   exit();
+}
+
+?>
 <!DOCTYPE html>
 <html lang="vi">
 
@@ -140,9 +150,22 @@
                                     <i class="fa-solid fa-cubes"></i> Quản lý sản phẩm
                                 </a>
                                 <ul class="dropdown-menu">
+<<<<<<< Updated upstream
                                     <li><a class="dropdown-item" href="#"><i class="fa-solid fa-list"></i> Danh sách sản phẩm</a></li>
                                     <li><a class="dropdown-item" href="#"><i class="fa-solid fa-plus-circle"></i> Thêm sản phẩm</a></li>
                                     <li><a class="dropdown-item" href="#"><i class="fa-solid fa-layer-group"></i> Danh mục loại sản phẩm</a></li>
+=======
+                                    <li><a class="dropdown-item"
+                                            href="/Pizza_PHP/admin/view/product/list_products.php"><i
+                                                class="fa-solid fa-list"></i> Danh sách sản phẩm</a></li>
+                                    <li><a class="dropdown-item"
+                                            href="/unitop/backend/lesson/school/project_pizza/admin/view/combo/listcombo.php"><i
+                                                class="fa-solid fa-list"></i> Danh sách combo</a></li>
+
+                                    <li><a class="dropdown-item"
+                                            href="/unitop/backend/lesson/school/project_pizza/admin/view/product/manage_categories.php"><i
+                                                class="fa-solid fa-layer-group"></i> Danh mục loại sản phẩm</a></li>
+>>>>>>> Stashed changes
                                 </ul>
                             </li>
 
