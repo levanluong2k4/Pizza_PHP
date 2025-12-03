@@ -75,7 +75,7 @@ unset($_SESSION['success'], $_SESSION['error']);
                         </div>
                     <?php endif; ?>
 
-                    <form method="POST" action="/unitop/backend/lesson/school/project_pizza/admin/process/process_create_employee.php">
+                    <form method="POST" action="../../process/process_create_employee.php">
                         <div class="mb-3">
                             <label class="form-label">Tên nhân viên <span class="text-danger">*</span></label>
                             <input type="text" name="ten" class="form-control" 

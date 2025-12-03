@@ -105,7 +105,8 @@ if ($res && mysqli_num_rows($res) > 0) {
         echo '<td>' . number_format($row['orders_count']) . '</td>';
         echo '<td>' . number_format($row['total_spent'],0,'.',',') . '</td>';
         echo '<td>' . number_format($row['items_count']) . '</td>';
-        echo '<td><a class="btn btn-sm btn-primary" href="/unitop/backend/lesson/school/project_pizza/admin/view/customer/detail_customer.php?MaKH=' . urlencode($row['MaKH']) . '">Chi tiết</a></td>';
+        // use relative path (same folder) so link works regardless of server base path
+        echo '<td><a class="btn btn-sm btn-primary" href="detail_customer.php?MaKH=' . urlencode($row['MaKH']) . '">Chi tiết</a></td>';
         echo '</tr>';
     }
 } else {

@@ -119,7 +119,8 @@ $result = mysqli_query($ketnoi, $sql);
                                 <td><?php echo number_format(intval($r['orders_count'])); ?></td>
                                 <td><?php echo number_format(floatval($r['total_spent']), 0, '.', ','); ?></td>
                                 <td>
-                                    <a href="/unitop/backend/lesson/school/project_pizza/admin/view/customer/detail_customer.php?MaKH=<?php echo $r['MaKH']; ?>" class="btn btn-sm btn-primary">Chi tiết</a>
+                                    <?php $linkBase = isset($base) ? $base : '/Pizza_PHP'; ?>
+                                    <a href="<?php echo $linkBase; ?>/admin/view/customer/detail_customer.php?MaKH=<?php echo urlencode($r['MaKH']); ?>" class="btn btn-sm btn-primary">Chi tiết</a>
                                 </td>
                             </tr>
                         <?php endwhile; ?>

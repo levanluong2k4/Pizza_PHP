@@ -1,3 +1,19 @@
+<?php
+// compute base path before /admin so links work when served from a subfolder
+$script = $_SERVER['SCRIPT_NAME'] ?? '';
+$pos = strpos($script, '/admin');
+if ($pos !== false) {
+    $base = substr($script, 0, $pos);
+} elseif (strpos($script, '/Pizza_PHP') !== false) {
+    // rare case: script contains project name but not '/admin'
+    $p = strpos($script, '/Pizza_PHP');
+    $base = substr($script, 0, $p);
+} else {
+    // fallback to common project folder name so URLs work under htdocs
+    $base = '/Pizza_PHP';
+}
+?>
+
 <!DOCTYPE html>
 <html lang="vi">
 
@@ -169,8 +185,9 @@
                     </li>
 
                     <!-- Quản lý nhân viên -->
+                     
                      <li class="nav-item">
-                        <a class="nav-link" href="/unitop/backend/lesson/school/project_pizza/admin/view/employee/create_account.php">
+                        <a class="nav-link" href="/Pizza_PHP/admin/view/employee/create_account.php">
                             <i class="fa-solid fa-user"></i> Quản lý tài khoản
                         </a>
                     </li>
@@ -178,7 +195,7 @@
 
                     <!-- ✅ CẬP NHẬT: Quản lý khách hàng -->
                     <li class="nav-item dropdown">
-                        <a class="nav-link" href="/unitop/backend/lesson/school/project_pizza/admin/view/customer/list_customer.php"><i class="fa-solid fa-users"></i> Quản lý khách hàng</a>
+                        <a class="nav-link" href="/Pizza_PHP/admin/view/customer/list_customer.php"><i class="fa-solid fa-users"></i> Quản lý khách hàng</a>
                         <ul class="dropdown-menu" aria-labelledby="customerDropdown">
                             <li><a class="dropdown-item" href="/Pizza_PHP/admin/view/customer/list_customer.php"><i class="fa-solid fa-list"></i> Danh sách khách hàng</a></li>
                             <li><a class="dropdown-item" href="/Pizza_PHP/admin/view/customer/top_customers.php"><i class="fa-solid fa-crown"></i> Khách hàng mua nhiều nhất</a></li>
