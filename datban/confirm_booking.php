@@ -3,9 +3,16 @@ session_start();
 require '../includes/db_connect.php';
 
 $madatban = intval($_GET['id'] ?? 0);
-$resultCode = intval($_GET['resultCode'] ?? 0);
+$resultCode = intval($_GET['resultCode']);
 $vnp_TransactionStatus = intval($_GET['vnp_TransactionStatus'] ?? 0);
 $phuongthuc=$_GET['thanhtoan'] ?? '';
+
+// echo '<pre>';
+// print_r($_SESSION);
+// print_r($_POST);
+// print_r($_GET);
+
+// echo '</pre>';
 
 if(!isset($_GET['id'])){
     header('Location: ../trangchu.php');
@@ -17,10 +24,21 @@ if($phuongthuc=='momo' ){
         $sql_update="UPDATE `datban` SET `TrangThaiThanhToan`='chuathanhtoan' WHERE MaDatBan=$madatban";
         mysqli_query($ketnoi,$sql_update);
     }
+    else{
+        // Thanh toán thành công
+        $sql_update="UPDATE `datban` SET `TrangThaiThanhToan`='dathanhtoan' WHERE MaDatBan=$madatban";
+        mysqli_query($ketnoi,$sql_update);
+    }
+    
 }
 if($phuongthuc=='vnpay'){
     if($vnp_TransactionStatus!=0){
         $sql_update="UPDATE `datban` SET `TrangThaiThanhToan`='chuathanhtoan' WHERE MaDatBan=$madatban";
+        mysqli_query($ketnoi,$sql_update);
+    }
+    else{
+        // Thanh toán thành công
+        $sql_update="UPDATE `datban` SET `TrangThaiThanhToan`='dathanhtoan' WHERE MaDatBan=$madatban";
         mysqli_query($ketnoi,$sql_update);
     }
 }

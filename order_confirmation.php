@@ -4,7 +4,7 @@ require "includes/db_connect.php";
 
 $order_id = $_GET['order_id'] ?? null;
 $resultCode = $_GET['resultCode'] ?? null;
-$phuongthucchuyenkhoan=$_GET['phuongthucthanhtoan'];
+
 $order_id = str_replace("'", "", $order_id);
 
 if(!isset($_GET['order_id'])){
