@@ -4,6 +4,7 @@ require "includes/db_connect.php";
 
 $order_id = $_GET['order_id'] ?? null;
 $resultCode = $_GET['resultCode'] ?? null;
+$vnp_TransactionStatus = intval($_GET['vnp_TransactionStatus']?? null);
 
 $order_id = str_replace("'", "", $order_id);
 
@@ -21,6 +22,13 @@ if($resultCode == 0){
   
   
 } 
+if($vnp_TransactionStatus == 0){
+    $update_sql = "UPDATE `donhang` 
+                    SET `trangthaithanhtoan`='dathanhtoan',
+                        `phuongthucthanhtoan`='Chuyển khoản' 
+                    WHERE MaDHcode = '$order_id'";
+  
+}
 
 if(!isset($_GET['resultCode'])||(isset($_GET['resultCode'])&&$resultCode != 0)) {
    

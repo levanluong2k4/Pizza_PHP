@@ -2,10 +2,11 @@
 session_start();
 require "includes/db_connect.php";
 
-if(!isset($_SESSION['user_id'])&&$_SESSION['role']=='user'){
-    header("Location: sign_in.php");
+if(!isset($_SESSION['user_id'])){
+    header("Location: /unitop/backend/lesson/school/project_pizza/sign_in.php");
     exit();
 }
+
 
 $id = $_SESSION['user_id'];
 
@@ -325,7 +326,7 @@ else:
 <div class="text-center mt-4 p-4">
     <i class="fas fa-inbox fa-3x text-muted mb-3"></i>
     <p class="text-muted fs-5">Chưa có đơn đặt bàn nào.</p>
-    <a href="datban/index.php" class="btn btn-primary">
+    <a href="/unitop/backend/lesson/school/project_pizza/datban/info_datban.php?loaidatban=thuong" class="btn btn-success">
         <i class="fas fa-plus me-2"></i>Đặt bàn ngay
     </a>
 </div>

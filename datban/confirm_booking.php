@@ -4,7 +4,7 @@ require '../includes/db_connect.php';
 
 $madatban = intval($_GET['id'] ?? 0);
 $resultCode = intval($_GET['resultCode']);
-$vnp_TransactionStatus = intval($_GET['vnp_TransactionStatus'] ?? 0);
+$vnp_TransactionStatus = intval($_GET['vnp_TransactionStatus'] );
 $phuongthuc=$_GET['thanhtoan'] ?? '';
 
 // echo '<pre>';

@@ -2,8 +2,8 @@
 session_start();
 require "includes/db_connect.php";
 
-if (!isset($_SESSION['user_id'])) {
-    header("Location: trangchu.php");
+if(!isset($_SESSION['user_id'])){
+    header("Location: /unitop/backend/lesson/school/project_pizza/sign_in.php");
     exit();
 }
 
